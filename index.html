@@ -530,7 +530,7 @@
 
 <div class="notice-bar">
   <div class="notice-icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11v2a2 2 0 0 0 2 2h1l3 5V4L6 9H5a2 2 0 0 0-2 2Z"/><path d="M14 8a5 5 0 0 1 0 8"/><path d="M17.5 5.5a9 9 0 0 1 0 13"/></svg></div>
-  <div class="notice-track"><span>যেকোনো প্রশ্নে হোয়াটসঅ্যাপ করুন — সাপোর্ট টিম ২৪/৭ রেডি &nbsp; • &nbsp; নতুন কোর্সে চলছে বিশেষ ছাড় &nbsp; • &nbsp; আজই জয়েন করুন</span></div>
+  <div class="notice-track"><span id="noticeTickerText">যেকোনো প্রশ্নে হোয়াটসঅ্যাপ করুন — সাপোর্ট টিম ২৪/৭ রেডি &nbsp; • &nbsp; নতুন কোর্সে চলছে বিশেষ ছাড় &nbsp; • &nbsp; আজই জয়েন করুন</span></div>
 </div>
 
 <div class="icon-grid">
@@ -879,23 +879,37 @@
   }
 
   /* ---------- Homepage promo video (Firestore: settings/homepage) ---------- */
-  /* Optional document at settings/homepage with field: promoVideoId (YouTube video id) */
+  /* Optional document at settings/homepage with fields:
+     promoVideoId (YouTube video id), tickerText (scrolling notice-bar text) */
   let promoVideoId = null;
+  function setTickerText(text){
+    if(!text) return;
+    document.getElementById('noticeTickerText').textContent = text;
+  }
   async function loadHomepageSettings(){
-    // Paint instantly from the last known ID (cached locally) while the
+    // Paint instantly from the last known values (cached locally) while the
     // Firestore round-trip is still in flight, so slow connections don't
-    // sit on the default banner for several seconds.
+    // sit on stale/default content for several seconds.
     try{
-      const cached = localStorage.getItem('promoVideoId');
-      if(cached) setupPromoVideo(cached);
+      const cachedVideo = localStorage.getItem('promoVideoId');
+      if(cachedVideo) setupPromoVideo(cachedVideo);
+      const cachedTicker = localStorage.getItem('tickerText');
+      if(cachedTicker) setTickerText(cachedTicker);
     }catch(e){ /* localStorage unavailable, ignore */ }
 
     try{
       const snap = await getDoc(doc(db, 'settings', 'homepage'));
-      if(snap.exists() && snap.data().promoVideoId){
-        promoVideoId = snap.data().promoVideoId;
-        setupPromoVideo(promoVideoId);
-        try{ localStorage.setItem('promoVideoId', promoVideoId); }catch(e){}
+      if(snap.exists()){
+        const data = snap.data();
+        if(data.promoVideoId){
+          promoVideoId = data.promoVideoId;
+          setupPromoVideo(promoVideoId);
+          try{ localStorage.setItem('promoVideoId', promoVideoId); }catch(e){}
+        }
+        if(data.tickerText){
+          setTickerText(data.tickerText);
+          try{ localStorage.setItem('tickerText', data.tickerText); }catch(e){}
+        }
       }
     }catch(err){
       console.error('loadHomepageSettings error:', err);
