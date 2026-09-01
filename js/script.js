@@ -41,7 +41,7 @@
     if(!root) return;
     const htmlParts = await Promise.all(PAGE_FRAGMENTS.map(async (id)=>{
       try{
-        const res = await fetch(`pages/${id}.html`);
+        const res = await fetch(`html/pages/${id}.html`);
         if(!res.ok) throw new Error('HTTP '+res.status);
         return await res.text();
       }catch(err){
