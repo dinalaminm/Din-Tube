@@ -1,0 +1,23 @@
+<section class="page" id="page-support">
+  <div class="simple-page">
+    <h1>সাপোর্ট</h1>
+    <div id="supportLoggedOut">
+      <p>টিকিট পাঠাতে ও ট্র্যাক করতে আগে লগ ইন করুন।</p>
+      <button class="btn-primary" id="supportLoginBtn" style="border:none; cursor:pointer;">লগ ইন করুন</button>
+    </div>
+    <div id="supportLoggedIn" style="display:none;">
+      <p>প্রশ্ন থাকলে নিচের ফর্মে লিখুন, আমরা দ্রুত যোগাযোগ করব।</p>
+      <form id="supportForm" style="text-align:left; max-width:420px; margin:0 auto;">
+        <div class="form-field"><label>বিষয়</label><input type="text" id="supSubject" required placeholder="যেমন: পেমেন্ট সমস্যা"></div>
+        <div class="form-field"><label>বার্তা</label><textarea id="supMsg" rows="4" required></textarea></div>
+        <button type="submit" class="btn-primary" style="width:100%; border:none; cursor:pointer;">টিকিট পাঠান</button>
+        <div class="form-msg" id="supportMsg"></div>
+      </form>
+
+      <div id="myTickets" style="max-width:420px; margin:36px auto 0; text-align:left;">
+        <h3 style="font-size:1.1rem; margin-bottom:12px;">আমার টিকিট</h3>
+        <div id="ticketList"><p style="color:var(--muted);">লোড হচ্ছে...</p></div>
+      </div>
+    </div>
+  </div>
+</section>

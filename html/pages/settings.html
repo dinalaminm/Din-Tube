@@ -1,0 +1,33 @@
+<section class="page" id="page-settings">
+  <div class="simple-page">
+    <h1>প্রোফাইল সেটিংস</h1>
+    <form id="settingsProfileForm" style="text-align:left; max-width:400px; margin:0 auto;">
+      <div class="form-field"><label>নাম</label><input type="text" id="setName" required></div>
+      <div class="form-field"><label>ফোন নাম্বার</label><input type="text" id="setPhone" placeholder="017XXXXXXXX"></div>
+      <div class="form-field"><label>ইমেইল</label><input type="email" id="setEmail" disabled style="opacity:0.6;"></div>
+      <button type="submit" class="btn-primary" style="width:100%; border:none; cursor:pointer;">সংরক্ষণ করুন</button>
+      <div class="form-msg" id="settingsProfileMsg"></div>
+    </form>
+    <button class="btn-ghost" id="resetPassBtn" style="width:100%; max-width:400px; margin-top:16px; cursor:pointer;">পাসওয়ার্ড পরিবর্তন করুন</button>
+    <div class="form-msg" id="settingsPassMsg" style="max-width:400px; margin-left:auto; margin-right:auto;"></div>
+
+    <div style="max-width:400px; margin:0 auto;">
+      <h3 style="font-size:1.05rem; margin:30px 0 12px; text-align:left;">অ্যাকাউন্ট ও ডেটা</h3>
+      <button class="btn-ghost" id="exportDataBtn" style="width:100%; cursor:pointer;">📥 আমার ডেটা এক্সপোর্ট করুন (JSON)</button>
+      <p style="color:var(--muted); font-size:0.78rem; text-align:left; margin-top:6px;">
+        প্রোফাইল, অর্ডার, সাপোর্ট টিকিট ও ওয়ালেট লেনদেনের একটা কপি ডাউনলোড হবে।
+      </p>
+
+      <button class="btn-ghost" id="showDeleteAccountBtn" style="width:100%; margin-top:18px; cursor:pointer; color:var(--coral); border-color:var(--coral);">🗑️ অ্যাকাউন্ট ডিলিট করুন</button>
+
+      <form id="deleteAccountForm" style="display:none; text-align:left; margin-top:14px; border:1px solid var(--coral); border-radius:12px; padding:16px;">
+        <p style="color:var(--coral); font-weight:700; font-size:0.85rem; margin-bottom:10px;">
+          এই কাজটি ফেরানো যাবে না — আপনার লগইন অ্যাক্সেস ও প্রোফাইল তথ্য স্থায়ীভাবে মুছে যাবে। (হিসাব-নিকাশের জন্য পূর্ববর্তী অর্ডার/লেনদেনের রেকর্ড সংরক্ষিত থাকবে, ব্যক্তিগত তথ্য ছাড়া।)
+        </p>
+        <div class="form-field"><label>নিশ্চিত করতে পাসওয়ার্ড দিন</label><input type="password" id="deleteConfirmPass" required placeholder="••••••••"></div>
+        <button type="submit" class="btn-primary" style="width:100%; border:none; cursor:pointer; background:var(--coral);">স্থায়ীভাবে ডিলিট করুন</button>
+        <div class="form-msg" id="deleteAccountMsg"></div>
+      </form>
+    </div>
+  </div>
+</section>

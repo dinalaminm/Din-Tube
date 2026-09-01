@@ -1,0 +1,27 @@
+<section class="page" id="page-login">
+  <div class="simple-page">
+    <h1 id="authTitle">লগ ইন করুন</h1>
+    <p id="authSubtitle">আপনার একাউন্টে প্রবেশ করে অর্ডার ট্র্যাক করুন ও এক্সক্লুসিভ অফার পান।</p>
+    <div class="auth-tabs">
+      <button type="button" class="auth-tab active" data-authtab="login">লগ ইন</button>
+      <button type="button" class="auth-tab" data-authtab="register">রেজিস্ট্রেশন</button>
+    </div>
+
+    <form id="loginForm" style="text-align:left; max-width:360px; margin:0 auto;">
+      <div class="form-field"><label>ইমেইল</label><input type="email" id="loginId" required placeholder="you@example.com"></div>
+      <div class="form-field"><label>পাসওয়ার্ড</label><input type="password" id="loginPass" required placeholder="••••••••"></div>
+      <button type="submit" class="btn-primary" style="width:100%; border:none; cursor:pointer;">লগ ইন করুন</button>
+      <a href="#" id="forgotPassLink" style="display:block; text-align:center; margin-top:12px; font-size:0.85rem; color:var(--muted);">পাসওয়ার্ড ভুলে গেছেন?</a>
+      <div class="form-msg" id="loginMsg"></div>
+    </form>
+
+    <form id="registerForm" style="display:none; text-align:left; max-width:360px; margin:0 auto;">
+      <div class="form-field"><label>নাম</label><input type="text" id="regName" required></div>
+      <div class="form-field"><label>ফোন নাম্বার</label><input type="text" id="regPhone" required placeholder="017XXXXXXXX"></div>
+      <div class="form-field"><label>ইমেইল</label><input type="email" id="regEmail" required></div>
+      <div class="form-field"><label>পাসওয়ার্ড</label><input type="password" id="regPass" required placeholder="কমপক্ষে ৬ ক্যারেক্টার"></div>
+      <button type="submit" class="btn-primary" style="width:100%; border:none; cursor:pointer;">অ্যাকাউন্ট তৈরি করুন</button>
+      <div class="form-msg" id="registerMsg"></div>
+    </form>
+  </div>
+</section>
