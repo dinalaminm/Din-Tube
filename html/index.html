@@ -1,1 +1,225 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Creator Rivo | Watch It. Want It. Wear It.</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700;9..144,900&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+<div class="toast" id="toast"></div>
 
+
+<header>
+  <nav>
+    <div class="logo">Creator <span>Rivo</span></div>
+    <div class="nav-links">
+      <a href="#" data-nav="home" data-scroll="courses">কোর্স</a>
+      <a href="#" data-nav="home" data-scroll="shop">প্রোডাক্ট</a>
+      <a href="#" data-nav="home" data-scroll="how">কীভাবে কাজ করে</a>
+      <a href="#" data-nav="home" data-scroll="reviews">রিভিউ</a>
+    </div>
+    <button class="cart-btn" id="cartBtn" data-nav="cart" aria-label="কার্ট">
+      <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8h12l1 12.5a1 1 0 0 1-1 1.5H6a1 1 0 0 1-1-1.5L6 8Z"/><path d="M9 8V6a3 3 0 0 1 6 0v2"/></svg>
+      <span class="cart-badge" id="cartBadge">0</span>
+    </button>
+    <button class="nav-cta" id="loginBtn">লগ ইন</button>
+    <button class="burger" id="burgerBtn" aria-label="মেনু খুলুন" aria-expanded="false">☰</button>
+  </nav>
+  <div class="mobile-menu" id="mobileMenu">
+    <a href="#" data-nav="home" data-scroll="courses">কোর্স</a>
+    <a href="#" data-nav="home" data-scroll="shop">প্রোডাক্ট</a>
+    <a href="#" data-nav="home" data-scroll="how">কীভাবে কাজ করে</a>
+    <a href="#" data-nav="home" data-scroll="reviews">রিভিউ</a>
+    <a href="#" data-nav="cart">কার্ট</a>
+  </div>
+</header>
+
+<div id="announcementBanner" class="announcement-banner" style="display:none;">
+  <div class="announcement-text">
+    <strong id="annBannerTitle"></strong>
+    <span id="annBannerMessage"></span>
+  </div>
+  <button type="button" id="announcementDismiss" aria-label="বন্ধ করুন">✕</button>
+</div>
+
+<main id="page-home" class="page active">
+<div class="promo-wrap">
+  <div class="promo-card" id="promoCard">
+    <div class="promo-bg-text" id="promoBgText">Creator Rivo</div>
+    <div class="promo-top" id="promoTop">
+      <div class="promo-avatar"></div>
+      <div>
+        <h4>Creator Rivo থেকে কীভাবে কিনবেন</h4>
+        <span>Official Channel</span>
+      </div>
+    </div>
+    <div class="promo-play" id="promoPlayBtn"></div>
+    <div class="promo-bottom" id="promoBottom">
+      <div class="promo-icons">
+        <div class="promo-icon-btn"><svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12v7a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-7"/><path d="M16 6l-4-4-4 4"/><path d="M12 2v14"/></svg></div>
+        <div class="promo-icon-btn"><svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3.5 2"/></svg></div>
+      </div>
+      <div class="promo-yt" id="promoYtBtn"><svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor"><path d="M8 5v14l11-7Z"/></svg> <span>ইউটিউবে দেখুন</span></div>
+    </div>
+  </div>
+</div>
+
+<div class="notice-bar">
+  <div class="notice-icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11v2a2 2 0 0 0 2 2h1l3 5V4L6 9H5a2 2 0 0 0-2 2Z"/><path d="M14 8a5 5 0 0 1 0 8"/><path d="M17.5 5.5a9 9 0 0 1 0 13"/></svg></div>
+  <div class="notice-track"><span id="noticeTickerText">যেকোনো প্রশ্নে হোয়াটসঅ্যাপ করুন — সাপোর্ট টিম ২৪/৭ রেডি &nbsp; • &nbsp; নতুন কোর্সে চলছে বিশেষ ছাড় &nbsp; • &nbsp; আজই জয়েন করুন</span></div>
+</div>
+
+<div class="icon-grid">
+  <div class="icon-tile" data-nav="live" role="button" tabindex="0">
+    <div class="ic ic-live"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3" fill="currentColor" stroke="none"/><path d="M7.5 7.5a7 7 0 0 0 0 9M16.5 7.5a7 7 0 0 1 0 9M4.5 4.5a11 11 0 0 0 0 15M19.5 4.5a11 11 0 0 1 0 15"/></svg></div>
+    <span>লাইভ স্ট্রিম</span>
+  </div>
+  <div class="icon-tile" data-nav="premium" role="button" tabindex="0">
+    <div class="ic ic-premium"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h12l3 5-9 13L3 8Z"/><path d="M3 8h18M9 3l3 5 3-5M12 8l-3 13M12 8l3 13"/></svg></div>
+    <span>প্রিমিয়াম</span>
+  </div>
+  <div class="icon-tile" data-nav="home" data-scroll="courses" role="button" tabindex="0">
+    <div class="ic ic-course"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 9.5 12 5l10 4.5-10 4.5-10-4.5Z"/><path d="M6 11.5V17c0 1.4 2.7 2.5 6 2.5s6-1.1 6-2.5v-5.5"/><path d="M20.5 9.5v6"/></svg></div>
+    <span>কোর্স</span>
+  </div>
+  <div class="icon-tile" data-nav="home" data-scroll="shop" role="button" tabindex="0">
+    <div class="ic ic-product"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8h12l1 12.5a1 1 0 0 1-1 1.5H6a1 1 0 0 1-1-1.5L6 8Z"/><path d="M9 8V6a3 3 0 0 1 6 0v2"/></svg></div>
+    <span>প্রোডাক্ট</span>
+  </div>
+  <div class="icon-tile" data-nav="support" role="button" tabindex="0">
+    <div class="ic ic-support"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 13v-1a8 8 0 0 1 16 0v1"/><rect x="2.5" y="13" width="5" height="6" rx="1.5"/><rect x="16.5" y="13" width="5" height="6" rx="1.5"/><path d="M20 19v1a2 2 0 0 1-2 2h-3"/></svg></div>
+    <span>সাপোর্ট</span>
+  </div>
+  <div class="icon-tile" data-nav="download" role="button" tabindex="0">
+    <div class="ic ic-download"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 16a4.5 4.5 0 0 1-1-8.9 5.5 5.5 0 0 1 10.7-2A4.5 4.5 0 0 1 17.5 16"/><path d="M12 11v8m0 0-3-3m3 3 3-3"/></svg></div>
+    <span>ডাউনলোড</span>
+  </div>
+  <div class="icon-tile" data-nav="notice" role="button" tabindex="0">
+    <span class="tile-badge" id="noticeTileBadge"></span>
+    <div class="ic ic-notice"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8a6 6 0 0 0-12 0c0 5-2 6-2 6h16s-2-1-2-6"/><path d="M10.5 21a1.7 1.7 0 0 0 3 0"/></svg></div>
+    <span>নোটিশ</span>
+  </div>
+  <div class="icon-tile" data-nav="more" role="button" tabindex="0">
+    <div class="ic ic-more"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7.5" height="7.5" rx="2"/><rect x="13.5" y="3" width="7.5" height="7.5" rx="2"/><rect x="3" y="13.5" width="7.5" height="7.5" rx="2"/><rect x="13.5" y="13.5" width="7.5" height="7.5" rx="2"/></svg></div>
+    <span>আরও...</span>
+  </div>
+</div>
+
+<div class="search-filter-bar">
+  <input type="text" id="globalSearchInput" placeholder="কোর্স বা প্রোডাক্ট খুঁজুন...">
+  <div class="category-chips" id="categoryChips"></div>
+</div>
+
+<section class="course-section" id="courses">
+  <div class="wrap">
+    <div class="bar-head">
+      <div class="left"><div class="bar"></div><h2>বাছাই করুন <em>কোর্স</em></h2></div>
+      <a href="#" data-nav="all-courses">সব দেখুন →</a>
+    </div>
+    <div class="course-row" id="courseGrid"></div>
+  </div>
+</section>
+
+<section id="shop">
+  <div class="wrap">
+    <div class="bar-head">
+      <div class="left"><div class="bar"></div><h2>বাছাই করুন <em>প্রোডাক্ট</em></h2></div>
+      <a href="#" data-nav="all-products">সব দেখুন →</a>
+    </div>
+    <div class="product-grid" id="productGrid"></div>
+  </div>
+</section>
+
+<section id="how">
+  <div class="wrap">
+    <div class="section-head">
+      <div>
+        <h2>কীভাবে কাজ করে</h2>
+        <p>তিনটা সহজ ধাপে দেখা থেকে ডেলিভারি পর্যন্ত।</p>
+      </div>
+    </div>
+    <div class="steps">
+      <div class="step"><span class="num">০১</span><h3>স্ক্রল করে দেখুন</h3><p>ফরইউ ফিডে ঘুরে বেড়ান, বিক্রেতাদের আসল প্রোডাক্ট রিল দেখুন — বিজ্ঞাপনের মতো না, রিয়েল ইউজেজ দেখান।</p></div>
+      <div class="step"><span class="num">০২</span><h3>এক ট্যাপে অর্ডার</h3><p>ভিডিওর নিচেই দাম, সাইজ আর স্টক দেখা যায়। চ্যাট না করেই সরাসরি চেকআউটে যান।</p></div>
+      <div class="step"><span class="num">০৩</span><h3>ট্র্যাক ও রিভিউ</h3><p>অর্ডার ট্র্যাক করুন, পেয়ে গেলে নিজের রিল বানিয়ে পয়েন্ট জিতুন।</p></div>
+    </div>
+  </div>
+</section>
+
+<div class="marquee-wrap" id="reviews">
+  <div class="marquee" id="marquee"></div>
+</div>
+
+<section>
+  <div class="wrap">
+    <div class="cta-band">
+      <h2>নিজের প্রোডাক্ট রিল আকারে বিক্রি করতে চান?</h2>
+      <p>সেলার হিসেবে জয়েন করুন, ফ্রিতে প্রোফাইল খুলুন, আজই প্রথম রিল আপলোড করুন।</p>
+      <a href="#" class="btn-primary" data-nav="login">সেলার হিসেবে শুরু করুন</a>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<div id="pagesRoot"><!-- lazily-fetched pages injected here by script.js --></div>
+
+
+<footer>
+  <div class="wrap">
+    <div class="foot-grid">
+      <div>
+        <div class="logo" style="margin-bottom:14px;">Creator <span>Rivo</span></div>
+        <p style="color:var(--muted); font-size:0.9rem; max-width:280px; line-height:1.6;">
+          ভিডিও দেখে কেনাকাটার নতুন অভ্যাস। রিয়েল প্রোডাক্ট, রিয়েল রিভিউ, রিয়েল টাইমে।
+        </p>
+      </div>
+      <div>
+        <h5>শপ</h5>
+        <ul>
+          <li><a href="#" data-nav="home" data-scroll="shop">ফ্যাশন</a></li>
+          <li><a href="#" data-nav="home" data-scroll="shop">ইলেকট্রনিক্স</a></li>
+          <li><a href="#" data-nav="home" data-scroll="shop">বিউটি</a></li>
+          <li><a href="#" data-nav="home" data-scroll="shop">হোম ডেকর</a></li>
+        </ul>
+      </div>
+      <div>
+        <h5>কোম্পানি</h5>
+        <ul>
+          <li><a href="#" data-nav="about">আমাদের সম্পর্কে</a></li>
+          <li><a href="#" data-nav="about">ক্যারিয়ার</a></li>
+          <li><a href="#" data-nav="login">সেলার হন</a></li>
+          <li><a href="#" data-nav="support">যোগাযোগ</a></li>
+        </ul>
+      </div>
+      <div>
+        <h5>সাপোর্ট</h5>
+        <ul>
+          <li><a href="#" data-nav="support">অর্ডার ট্র্যাকিং</a></li>
+          <li><a href="#" data-nav="support">রিটার্ন পলিসি</a></li>
+          <li><a href="#" data-nav="support">প্রশ্নোত্তর</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="foot-bottom">
+      <span>© 2026 Creator Rivo। সর্বস্বত্ব সংরক্ষিত।</span>
+      <span>প্রাইভেসি পলিসি · শর্তাবলী</span>
+    </div>
+  </div>
+</footer>
+
+<script type="module" src="../js/script.js"></script>
+
+<nav class="tabbar">
+  <a href="#" class="active" data-nav="home" data-tab="content"><span class="ic"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M10 9.5v5l4.5-2.5Z" fill="currentColor" stroke="none"/></svg></span>কনটেন্ট</a>
+  <a href="#" data-nav="home" data-scroll="courses" data-tab="course"><span class="ic"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 9.5 12 5l10 4.5-10 4.5-10-4.5Z"/><path d="M6 11.5V17c0 1.4 2.7 2.5 6 2.5s6-1.1 6-2.5v-5.5"/></svg></span>কোর্স</a>
+  <a href="#" data-nav="home" data-scroll="shop" data-tab="product"><span class="ic"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8h12l1 12.5a1 1 0 0 1-1 1.5H6a1 1 0 0 1-1-1.5L6 8Z"/><path d="M9 8V6a3 3 0 0 1 6 0v2"/></svg></span>প্রোডাক্ট</a>
+  <a href="#" data-nav="download" data-tab="download"><span class="ic"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 16a4.5 4.5 0 0 1-1-8.9 5.5 5.5 0 0 1 10.7-2A4.5 4.5 0 0 1 17.5 16"/><path d="M12 11v8m0 0-3-3m3 3 3-3"/></svg></span>ডাউনলোড</a>
+  <a href="#" data-nav="profile" data-tab="profile"><span class="ic"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="3.5"/><path d="M4.5 20a7.5 7.5 0 0 1 15 0"/></svg></span>প্রোফাইল</a>
+</nav>
+
+</body>
+</html>
