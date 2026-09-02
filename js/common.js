@@ -12,32 +12,59 @@ import {
 import {
   getAuth, onAuthStateChanged, createUserWithEmailAndPassword, signInWithEmailAndPassword,
   signOut, updateProfile, sendPasswordResetEmail, deleteUser,
-  EmailAuthProvider, reauthenticateWithCredential
+  EmailAuthProvider, reauthenticateWithCredential,
+  GoogleAuthProvider, signInWithPopup
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
 const firebaseConfig = {
-  apiKey: "AIzaSyAUjV_tUlWb5S7A8HSoTcU3vjvbuPzjtvI",
-  authDomain: "app-1-e0ede.firebaseapp.com",
-  databaseURL: "https://app-1-e0ede-default-rtdb.firebaseio.com",
-  projectId: "app-1-e0ede",
-  storageBucket: "app-1-e0ede.firebasestorage.app",
-  messagingSenderId: "679519684721",
-  appId: "1:679519684721:web:3f7e84e8bc1deaa90c73d0",
-  measurementId: "G-10D47MBM1B"
+  apiKey: "AIzaSyAxFnJP3DwWC31P0jP3E_30r38qtUol0iQ",
+  authDomain: "creatorrivo.firebaseapp.com",
+  projectId: "creatorrivo",
+  storageBucket: "creatorrivo.firebasestorage.app",
+  messagingSenderId: "862514355485",
+  appId: "1:862514355485:web:d984df8a56e1fb1d51d5f4"
 };
 const fbApp = initializeApp(firebaseConfig);
 export const db = getFirestore(fbApp);
 export const auth = getAuth(fbApp);
+export const googleProvider = new GoogleAuthProvider();
 
 export {
   collection, getDocs, doc, getDoc, setDoc, addDoc, updateDoc, deleteDoc,
   serverTimestamp, query, where, increment, runTransaction,
   onAuthStateChanged, createUserWithEmailAndPassword, signInWithEmailAndPassword,
   signOut, updateProfile, sendPasswordResetEmail, deleteUser,
-  EmailAuthProvider, reauthenticateWithCredential
+  EmailAuthProvider, reauthenticateWithCredential,
+  signInWithPopup
 };
 
-/* ---------- Small shared helpers ---------- */
+/* ---------- Google sign-in (used on login.html) ----------
+   Creates the users/{uid} profile doc the first time someone signs in
+   with Google, same shape as the email/password register flow. If the
+   doc already exists this only touches name/email so nothing else
+   (walletBalance, phone, etc.) gets overwritten. */
+export async function signInWithGoogle(){
+  const cred = await signInWithPopup(auth, googleProvider);
+  const userRef = doc(db, 'users', cred.user.uid);
+  const existing = await getDoc(userRef);
+  if(!existing.exists()){
+    await setDoc(userRef, {
+      name: cred.user.displayName || '',
+      email: cred.user.email || '',
+      phone: '',
+      role: 'user',
+      createdAt: serverTimestamp()
+    });
+  } else {
+    await setDoc(userRef, {
+      name: cred.user.displayName || existing.data().name || '',
+      email: cred.user.email || existing.data().email || ''
+    }, { merge: true });
+  }
+  return cred.user;
+}
+
+
 export function escapeHtml(str){
   if(str === null || str === undefined) return '';
   return String(str)
@@ -216,6 +243,40 @@ async function loadAnnouncement(){
 }
 
 /* ---------- Shared card renderer — links to detail.html?type=..&id=.. (real URL) ---------- */
+/* ---------- Skeleton loading placeholders ---------- */
+export function renderSkeletonCards(gridId, count){
+  const grid = document.getElementById(gridId);
+  if(!grid) return;
+  count = count || 6;
+  grid.innerHTML = '';
+  for(let i=0; i<count; i++){
+    const el = document.createElement('div');
+    el.className = 'product-card skel-card';
+    el.innerHTML = `
+      <div class="skeleton skel-img"></div>
+      <div class="skeleton skel-line w-70"></div>
+      <div class="skeleton skel-line w-40"></div>
+    `;
+    grid.appendChild(el);
+  }
+}
+export function renderSkeletonList(containerId, count){
+  const el = document.getElementById(containerId);
+  if(!el) return;
+  count = count || 3;
+  el.innerHTML = '';
+  for(let i=0; i<count; i++){
+    const row = document.createElement('div');
+    row.className = 'skel-list-row';
+    row.innerHTML = `
+      <div class="skeleton skel-line w-30"></div>
+      <div class="skeleton skel-line w-90"></div>
+      <div class="skeleton skel-line w-60"></div>
+    `;
+    el.appendChild(row);
+  }
+}
+
 export function renderCard(type, item, i){
   const bg = itemBg(item, i);
   const badge = (type === 'courses' || type === 'videos') ? (item.discount || '') : (item.oldPrice ? 'সেল' : '');
@@ -245,7 +306,7 @@ export function renderCard(type, item, i){
 export async function loadCollectionGrid(collectionName, gridId, opts){
   const grid = document.getElementById(gridId);
   if(!grid) return [];
-  grid.innerHTML = '<p style="color:var(--muted);">লোড হচ্ছে...</p>';
+  renderSkeletonCards(gridId, (opts && opts.skeletonCount) || 6);
   try{
     const snap = await getDocs(collection(db, collectionName));
     const data = [];
