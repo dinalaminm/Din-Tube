@@ -1,4 +1,4 @@
-import { db, collection, addDoc, getDocs, query, where, serverTimestamp, onUserReady, getCurrentUser, escapeHtml } from '../common.js';
+import { db, collection, addDoc, getDocs, query, where, serverTimestamp, onUserReady, getCurrentUser, escapeHtml, renderSkeletonList } from '../common.js';
 
 document.getElementById('supportLoginBtn').addEventListener('click', ()=> window.location.href = 'login.html');
 
@@ -58,7 +58,7 @@ async function loadMyTickets(){
   const list = document.getElementById('ticketList');
   const currentUser = getCurrentUser();
   if(!currentUser || !list) return;
-  list.innerHTML = '<p style="color:var(--muted);">লোড হচ্ছে...</p>';
+  renderSkeletonList('ticketList', 2);
   try{
     const q = query(collection(db, 'supportTickets'), where('uid', '==', currentUser.uid));
     const snap = await getDocs(q);

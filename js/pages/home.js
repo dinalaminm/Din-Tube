@@ -113,12 +113,24 @@ async function loadTestimonials(){
   const marquee = document.getElementById('marquee');
   const reviewsSection = document.getElementById('reviews');
   if(!marquee) return;
+  marquee.innerHTML = Array.from({length:3}).map(()=> `
+    <div class="quote">
+      <div class="skeleton" style="height:14px; border-radius:6px; margin-bottom:8px; width:100%;"></div>
+      <div class="skeleton" style="height:14px; border-radius:6px; margin-bottom:14px; width:70%;"></div>
+      <div class="who">
+        <div class="skeleton avatar"></div>
+        <div class="skeleton" style="height:12px; border-radius:6px; width:80px;"></div>
+      </div>
+    </div>
+  `).join('');
   try{
     const snap = await getDocs(collection(db, 'testimonials'));
     if(snap.empty){
+      marquee.innerHTML = '';
       if(reviewsSection) reviewsSection.style.display = 'none';
       return;
     }
+    marquee.innerHTML = '';
     const items = [];
     snap.forEach(d=> items.push(d.data()));
     [...items, ...items].forEach(t=>{
@@ -134,6 +146,7 @@ async function loadTestimonials(){
       marquee.appendChild(q);
     });
   }catch(err){
+    marquee.innerHTML = '';
     if(reviewsSection) reviewsSection.style.display = 'none';
     console.error('loadTestimonials error:', err);
   }

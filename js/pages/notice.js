@@ -1,7 +1,8 @@
-import { db, collection, getDocs } from '../common.js';
+import { db, collection, getDocs, renderSkeletonList } from '../common.js';
 
 async function loadNotices(){
   const list = document.getElementById('noticeList');
+  renderSkeletonList('noticeList', 4);
   try{
     const snap = await getDocs(collection(db, 'notices'));
     if(snap.empty){

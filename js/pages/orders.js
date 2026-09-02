@@ -1,4 +1,4 @@
-import { db, collection, getDocs, query, where, requireAuth, onUserReady, escapeHtml } from '../common.js';
+import { db, collection, getDocs, query, where, requireAuth, onUserReady, escapeHtml, renderSkeletonList } from '../common.js';
 
 requireAuth();
 
@@ -8,6 +8,7 @@ const orderStatusColorUser = { pending:'#F59E0B', paid:'#2563EB', completed:'#16
 onUserReady(async (user)=>{
   if(!user) return;
   const wrap = document.getElementById('myOrdersList');
+  renderSkeletonList('myOrdersList', 3);
   try{
     const q = query(collection(db, 'orders'), where('uid', '==', user.uid));
     const snap = await getDocs(q);

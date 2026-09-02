@@ -10,6 +10,21 @@ const id = params.get('id');
 
 const COLLECTION_BY_TYPE = { courses:'courses', products:'products', software:'software', videos:'videos' };
 
+function showDetailSkeleton(){
+  const imageWrap = document.getElementById('detailImageWrap');
+  if(imageWrap){
+    imageWrap.style.display = 'block';
+    imageWrap.innerHTML = '<div class="skeleton" style="aspect-ratio:4/3; border-radius:16px;"></div>';
+  }
+  document.getElementById('detailTitle').innerHTML = '<span class="skeleton skel-detail-line w-80" style="display:inline-block;"></span>';
+  document.getElementById('detailDesc').innerHTML = '<span class="skeleton skel-detail-line w-100" style="display:block;"></span><span class="skeleton skel-detail-line w-50" style="display:block;"></span>';
+  document.getElementById('detailPriceNow').innerHTML = '<span class="skeleton skel-detail-line w-30" style="display:inline-block;"></span>';
+}
+function clearDetailImageSkeleton(){
+  const imageWrap = document.getElementById('detailImageWrap');
+  if(imageWrap) imageWrap.innerHTML = '<div id="detailImage" style="aspect-ratio:4/3; border-radius:16px; background-size:cover; background-position:center;"></div>';
+}
+
 function renderFeatures(list){
   const wrap = document.getElementById('detailFeatures');
   if(!Array.isArray(list) || list.length === 0){ wrap.innerHTML = ''; return; }
@@ -28,10 +43,14 @@ async function boot(){
     return;
   }
 
+  showDetailSkeleton();
+
   let item;
   try{
     const snap = await getDoc(doc(db, COLLECTION_BY_TYPE[type], id));
     if(!snap.exists()){
+      clearDetailImageSkeleton();
+      document.getElementById('detailImageWrap').style.display = 'none';
       document.getElementById('detailTitle').textContent = 'পাওয়া যায়নি';
       document.getElementById('detailDesc').textContent = 'এই আইটেমটি এখন আর নেই।';
       return;
@@ -39,6 +58,8 @@ async function boot(){
     item = { id: snap.id, ...snap.data() };
   }catch(err){
     console.error('detail fetch error:', err);
+    clearDetailImageSkeleton();
+    document.getElementById('detailImageWrap').style.display = 'none';
     document.getElementById('detailTitle').textContent = 'লোড করা যায়নি';
     document.getElementById('detailDesc').textContent = 'Firestore রুলস/কানেকশন চেক করুন।';
     return;
@@ -55,6 +76,7 @@ async function boot(){
 }
 
 function renderDetail(item, owned){
+  clearDetailImageSkeleton();
   const videoWrap = document.getElementById('detailVideoWrap');
   const videoFrame = document.getElementById('detailVideoFrame');
   const imageWrap = document.getElementById('detailImageWrap');

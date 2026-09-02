@@ -1,6 +1,6 @@
 import {
   db, collection, addDoc, getDocs, query, where, serverTimestamp,
-  requireAuth, onUserReady, getCurrentUser, escapeHtml
+  requireAuth, onUserReady, getCurrentUser, escapeHtml, renderSkeletonList
 } from '../common.js';
 
 requireAuth();
@@ -50,7 +50,7 @@ async function loadWalletTransactions(){
   const currentUser = getCurrentUser();
   const wrap = document.getElementById('walletTxnList');
   if(!currentUser || !wrap) return;
-  wrap.innerHTML = '<p style="color:var(--muted);">লোড হচ্ছে...</p>';
+  renderSkeletonList('walletTxnList', 3);
   try{
     const q = query(collection(db, 'walletTransactions'), where('uid', '==', currentUser.uid));
     const snap = await getDocs(q);

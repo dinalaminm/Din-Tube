@@ -1,10 +1,11 @@
-import { db, collection, getDocs, doc, getDoc, query, where, requireAuth, onUserReady } from '../common.js';
+import { db, collection, getDocs, doc, getDoc, query, where, requireAuth, onUserReady, renderSkeletonList } from '../common.js';
 
 requireAuth();
 
 onUserReady(async (user)=>{
   if(!user) return;
   const wrap = document.getElementById('myDownloadsList');
+  renderSkeletonList('myDownloadsList', 3);
   try{
     const q = query(collection(db, 'orders'), where('uid', '==', user.uid));
     const snap = await getDocs(q);
