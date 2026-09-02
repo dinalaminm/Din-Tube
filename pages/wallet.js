@@ -1,0 +1,82 @@
+import {
+  db, collection, addDoc, getDocs, query, where, serverTimestamp,
+  requireAuth, onUserReady, getCurrentUser, escapeHtml
+} from '../common.js';
+
+requireAuth();
+
+onUserReady((user, profile)=>{
+  if(!user) return;
+  document.getElementById('walletBalanceDisplay').textContent = '৳' + Number(profile?.walletBalance || 0).toLocaleString('en-US');
+  loadWalletTransactions();
+});
+
+document.getElementById('depositForm').addEventListener('submit', async (e)=>{
+  e.preventDefault();
+  const msg = document.getElementById('depositMsg');
+  const currentUser = getCurrentUser();
+  if(!currentUser){ msg.textContent = 'আগে লগ ইন করুন।'; msg.className = 'form-msg err'; return; }
+  const amount = Number(document.getElementById('depAmount').value);
+  const method = document.getElementById('depMethod').value;
+  const txnId = document.getElementById('depTxnId').value.trim();
+  const note = document.getElementById('depNote').value.trim();
+  if(!amount || amount <= 0 || !txnId){
+    msg.textContent = 'পরিমাণ ও ট্রানজেকশন আইডি সঠিকভাবে দিন।';
+    msg.className = 'form-msg err';
+    return;
+  }
+  msg.textContent = 'পাঠানো হচ্ছে...';
+  msg.className = 'form-msg';
+  try{
+    await addDoc(collection(db, 'walletTransactions'), {
+      uid: currentUser.uid, type: 'deposit', status: 'pending',
+      amount, method, transactionId: txnId, note, createdAt: serverTimestamp()
+    });
+    msg.textContent = 'ডিপোজিট রিকোয়েস্ট পাঠানো হয়েছে। অ্যাডমিন যাচাই করার পর ব্যালেন্স যোগ হবে।';
+    msg.className = 'form-msg ok';
+    e.target.reset();
+    loadWalletTransactions();
+  }catch(err){
+    msg.textContent = 'পাঠানো যায়নি, আবার চেষ্টা করুন।';
+    msg.className = 'form-msg err';
+    console.error('deposit request error:', err);
+  }
+});
+
+const txnTypeLabel = { deposit:'ডিপোজিট', purchase:'কেনাকাটা', refund:'রিফান্ড' };
+const txnStatusLabel = { pending:'পেন্ডিং', approved:'অনুমোদিত', rejected:'বাতিল', completed:'সম্পন্ন' };
+
+async function loadWalletTransactions(){
+  const currentUser = getCurrentUser();
+  const wrap = document.getElementById('walletTxnList');
+  if(!currentUser || !wrap) return;
+  wrap.innerHTML = '<p style="color:var(--muted);">লোড হচ্ছে...</p>';
+  try{
+    const q = query(collection(db, 'walletTransactions'), where('uid', '==', currentUser.uid));
+    const snap = await getDocs(q);
+    const txns = [];
+    snap.forEach(d => txns.push({ id: d.id, ...d.data() }));
+    txns.sort((a,b)=> (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0));
+    if(txns.length === 0){
+      wrap.innerHTML = '<p style="color:var(--muted);">এখনো কোনো লেনদেন নেই।</p>';
+      return;
+    }
+    wrap.innerHTML = txns.map(t=>{
+      const isCredit = t.type === 'deposit' || t.type === 'refund';
+      const sign = isCredit ? '+' : '−';
+      const dateStr = t.createdAt && t.createdAt.toDate ? t.createdAt.toDate().toLocaleDateString('bn-BD') : '';
+      return `
+        <div class="txn-row">
+          <div>
+            <strong>${txnTypeLabel[t.type] || t.type}</strong>
+            <div style="color:var(--muted); font-size:0.78rem; margin-top:2px;">${dateStr} · ${txnStatusLabel[t.status] || t.status}${t.method ? ' · ' + escapeHtml(t.method) : ''}</div>
+          </div>
+          <span class="txn-amt ${isCredit ? 'credit' : 'debit'}">${sign}৳${Number(t.amount || 0).toLocaleString('en-US')}</span>
+        </div>
+      `;
+    }).join('');
+  }catch(err){
+    wrap.innerHTML = '<p style="color:var(--coral);">লেনদেন লোড করা যায়নি।</p>';
+    console.error('loadWalletTransactions error:', err);
+  }
+}
