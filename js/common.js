@@ -361,5 +361,27 @@ function initChrome(){
   }
   updateCartBadge();
   loadAnnouncement();
+  initFooterNewsletter();
 }
+
+/* ---------- Footer newsletter (client-side only, shown on every page) ---------- */
+function initFooterNewsletter(){
+  const form = document.getElementById('footerNewsletterForm');
+  if(!form) return;
+  form.addEventListener('submit', (e)=>{
+    e.preventDefault();
+    const emailInput = document.getElementById('footerNewsletterEmail');
+    const msg = document.getElementById('footerNewsletterMsg');
+    const email = emailInput.value.trim();
+    if(!email){
+      msg.textContent = 'ইমেইল দিন।';
+      msg.className = 'foot-news-msg err';
+      return;
+    }
+    msg.textContent = 'ধন্যবাদ! আপনি সাবস্ক্রাইব করেছেন।';
+    msg.className = 'foot-news-msg';
+    form.reset();
+  });
+}
+
 initChrome();
