@@ -266,14 +266,46 @@
   .page-profile .simple-page{padding-top:0;}
 
   /* Auth-check loading state (avoids a "please log in" flash while
-     Firebase resolves the session on each fresh page load) */
-  .profile-loading{display:flex; align-items:center; justify-content:center; padding:80px 0;}
-  .spinner{
-    width:32px; height:32px; border-radius:50%;
-    border:3px solid var(--line); border-top-color:var(--coral);
-    animation:spin .7s linear infinite;
+     Firebase resolves the session on each fresh page load) — a skeleton
+     that mirrors the real hero/wallet/dash-grid layout with a shimmer sweep. */
+  .profile-loading{padding-top:20px;}
+  .profile-skel-hero{
+    background:var(--surface); border:1px solid var(--line); border-radius:20px;
+    margin-bottom:20px; box-shadow:0 8px 22px rgba(28,27,41,0.06); overflow:hidden;
   }
-  @keyframes spin{ to{ transform:rotate(360deg); } }
+  .profile-skel-banner{
+    height:64px; background:linear-gradient(120deg,var(--line),var(--surface-2));
+    position:relative; overflow:hidden;
+  }
+  .profile-skel-body{display:flex; align-items:flex-end; gap:14px; padding:0 20px 20px; margin-top:-30px; text-align:left;}
+  .profile-skel-avatar{
+    width:78px; height:78px; border-radius:50%; border:4px solid var(--surface);
+    background:var(--surface-2); flex:0 0 auto; position:relative; overflow:hidden;
+  }
+  .profile-skel-lines{flex:1; padding-bottom:8px; display:flex; flex-direction:column; gap:9px;}
+  .profile-skel-line{height:13px; border-radius:6px; background:var(--surface-2); position:relative; overflow:hidden;}
+  .profile-skel-line.w1{width:135px; height:17px;}
+  .profile-skel-line.w2{width:100px;}
+  .profile-skel-wallet{
+    height:92px; border-radius:16px; margin-bottom:20px; position:relative; overflow:hidden;
+    background:linear-gradient(135deg,#26243b 0%,#332f4f 50%,var(--coral-dark) 135%);
+  }
+  .profile-skel-grid{display:grid; grid-template-columns:repeat(2,1fr); gap:12px;}
+  .profile-skel-cell{
+    height:98px; border-radius:14px; background:var(--surface); border:1px solid var(--line);
+    position:relative; overflow:hidden;
+  }
+  .profile-skel-banner::after, .profile-skel-avatar::after, .profile-skel-line::after,
+  .profile-skel-wallet::after, .profile-skel-cell::after{
+    content:''; position:absolute; inset:0; transform:translateX(-100%);
+    background:linear-gradient(90deg, transparent, rgba(255,255,255,0.6), transparent);
+    animation:profileSkelShimmer 1.5s ease-in-out infinite;
+  }
+  .profile-skel-wallet::after{background:linear-gradient(90deg, transparent, rgba(255,255,255,0.18), transparent);}
+  .profile-skel-cell:nth-child(2)::after{animation-delay:.1s;}
+  .profile-skel-cell:nth-child(3)::after{animation-delay:.2s;}
+  .profile-skel-cell:nth-child(4)::after{animation-delay:.3s;}
+  @keyframes profileSkelShimmer{ 100%{transform:translateX(100%);} }
 
   /* Profile page — signed-out state */
   .profile-guest{
