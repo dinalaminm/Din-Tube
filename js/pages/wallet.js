@@ -5,30 +5,72 @@ import {
 
 requireAuth();
 
+/* ---------- Wallet balance: cache in localStorage so a refresh shows the
+   last known amount instantly instead of flashing ৳0 while auth loads. ---------- */
+const WALLET_BALANCE_CACHE_KEY = 'cr_wallet_balance_cache';
+function getCachedWalletBalance(){
+  try{
+    const cached = JSON.parse(localStorage.getItem(WALLET_BALANCE_CACHE_KEY) || 'null');
+    return (cached && typeof cached.balance === 'number') ? cached.balance : null;
+  }catch(e){ return null; }
+}
+function cacheWalletBalance(balance){
+  try{ localStorage.setItem(WALLET_BALANCE_CACHE_KEY, JSON.stringify({ balance })); }catch(e){ /* ignore */ }
+}
+
+/* Render immediately on script load: the cached balance if we have one,
+   otherwise a shimmer placeholder (never a bare "৳0"). */
+(function renderInitialBalance(){
+  const el = document.getElementById('walletBalanceDisplay');
+  const cached = getCachedWalletBalance();
+  if(cached !== null) el.textContent = '৳' + cached.toLocaleString('en-US');
+  else el.innerHTML = '<span class="skeleton-dark skel-amount"></span>';
+})();
+
 onUserReady((user, profile)=>{
   if(!user) return;
-  document.getElementById('walletBalanceDisplay').textContent = '৳' + Number(profile?.walletBalance || 0).toLocaleString('en-US');
+  const balance = Number(profile?.walletBalance || 0);
+  document.getElementById('walletBalanceDisplay').textContent = '৳' + balance.toLocaleString('en-US');
+  cacheWalletBalance(balance);
   loadWalletTransactions();
 });
 
-/* ---------- Payment method chips + merchant number (from admin settings/payment) ---------- */
+/* ---------- Payment method chips + merchant number (from admin settings/payment) ----------
+   Numbers are cached in localStorage too, so switching methods or refreshing the
+   page shows the last known number immediately; a fresh Firestore read then
+   quietly confirms/updates it in the background. Only a first-ever visit with
+   nothing cached yet falls back to a shimmer placeholder. */
 const MERCHANT_NUMBER_FIELD = { bKash:'bkashNumber', Nagad:'nagadNumber', Rocket:'rocketNumber' };
 const MERCHANT_ICON_TEXT = { bKash:'bK', Nagad:'N', Rocket:'R' };
-let merchantNumbersCache = null;
-async function getMerchantNumbers(){
-  if(merchantNumbersCache) return merchantNumbersCache;
-  try{
-    const snap = await getDoc(doc(db, 'settings', 'payment'));
-    merchantNumbersCache = snap.exists() ? snap.data() : {};
-  }catch(err){
-    console.error('payment settings fetch error:', err);
-    merchantNumbersCache = {};
-  }
-  return merchantNumbersCache;
+const MERCHANT_NUMBERS_CACHE_KEY = 'cr_merchant_numbers_cache';
+
+function getCachedMerchantNumbers(){
+  try{ return JSON.parse(localStorage.getItem(MERCHANT_NUMBERS_CACHE_KEY) || 'null'); }catch(e){ return null; }
+}
+function cacheMerchantNumbers(numbers){
+  try{ localStorage.setItem(MERCHANT_NUMBERS_CACHE_KEY, JSON.stringify(numbers || {})); }catch(e){ /* ignore */ }
 }
 
-async function updateMerchantNumberBox(){
-  const method = document.getElementById('depMethod').value;
+let merchantNumbersCache = getCachedMerchantNumbers(); // seed from localStorage, may be null
+let merchantNumbersFetchPromise = null;
+function fetchMerchantNumbers(){
+  if(merchantNumbersFetchPromise) return merchantNumbersFetchPromise;
+  merchantNumbersFetchPromise = (async ()=>{
+    try{
+      const snap = await getDoc(doc(db, 'settings', 'payment'));
+      const data = snap.exists() ? snap.data() : {};
+      merchantNumbersCache = data;
+      cacheMerchantNumbers(data);
+      return data;
+    }catch(err){
+      console.error('payment settings fetch error:', err);
+      return merchantNumbersCache || {}; // keep showing whatever we had cached
+    }
+  })();
+  return merchantNumbersFetchPromise;
+}
+
+function renderMerchantNumber(method, numbers){
   const box = document.getElementById('merchantNumberBox');
   const icon = document.getElementById('merchantNumberIcon');
   const label = document.getElementById('merchantNumberLabel');
@@ -41,24 +83,35 @@ async function updateMerchantNumberBox(){
   box.dataset.method = method;
   icon.textContent = MERCHANT_ICON_TEXT[method] || method[0];
   label.textContent = method + ' নম্বর';
-  valueEl.textContent = 'লোড হচ্ছে...';
-  valueEl.className = 'merchant-number-value muted';
-  hint.textContent = '';
-  copyBtn.disabled = true;
   copyBtn.textContent = 'কপি';
   copyBtn.classList.remove('copied');
-  const numbers = await getMerchantNumbers();
-  const number = numbers[field];
+  const number = numbers ? numbers[field] : null;
   if(number){
     valueEl.textContent = number;
     valueEl.className = 'merchant-number-value';
     hint.textContent = 'ট্যাপ করে কপি করুন';
     copyBtn.disabled = false;
-  }else{
+  }else if(numbers){
+    // Settings have actually loaded and this method genuinely has no number set.
     valueEl.textContent = `${method} নম্বর এখনো যোগ করা হয়নি`;
     valueEl.className = 'merchant-number-value muted';
     hint.textContent = 'অনুগ্রহ করে সাপোর্টে যোগাযোগ করুন';
     copyBtn.disabled = true;
+  }else{
+    // Nothing cached yet (first-ever visit) — shimmer instead of a "লোড হচ্ছে..." label.
+    valueEl.innerHTML = '<span class="skeleton skel-merchant-number"></span>';
+    valueEl.className = 'merchant-number-value';
+    hint.innerHTML = '<span class="skeleton skel-merchant-hint"></span>';
+    copyBtn.disabled = true;
+  }
+}
+
+async function updateMerchantNumberBox(){
+  const method = document.getElementById('depMethod').value;
+  renderMerchantNumber(method, merchantNumbersCache); // instant, from cache (or shimmer)
+  const fresh = await fetchMerchantNumbers();
+  if(document.getElementById('depMethod').value === method){
+    renderMerchantNumber(method, fresh); // silently confirm/update once Firestore replies
   }
 }
 
