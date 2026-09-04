@@ -1,6 +1,6 @@
 import {
   db, doc, getDoc, collection, addDoc, serverTimestamp, increment, runTransaction,
-  getCart, saveCart, onUserReady, getCurrentUser, getCurrentProfile, showToast
+  getCart, saveCart, onUserReady, getCurrentUser, getCurrentProfile, syncProfileCache, showToast
 } from '../common.js';
 
 function renderCart(){
@@ -182,7 +182,7 @@ async function payWithWallet(){
         orderId: orderRef.id, note: 'ওয়ালেট দিয়ে অর্ডার পরিশোধ', createdAt: serverTimestamp()
       });
     });
-    if(profile) profile.walletBalance = Number(profile.walletBalance || 0) - total;
+    if(profile){ profile.walletBalance = Number(profile.walletBalance || 0) - total; syncProfileCache(); }
     saveCart([]);
     renderCart();
     overlay.style.display = 'none';
