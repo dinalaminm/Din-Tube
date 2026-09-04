@@ -382,17 +382,18 @@ function applyHeaderAuthState(user, profile){
   loadNoticeBadge();
 }
 
-/* ---------- Notice unread badge (shown on home page icon-grid + profile dash-grid) ---------- */
+/* ---------- Notice unread badge (shown on home page icon-grid + profile dash-grid + header bell) ---------- */
 async function loadNoticeBadge(){
   const tileBadge = document.getElementById('noticeTileBadge');
   const dashBadge = document.getElementById('dashNoticeBadge');
-  if(!tileBadge && !dashBadge) return;
+  const headerBadge = document.getElementById('headerNoticeBadge');
+  if(!tileBadge && !dashBadge && !headerBadge) return;
   try{
     const snap = await getDocs(collection(db, 'notices'));
     let seenCount = 0;
     try{ seenCount = Number(localStorage.getItem('seenNoticeCount') || 0); }catch(e){}
     const diff = Math.max(0, snap.size - seenCount);
-    [tileBadge, dashBadge].forEach(badge=>{
+    [tileBadge, dashBadge, headerBadge].forEach(badge=>{
       if(!badge) return;
       if(diff > 0){ badge.textContent = diff; badge.style.display = 'flex'; }
       else badge.style.display = 'none';
