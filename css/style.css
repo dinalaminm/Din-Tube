@@ -1,4 +1,4 @@
-  :root{
+:root{
     --bg:#F4F4FB;
     --surface:#FFFFFF;
     --surface-2:#FAFAFE;
@@ -606,6 +606,63 @@
   @media (prefers-reduced-motion: reduce){
     html{scroll-behavior:auto;}
     .marquee{animation:none;}
-    .grid-card:hover, .btn-primary:hover{transform:none;}
-    .skeleton{animation:none;}
+  /* ---------- Checkout payment-method modal ---------- */
+  .modal-overlay{
+    position:fixed; inset:0; background:rgba(20,18,25,0.55); z-index:200;
+    display:flex; align-items:flex-end; justify-content:center;
+  }
+  .modal-box{
+    background:var(--surface); width:100%; max-width:480px; max-height:88vh; overflow-y:auto;
+    border-radius:22px 22px 0 0; padding:22px 20px 28px; box-shadow:0 -10px 30px rgba(0,0,0,0.2);
+  }
+  .modal-head{display:flex; align-items:flex-start; justify-content:space-between; gap:12px; margin-bottom:18px;}
+  .modal-eyebrow{display:block; font-size:0.72rem; font-weight:800; letter-spacing:0.1em; color:var(--coral); margin-bottom:4px;}
+  .modal-head h3{font-family:'Fraunces',serif; font-size:1.25rem;}
+  .modal-close{
+    flex:0 0 auto; width:34px; height:34px; border-radius:50%; border:none; background:var(--surface-2);
+    color:var(--text); font-size:1rem; cursor:pointer; display:flex; align-items:center; justify-content:center;
+  }
+  .order-summary-box{
+    background:var(--bg); border:1px solid var(--line); border-radius:14px; padding:14px 16px; margin-bottom:20px;
+  }
+  .order-summary-box > span{font-size:0.78rem; color:var(--muted); font-weight:700; text-transform:uppercase; letter-spacing:0.04em;}
+  .order-summary-row{display:flex; justify-content:space-between; align-items:center; margin-top:8px; font-size:1rem;}
+  .order-summary-row strong{color:var(--coral); font-size:1.15rem;}
+  .pm-section-label{font-weight:700; font-size:0.92rem; margin-bottom:12px;}
+  .pm-list{display:flex; flex-direction:column; gap:10px; margin-bottom:18px;}
+  .pm-row{
+    display:flex; align-items:center; gap:14px; width:100%; text-align:left; padding:13px 14px;
+    border:1.5px solid var(--line); border-radius:14px; background:var(--surface); cursor:pointer; transition:.15s;
+    font-family:inherit;
+  }
+  .pm-row:hover{border-color:var(--coral);}
+  .pm-row.selected{border-color:var(--coral); background:#FFF1EF;}
+  .pm-icon{
+    flex:0 0 auto; width:40px; height:40px; border-radius:11px; color:#fff; font-weight:800; font-size:1.05rem;
+    display:flex; align-items:center; justify-content:center;
+  }
+  .pm-info{flex:1; min-width:0; display:flex; flex-direction:column; gap:2px;}
+  .pm-info strong{font-size:0.95rem;}
+  .pm-info span{font-size:0.78rem; color:var(--muted);}
+  .pm-chev{flex:0 0 auto; font-size:1.3rem; color:var(--muted);}
+  .pm-terms{display:flex; align-items:flex-start; gap:10px; font-size:0.82rem; color:var(--muted); line-height:1.5; margin-bottom:18px; cursor:pointer;}
+  .pm-terms input{flex:0 0 auto; margin-top:3px; width:16px; height:16px; accent-color:var(--coral);}
+  .pm-terms a{color:var(--coral); font-weight:700;}
+  .pm-back{background:none; border:none; color:var(--muted); font-weight:700; font-size:0.85rem; cursor:pointer; padding:0; margin-bottom:16px;}
+  .pm-back:hover{color:var(--coral);}
+  .manual-pay-box{background:var(--bg); border:1px dashed var(--line); border-radius:14px; padding:16px; margin-bottom:18px; text-align:center;}
+  .manual-pay-box p{font-size:0.88rem; color:var(--muted); margin-bottom:10px; line-height:1.6;}
+  .manual-pay-number{font-family:'Fraunces',serif; font-size:1.5rem; font-weight:700; color:var(--coral); letter-spacing:0.02em;}
+
+  .merchant-number-box{background:#FFF7F5; border:1.5px dashed var(--coral); border-radius:12px; padding:12px 14px; margin:-4px 0 16px;}
+  .merchant-number-label{display:block; font-weight:700; font-size:0.8rem; color:var(--muted); margin-bottom:6px;}
+  .merchant-number-row{display:flex; align-items:center; justify-content:space-between; gap:10px;}
+  .merchant-number-value{font-family:'Fraunces',serif; font-size:1.25rem; font-weight:700; color:var(--coral); letter-spacing:0.03em; word-break:break-all;}
+  .merchant-number-value.muted{font-family:inherit; font-size:0.85rem; font-weight:600; color:var(--muted);}
+  .merchant-number-copy{flex-shrink:0; border:1.5px solid var(--coral); background:#fff; color:var(--coral); font-weight:700; font-size:0.82rem; padding:7px 14px; border-radius:8px; cursor:pointer; transition:background 0.15s, color 0.15s;}
+  .merchant-number-copy:hover{background:var(--coral); color:#fff;}
+  .merchant-number-copy:disabled{opacity:0.5; cursor:not-allowed;}
+
+  @media (max-width:640px){
+    .modal-box{max-height:92vh;}
   }
