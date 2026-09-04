@@ -400,6 +400,38 @@ async function loadNoticeBadge(){
   }catch(err){ console.error('loadNoticeBadge error:', err); }
 }
 
+/* ---------- Bottom tab bar active-state (runs on every page) ----------
+   Most pages have a fixed page-to-tab mapping, but the "কোর্স" and
+   "প্রোডাক্ট" tabs point to in-page anchors on index.html (#courses /
+   #shop) rather than separate pages, so a static "active" class in the
+   HTML can't track them. This recalculates the correct tab whenever the
+   hash changes too, so tapping those tabs actually highlights them. */
+const PAGE_TAB_MAP = {
+  '': 'content', 'index.html': 'content',
+  'all-courses.html': 'course',
+  'all-products.html': 'product', 'detail.html': 'product', 'cart.html': 'product',
+  'download.html': 'download', 'mydownloads.html': 'download',
+  'profile.html': 'profile', 'settings.html': 'profile', 'wallet.html': 'profile',
+  'orders.html': 'profile', 'wishlist.html': 'profile', 'notice.html': 'profile',
+  'support.html': 'profile'
+};
+
+function setActiveBottomNav(){
+  const navLinks = document.querySelectorAll('.tabbar a[data-tab]');
+  if(!navLinks.length) return;
+  const page = window.location.pathname.split('/').pop();
+  let activeTab = PAGE_TAB_MAP[page] ?? 'content';
+  if(page === '' || page === 'index.html'){
+    const hash = window.location.hash.replace('#','');
+    if(hash === 'courses') activeTab = 'course';
+    else if(hash === 'shop') activeTab = 'product';
+    else activeTab = 'content';
+  }
+  navLinks.forEach(a => a.classList.toggle('active', a.dataset.tab === activeTab));
+}
+setActiveBottomNav();
+window.addEventListener('hashchange', setActiveBottomNav);
+
 /* ---------- Announcement banner (Firestore: settings/announcement) ---------- */
 async function loadAnnouncement(){
   try{
