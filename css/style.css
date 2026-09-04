@@ -910,6 +910,15 @@
   /* ---------- Footer (redesigned) ---------- */
   footer{margin-top:64px;}
   .foot-main{background:var(--text); color:rgba(255,255,255,0.72); padding:52px 0 26px;}
+  .foot-simple{padding:40px 0 26px;}
+  .foot-simple-wrap{display:flex; flex-direction:column; align-items:center; text-align:center; gap:18px;}
+  .foot-simple .logo{font-size:1.3rem;}
+  .foot-simple .foot-socials{margin-top:0;}
+  .foot-simple-links{display:flex; align-items:center; gap:12px; font-size:0.88rem;}
+  .foot-simple-links a{color:rgba(255,255,255,0.75); transition:.15s;}
+  .foot-simple-links a:hover{color:var(--gold);}
+  .foot-simple-links span{color:rgba(255,255,255,0.3);}
+  .foot-bottom-simple{width:100%; max-width:320px; margin:0 auto; padding-top:18px; border-top:1px solid rgba(255,255,255,0.1); font-size:0.8rem; color:rgba(255,255,255,0.45);}
   .foot-top{display:grid; grid-template-columns:1.3fr 1.6fr 1fr; gap:40px; padding-bottom:36px;}
   .foot-brand .logo{color:#fff;}
   .foot-tagline{max-width:280px; font-size:0.9rem; line-height:1.7; margin-top:2px;}
