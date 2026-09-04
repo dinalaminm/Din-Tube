@@ -59,11 +59,10 @@
     padding:10px 24px; max-width:1180px; margin:0 auto; gap:14px;
     min-height:52px;
   }
-  .logo{font-family:'Fraunces',serif; font-weight:800; font-size:1.28rem; letter-spacing:-0.01em; text-shadow:0 1px 0 rgba(255,255,255,0.6); transition:opacity .2s ease;}
+  .logo{font-family:'Fraunces',serif; font-weight:800; font-size:1.28rem; letter-spacing:-0.01em; color:var(--text); text-shadow:0 1px 0 rgba(255,255,255,0.6); transition:opacity .2s ease;}
   .logo:hover{opacity:0.82;}
   .logo span{
-    background:linear-gradient(135deg, var(--coral), var(--gold));
-    -webkit-background-clip:text; background-clip:text; color:transparent;
+    color:var(--coral);
   }
   .nav-links{display:flex; gap:26px; font-weight:600; font-size:0.86rem;}
   .nav-links a{position:relative; opacity:0.72; transition:opacity .2s ease; padding:4px 0;}
@@ -84,8 +83,8 @@
     flex:0 0 auto; width:34px; height:34px; border-radius:50%; display:flex; align-items:center; justify-content:center;
     background:var(--coral); color:#fff; font-weight:800; font-size:0.85rem; text-transform:uppercase;
     overflow:hidden;
-    border:2px solid rgba(255,255,255,0.85);
-    box-shadow:0 3px 10px -2px rgba(255,59,48,0.32), inset 0 1px 1px rgba(255,255,255,0.4);
+    border:2px solid var(--surface);
+    box-shadow:0 0 0 2px var(--coral), 0 3px 10px -2px rgba(255,59,48,0.32), inset 0 1px 1px rgba(255,255,255,0.4);
     transition:transform .18s ease, box-shadow .18s ease;
   }
   .avatar-btn::after{
