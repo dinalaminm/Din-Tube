@@ -274,6 +274,28 @@
     animation:spin .7s linear infinite;
   }
   @keyframes spin{ to{ transform:rotate(360deg); } }
+
+  /* Profile page — signed-out state */
+  .profile-guest{
+    max-width:400px; margin:36px auto 0; background:var(--surface); border:1px solid var(--line);
+    border-radius:22px; padding:40px 28px 32px; box-shadow:0 12px 28px rgba(28,27,41,0.08);
+    position:relative; overflow:hidden;
+  }
+  .profile-guest::before{
+    content:''; position:absolute; top:-60px; right:-60px; width:160px; height:160px; border-radius:50%;
+    background:radial-gradient(circle, rgba(255,122,69,0.16), transparent 70%); pointer-events:none;
+  }
+  .profile-guest-icon{
+    position:relative; z-index:1; width:72px; height:72px; border-radius:50%; margin:0 auto 20px;
+    background:linear-gradient(140deg,var(--gold),var(--coral)); color:#fff;
+    display:flex; align-items:center; justify-content:center;
+    box-shadow:0 10px 22px rgba(255,59,48,0.28);
+  }
+  .profile-guest h1{position:relative; z-index:1; font-size:1.4rem; margin-bottom:8px;}
+  .profile-guest p{position:relative; z-index:1; font-size:0.92rem; margin-bottom:24px;}
+  .profile-guest-btn{position:relative; z-index:1; width:100%; padding:15px; font-size:0.96rem;}
+  .profile-guest-alt{position:relative; z-index:1; margin-bottom:0; font-size:0.85rem;}
+  .profile-guest-alt a{color:var(--coral); font-weight:800;}
   .simple-page h1{font-size:1.9rem; margin-bottom:12px;}
   .simple-page p{color:var(--muted); margin-bottom:26px; line-height:1.6;}
   .form-field{margin-bottom:16px; text-align:left;}
