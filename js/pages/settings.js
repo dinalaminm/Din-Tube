@@ -3,7 +3,7 @@ import {
   updateProfile, sendPasswordResetEmail, deleteDoc, deleteUser,
   EmailAuthProvider, reauthenticateWithCredential,
   requireAuth, onUserReady, getCurrentUser, getCurrentProfile, syncProfileCache, showToast,
-  cartoonAvatarSVG
+  updateHeaderAvatar
 } from '../common.js';
 
 requireAuth();
@@ -30,10 +30,7 @@ document.getElementById('settingsProfileForm').addEventListener('submit', async 
     await setDoc(doc(db, 'users', currentUser.uid), { name, phone }, { merge: true });
     const profile = getCurrentProfile();
     if(profile){ profile.name = name; profile.phone = phone; syncProfileCache(); }
-    const avatarBtn = document.getElementById('avatarBtn');
-    if(avatarBtn){
-      avatarBtn.innerHTML = cartoonAvatarSVG(name);
-    }
+    updateHeaderAvatar(name);
     msg.textContent = 'সংরক্ষণ করা হয়েছে!';
     msg.className = 'form-msg ok';
   }catch(err){
