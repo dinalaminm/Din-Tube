@@ -140,21 +140,30 @@ function renderDetail(item, owned){
   }
 
   const buyBtn = document.getElementById('detailBuyBtn');
+  const buyNowBtn = document.getElementById('detailBuyNowBtn');
   buyBtn.disabled = false;
   buyBtn.style.opacity = '1';
   if((type === 'products' || type === 'software') && item.downloadUrl && owned){
     buyBtn.textContent = 'ডাউনলোড করুন';
     buyBtn.onclick = ()=> window.open(item.downloadUrl, '_blank');
+    buyNowBtn.style.display = 'none';
   } else if(type === 'videos' && owned){
     buyBtn.textContent = 'কেনা হয়ে গেছে ✓';
     buyBtn.onclick = null;
     buyBtn.disabled = true;
     buyBtn.style.opacity = '0.6';
+    buyNowBtn.style.display = 'none';
   } else {
     buyBtn.textContent = type === 'courses' ? 'কোর্সে ভর্তি হন' : (type === 'videos' ? 'কিনুন' : 'কার্টে যোগ করুন');
     buyBtn.onclick = ()=>{
       addToCart({ id: item.id, type, name: itemLabel(type, item), price: Number(item.price || 0), grad: itemBg(item, 0) });
       showToast(itemLabel(type, item) + ' কার্টে যোগ হয়েছে');
+    };
+    buyNowBtn.style.display = 'block';
+    buyNowBtn.textContent = 'এখনই কিনুন';
+    buyNowBtn.onclick = ()=>{
+      addToCart({ id: item.id, type, name: itemLabel(type, item), price: Number(item.price || 0), grad: itemBg(item, 0) });
+      window.location.href = 'cart.html?checkout=1';
     };
   }
 
