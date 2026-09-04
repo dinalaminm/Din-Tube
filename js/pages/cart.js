@@ -1,143 +1,246 @@
-<!DOCTYPE html>
-<html lang="bn">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>কার্ট | Creator Rivo</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700;9..144,900&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/style.css">
-</head>
-<body>
-<div class="toast" id="toast"></div>
+import {
+  db, doc, getDoc, collection, addDoc, serverTimestamp, increment, runTransaction,
+  getCart, saveCart, onUserReady, getCurrentUser, getCurrentProfile, syncProfileCache, showToast
+} from '../common.js';
 
-<header>
-  <nav>
-    <div class="logo">Creator <span>Rivo</span></div>
-    <div class="nav-links">
-      <a href="index.html#courses">কোর্স</a>
-      <a href="index.html#shop">প্রোডাক্ট</a>
-      <a href="index.html#how">কীভাবে কাজ করে</a>
-      <a href="index.html#reviews">রিভিউ</a>
-    </div>
-    <a class="cart-btn" id="cartBtn" href="cart.html" aria-label="কার্ট">
-      <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8h12l1 12.5a1 1 0 0 1-1 1.5H6a1 1 0 0 1-1-1.5L6 8Z"/><path d="M9 8V6a3 3 0 0 1 6 0v2"/></svg>
-      <span class="cart-badge" id="cartBadge">0</span>
-    </a>
-    <a class="nav-cta" id="loginBtn" href="login.html">লগ ইন</a>
-    <button class="burger" id="burgerBtn" aria-label="মেনু খুলুন" aria-expanded="false">☰</button>
-  </nav>
-  <div class="mobile-menu" id="mobileMenu">
-    <a href="index.html#courses">কোর্স</a>
-    <a href="index.html#shop">প্রোডাক্ট</a>
-    <a href="index.html#how">কীভাবে কাজ করে</a>
-    <a href="index.html#reviews">রিভিউ</a>
-    <a href="cart.html">কার্ট</a>
-  </div>
-</header>
-
-<div id="announcementBanner" class="announcement-banner" style="display:none;">
-  <div class="announcement-text">
-    <strong id="annBannerTitle"></strong>
-    <span id="annBannerMessage"></span>
-  </div>
-  <button type="button" id="announcementDismiss" aria-label="বন্ধ করুন">✕</button>
-</div>
-
-<main class="page-content">
-<div class="simple-page" style="text-align:left;">
-    <h1>আপনার কার্ট</h1>
-    <div id="cartItemsWrap"></div>
-    <p id="cartEmptyMsg" style="display:none;">কার্ট খালি — এখনো কোনো প্রোডাক্ট বা কোর্স যোগ করা হয়নি।</p>
-    <div class="cart-total-row" id="cartTotalRow" style="display:none;">
-      <span>মোট</span><span id="cartTotal">৳0</span>
-    </div>
-    <button class="btn-primary" id="openCheckoutBtn" style="width:100%; border:none; cursor:pointer; display:none; margin-top:10px;">চেকআউট করুন</button>
-    <div class="form-msg ok" id="checkoutMsg"></div>
-  </div>
-</main>
-
-<div class="modal-overlay" id="checkoutOverlay" style="display:none;">
-  <div class="modal-box">
-    <div class="modal-head">
-      <div>
-        <span class="modal-eyebrow">CHECKOUT</span>
-        <h3 id="checkoutModalTitle">পেমেন্ট মেথড বেছে নিন</h3>
+function renderCart(){
+  const cart = getCart();
+  const wrap = document.getElementById('cartItemsWrap');
+  const emptyMsg = document.getElementById('cartEmptyMsg');
+  const totalRow = document.getElementById('cartTotalRow');
+  const openCheckoutBtn = document.getElementById('openCheckoutBtn');
+  wrap.innerHTML = '';
+  if(cart.length === 0){
+    emptyMsg.style.display = 'block';
+    totalRow.style.display = 'none';
+    openCheckoutBtn.style.display = 'none';
+    return;
+  }
+  emptyMsg.style.display = 'none';
+  let total = 0;
+  cart.forEach((item, idx)=>{
+    total += item.price * item.qty;
+    const row = document.createElement('div');
+    row.className = 'cart-item';
+    row.innerHTML = `
+      <div class="thumb" style="background:${item.grad}"></div>
+      <div class="info">
+        <h4>${item.name}</h4>
+        <span style="color:var(--coral); font-weight:800;">৳${item.price.toLocaleString('en-US')}</span>
+        <div class="qty">
+          <button data-act="dec" data-idx="${idx}" type="button">−</button>
+          <span>${item.qty}</span>
+          <button data-act="inc" data-idx="${idx}" type="button">+</button>
+        </div>
       </div>
-      <button type="button" id="checkoutCloseBtn" class="modal-close" aria-label="বন্ধ করুন">✕</button>
-    </div>
+      <button class="remove" data-act="remove" data-idx="${idx}" type="button">মুছুন</button>
+    `;
+    wrap.appendChild(row);
+  });
+  document.getElementById('cartTotal').textContent = '৳' + total.toLocaleString('en-US');
+  totalRow.style.display = 'flex';
+  openCheckoutBtn.style.display = 'block';
+  wrap.querySelectorAll('button[data-act]').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      const idx = +btn.dataset.idx;
+      const act = btn.dataset.act;
+      const c = getCart();
+      if(act === 'inc') c[idx].qty += 1;
+      if(act === 'dec'){ c[idx].qty -= 1; if(c[idx].qty <= 0) c.splice(idx,1); }
+      if(act === 'remove') c.splice(idx,1);
+      saveCart(c);
+      renderCart();
+    });
+  });
+}
+renderCart();
+onUserReady(()=> renderCart());
 
-    <div id="checkoutStepMethod">
-      <div class="order-summary-box">
-        <span>অর্ডার সামারি</span>
-        <div class="order-summary-row"><span id="checkoutItemsLabel"></span><strong id="checkoutTotalLabel"></strong></div>
-      </div>
+/* If we arrived here via a detail page's "এখনই কিনুন" (Buy Now) button
+   (cart.html?checkout=1), skip straight to the checkout modal instead of
+   making the person tap "চেকআউট করুন" again. */
+if(new URLSearchParams(window.location.search).get('checkout') === '1'){
+  onUserReady(()=>{
+    if(getCart().length > 0) document.getElementById('openCheckoutBtn').click();
+  });
+}
 
-      <p class="pm-section-label">পেমেন্ট মেথড বেছে নিন</p>
-      <div class="pm-list" id="pmList">
-        <button type="button" class="pm-row" data-method="bKash">
-          <span class="pm-icon" style="background:rgba(226,19,110,0.12); color:#E2136E;">
-            <svg viewBox="0 0 24 24" width="21" height="21" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="7" y="2" width="10" height="20" rx="2.5"/><path d="M11 18h2"/></svg>
-          </span>
-          <span class="pm-info"><strong>bKash</strong><span>মোবাইল ব্যাংকিং · ম্যানুয়াল ভেরিফিকেশন</span></span>
-          <span class="pm-chev"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m9 6 6 6-6 6"/></svg></span>
-        </button>
-        <button type="button" class="pm-row" data-method="Nagad">
-          <span class="pm-icon" style="background:rgba(246,130,31,0.12); color:#F6821F;">
-            <svg viewBox="0 0 24 24" width="21" height="21" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="7" y="2" width="10" height="20" rx="2.5"/><path d="M11 18h2"/></svg>
-          </span>
-          <span class="pm-info"><strong>Nagad</strong><span>মোবাইল ব্যাংকিং · ম্যানুয়াল ভেরিফিকেশন</span></span>
-          <span class="pm-chev"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m9 6 6 6-6 6"/></svg></span>
-        </button>
-        <button type="button" class="pm-row" data-method="Rocket">
-          <span class="pm-icon" style="background:rgba(135,48,214,0.12); color:#8730D6;">
-            <svg viewBox="0 0 24 24" width="21" height="21" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></svg>
-          </span>
-          <span class="pm-info"><strong>Rocket</strong><span>মোবাইল ব্যাংকিং · ম্যানুয়াল ভেরিফিকেশন</span></span>
-          <span class="pm-chev"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m9 6 6 6-6 6"/></svg></span>
-        </button>
-        <button type="button" class="pm-row" data-method="Wallet">
-          <span class="pm-icon" style="background:rgba(255,59,48,0.12); color:var(--coral);">
-            <svg viewBox="0 0 24 24" width="21" height="21" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 12V8H6a2 2 0 0 1-2-2c0-1.1.9-2 2-2h12v4"/><path d="M4 6v12c0 1.1.9 2 2 2h14v-4"/><path d="M18 12a2 2 0 0 0 0 4h4v-4Z"/></svg>
-          </span>
-          <span class="pm-info"><strong>ওয়ালেট</strong><span id="pmWalletBalance">ব্যালেন্স: ৳0</span></span>
-          <span class="pm-chev"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m9 6 6 6-6 6"/></svg></span>
-        </button>
-      </div>
+/* ---------- Checkout modal ---------- */
+const overlay = document.getElementById('checkoutOverlay');
+const stepMethod = document.getElementById('checkoutStepMethod');
+const stepManual = document.getElementById('checkoutStepManual');
+const continueBtn = document.getElementById('checkoutContinueBtn');
+const termsCheckbox = document.getElementById('checkoutTerms');
+let selectedMethod = null;
 
-      <label class="pm-terms">
-        <input type="checkbox" id="checkoutTerms">
-        <span>আমি <a href="support.html" target="_blank">শর্তাবলী</a>, <a href="support.html" target="_blank">প্রাইভেসি পলিসি</a> ও <a href="support.html" target="_blank">রিটার্ন পলিসি</a> পড়েছি এবং সম্মত আছি।</span>
-      </label>
+const MERCHANT_NUMBER_FIELD = { bKash:'bkashNumber', Nagad:'nagadNumber', Rocket:'rocketNumber' };
+let merchantNumbersCache = null;
+async function getMerchantNumbers(){
+  if(merchantNumbersCache) return merchantNumbersCache;
+  try{
+    const snap = await getDoc(doc(db, 'settings', 'payment'));
+    merchantNumbersCache = snap.exists() ? snap.data() : {};
+  }catch(err){
+    console.error('payment settings fetch error:', err);
+    merchantNumbersCache = {};
+  }
+  return merchantNumbersCache;
+}
 
-      <button type="button" class="btn-primary" id="checkoutContinueBtn" style="width:100%; border:none; cursor:pointer; opacity:0.5;" disabled>এগিয়ে যান</button>
-      <div class="form-msg" id="checkoutStepMsg"></div>
-    </div>
+function resetCheckoutModal(){
+  selectedMethod = null;
+  termsCheckbox.checked = false;
+  document.querySelectorAll('.pm-row').forEach(r => r.classList.remove('selected'));
+  updateContinueState();
+  stepMethod.style.display = 'block';
+  stepManual.style.display = 'none';
+  document.getElementById('checkoutStepMsg').textContent = '';
+  document.getElementById('manualPayMsg').textContent = '';
+  document.getElementById('manualTxnId').value = '';
+}
 
-    <div id="checkoutStepManual" style="display:none;">
-      <button type="button" id="checkoutBackBtn" class="pm-back">← পেমেন্ট মেথড বদলান</button>
-      <div class="manual-pay-box">
-        <p id="manualPayInstruction"></p>
-        <div class="manual-pay-number" id="manualPayNumber"></div>
-      </div>
-      <div class="form-field"><label>ট্রানজেকশন আইডি</label><input type="text" id="manualTxnId" required placeholder="যেমন: 8N7A2K9X1Q"></div>
-      <button type="button" class="btn-primary" id="manualSubmitBtn" style="width:100%; border:none; cursor:pointer;">অর্ডার কনফার্ম করুন</button>
-      <div class="form-msg" id="manualPayMsg"></div>
-    </div>
-  </div>
-</div>
+function updateContinueState(){
+  const enabled = !!selectedMethod && termsCheckbox.checked;
+  continueBtn.disabled = !enabled;
+  continueBtn.style.opacity = enabled ? '1' : '0.5';
+}
 
+document.getElementById('openCheckoutBtn').addEventListener('click', ()=>{
+  const currentUser = getCurrentUser();
+  if(!currentUser){
+    document.getElementById('checkoutMsg').className = 'form-msg err';
+    document.getElementById('checkoutMsg').textContent = 'চেকআউট করতে আগে লগ ইন করুন।';
+    setTimeout(()=> window.location.href = 'login.html', 900);
+    return;
+  }
+  const cart = getCart();
+  const total = cart.reduce((s,c)=> s + c.price * c.qty, 0);
+  const itemCount = cart.reduce((s,c)=> s + c.qty, 0);
+  document.getElementById('checkoutItemsLabel').textContent = itemCount + 'টা আইটেম';
+  document.getElementById('checkoutTotalLabel').textContent = '৳' + total.toLocaleString('en-US');
+  const profile = getCurrentProfile();
+  document.getElementById('pmWalletBalance').textContent = 'ব্যালেন্স: ৳' + Number(profile?.walletBalance || 0).toLocaleString('en-US');
+  resetCheckoutModal();
+  overlay.style.display = 'flex';
+});
 
+document.getElementById('checkoutCloseBtn').addEventListener('click', ()=>{ overlay.style.display = 'none'; });
+overlay.addEventListener('click', (e)=>{ if(e.target === overlay) overlay.style.display = 'none'; });
 
-<script type="module" src="js/pages/cart.js"></script>
+document.querySelectorAll('.pm-row').forEach(row=>{
+  row.addEventListener('click', ()=>{
+    document.querySelectorAll('.pm-row').forEach(r => r.classList.remove('selected'));
+    row.classList.add('selected');
+    selectedMethod = row.dataset.method;
+    updateContinueState();
+  });
+});
+termsCheckbox.addEventListener('change', updateContinueState);
 
-<nav class="tabbar">
-  <a data-tab="content" href="index.html"><span class="ic"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M10 9.5v5l4.5-2.5Z" fill="currentColor" stroke="none"/></svg></span>কনটেন্ট</a>
-  <a data-tab="course" href="index.html#courses"><span class="ic"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 9.5 12 5l10 4.5-10 4.5-10-4.5Z"/><path d="M6 11.5V17c0 1.4 2.7 2.5 6 2.5s6-1.1 6-2.5v-5.5"/></svg></span>কোর্স</a>
-  <a data-tab="product" href="index.html#shop"><span class="ic"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8h12l1 12.5a1 1 0 0 1-1 1.5H6a1 1 0 0 1-1-1.5L6 8Z"/><path d="M9 8V6a3 3 0 0 1 6 0v2"/></svg></span>প্রোডাক্ট</a>
-  <a data-tab="download" href="download.html"><span class="ic"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 16a4.5 4.5 0 0 1-1-8.9 5.5 5.5 0 0 1 10.7-2A4.5 4.5 0 0 1 17.5 16"/><path d="M12 11v8m0 0-3-3m3 3 3-3"/></svg></span>ডাউনলোড</a>
-  <a data-tab="profile" href="profile.html"><span class="ic"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="3.5"/><path d="M4.5 20a7.5 7.5 0 0 1 15 0"/></svg></span>প্রোফাইল</a>
-</nav>
+continueBtn.addEventListener('click', async ()=>{
+  if(!selectedMethod) return;
+  if(selectedMethod === 'Wallet'){
+    await payWithWallet();
+  }else{
+    const numbers = await getMerchantNumbers();
+    const number = numbers[MERCHANT_NUMBER_FIELD[selectedMethod]];
+    document.getElementById('manualPayInstruction').textContent = number
+      ? `নিচের ${selectedMethod} নম্বরে "Send Money" করে টাকা পাঠান, তারপর ট্রানজেকশন আইডি বসান।`
+      : `${selectedMethod} নম্বর এখনো যোগ করা হয়নি — অনুগ্রহ করে সাপোর্টে যোগাযোগ করুন।`;
+    document.getElementById('manualPayNumber').textContent = number || '';
+    stepMethod.style.display = 'none';
+    stepManual.style.display = 'block';
+  }
+});
 
-</body>
-</html>
+document.getElementById('checkoutBackBtn').addEventListener('click', ()=>{
+  stepManual.style.display = 'none';
+  stepMethod.style.display = 'block';
+});
+
+async function payWithWallet(){
+  const msg = document.getElementById('checkoutStepMsg');
+  const currentUser = getCurrentUser();
+  const profile = getCurrentProfile();
+  const cart = getCart();
+  const total = cart.reduce((s,c)=> s + c.price * c.qty, 0);
+  if(total > Number(profile?.walletBalance || 0)){
+    msg.className = 'form-msg err';
+    msg.textContent = 'ওয়ালেটে পর্যাপ্ত ব্যালেন্স নেই। আগে ডিপোজিট করুন।';
+    return;
+  }
+  msg.className = 'form-msg';
+  msg.textContent = 'পেমেন্ট প্রসেস হচ্ছে...';
+  continueBtn.disabled = true;
+  const items = cart.map(c => ({ id: c.id || null, type: c.type || null, name: c.name, price: c.price, qty: c.qty }));
+  const userRef = doc(db, 'users', currentUser.uid);
+  const orderRef = doc(collection(db, 'orders'));
+  const txnRef = doc(collection(db, 'walletTransactions'));
+  try{
+    await runTransaction(db, async (tx)=>{
+      const uSnap = await tx.get(userRef);
+      const bal = Number((uSnap.exists() ? uSnap.data().walletBalance : 0) || 0);
+      if(bal < total) throw new Error('insufficient-balance');
+      tx.update(userRef, { walletBalance: increment(-total) });
+      tx.set(orderRef, {
+        uid: currentUser.uid, name: currentUser.displayName || '', email: currentUser.email || '',
+        items, total, status: 'completed', paymentMethod: 'Wallet', createdAt: serverTimestamp()
+      });
+      tx.set(txnRef, {
+        uid: currentUser.uid, type: 'purchase', status: 'completed', amount: total,
+        orderId: orderRef.id, note: 'ওয়ালেট দিয়ে অর্ডার পরিশোধ', createdAt: serverTimestamp()
+      });
+    });
+    if(profile){ profile.walletBalance = Number(profile.walletBalance || 0) - total; syncProfileCache(); }
+    saveCart([]);
+    renderCart();
+    overlay.style.display = 'none';
+    showToast('পেমেন্ট সফল হয়েছে! অ্যাক্সেস এখনই আনলক হয়ে গেছে।');
+  }catch(err){
+    msg.className = 'form-msg err';
+    msg.textContent = err.message === 'insufficient-balance' ? 'ওয়ালেটে পর্যাপ্ত ব্যালেন্স নেই।' : 'পেমেন্ট ব্যর্থ হয়েছে, আবার চেষ্টা করুন।';
+    console.error('wallet payment error:', err);
+  }finally{
+    continueBtn.disabled = false;
+  }
+}
+
+document.getElementById('manualSubmitBtn').addEventListener('click', async ()=>{
+  const msg = document.getElementById('manualPayMsg');
+  const txnId = document.getElementById('manualTxnId').value.trim();
+  const currentUser = getCurrentUser();
+  if(!txnId){
+    msg.className = 'form-msg err';
+    msg.textContent = 'ট্রানজেকশন আইডি দিন।';
+    return;
+  }
+  const cart = getCart();
+  const total = cart.reduce((s,c)=> s + c.price * c.qty, 0);
+  const btn = document.getElementById('manualSubmitBtn');
+  btn.disabled = true;
+  msg.className = 'form-msg';
+  msg.textContent = 'অর্ডার প্রসেস হচ্ছে...';
+  try{
+    await addDoc(collection(db, 'orders'), {
+      uid: currentUser.uid,
+      name: currentUser.displayName || '',
+      email: currentUser.email || '',
+      items: cart.map(c => ({ id: c.id || null, type: c.type || null, name: c.name, price: c.price, qty: c.qty })),
+      total,
+      status: 'pending',
+      paymentMethod: selectedMethod,
+      transactionId: txnId,
+      createdAt: serverTimestamp()
+    });
+    saveCart([]);
+    renderCart();
+    overlay.style.display = 'none';
+    showToast('অর্ডার পাঠানো হয়েছে! পেমেন্ট ভেরিফাই হলে অ্যাক্সেস আনলক হবে।');
+  }catch(err){
+    msg.className = 'form-msg err';
+    msg.textContent = 'অর্ডার করা যায়নি, আবার চেষ্টা করুন।';
+    console.error('manual order create error:', err);
+  }finally{
+    btn.disabled = false;
+  }
+});
