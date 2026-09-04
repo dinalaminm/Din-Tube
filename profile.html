@@ -46,10 +46,17 @@
 
 <main class="page-content">
 <div class="simple-page">
-    <div id="profileLoggedOut">
-      <h1>প্রোফাইল</h1>
-      <p>প্রোফাইল দেখতে প্রথমে লগ ইন করুন।</p>
-      <button class="btn-primary" id="goLoginBtn" style="border:none; cursor:pointer;">লগ ইন করুন</button>
+    <div id="profileLoading" class="profile-loading">
+      <span class="spinner"></span>
+    </div>
+    <div id="profileLoggedOut" class="profile-guest" style="display:none;">
+      <div class="profile-guest-icon">
+        <svg viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 20a8 8 0 0 1 16 0"/></svg>
+      </div>
+      <h1>আপনার প্রোফাইল</h1>
+      <p>অর্ডার, ওয়ালেট, ডাউনলোড আর নোটিফিকেশন দেখতে প্রথমে লগ ইন করুন।</p>
+      <button class="btn-primary profile-guest-btn" id="goLoginBtn" style="border:none; cursor:pointer;">লগ ইন করুন</button>
+      <p class="profile-guest-alt">নতুন ব্যবহারকারী? <a href="login.html">অ্যাকাউন্ট খুলুন</a></p>
     </div>
     <div id="profileLoggedIn" style="display:none; text-align:left;">
 
