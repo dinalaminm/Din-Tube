@@ -225,9 +225,29 @@ onAuthStateChanged(auth, async (user)=>{
 
   authResolved = true;
   applyHeaderAuthState(user, cachedProfile);
+  loadPendingOrderBadge(user);
   readyCallbacks.forEach(cb => cb(user, cachedProfile));
   readyCallbacks.length = 0;
 });
+
+/* ---------- Header bag icon badge: count of this user's pending orders
+   (the bag icon links to orders.html, not a shopping cart — see updateCartBadge
+   below, which is legacy/unused now that nothing calls addToCart). ---------- */
+async function loadPendingOrderBadge(user){
+  const badge = document.getElementById('cartBadge');
+  if(!badge) return;
+  if(!user){ badge.style.display = 'none'; return; }
+  try{
+    const q = query(collection(db, 'orders'), where('uid', '==', user.uid), where('status', '==', 'pending'));
+    const snap = await getDocs(q);
+    const count = snap.size;
+    badge.textContent = count;
+    badge.style.display = count > 0 ? 'flex' : 'none';
+  }catch(err){
+    console.error('loadPendingOrderBadge error:', err);
+    badge.style.display = 'none';
+  }
+}
 
 export function onUserReady(cb){
   if(authResolved) cb(cachedUser, cachedProfile);
