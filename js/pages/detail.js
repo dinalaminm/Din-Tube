@@ -276,6 +276,27 @@ document.getElementById('checkoutBackBtn').addEventListener('click', ()=>{
   stepMethod.style.display = 'block';
 });
 
+document.getElementById('manualPayCopyBtn').addEventListener('click', async (e)=>{
+  const btn = e.currentTarget;
+  const number = document.getElementById('manualPayNumber').textContent.trim();
+  if(!number) return;
+  try{
+    await navigator.clipboard.writeText(number);
+  }catch(err){
+    const ta = document.createElement('textarea');
+    ta.value = number;
+    ta.style.position = 'fixed';
+    ta.style.opacity = '0';
+    document.body.appendChild(ta);
+    ta.select();
+    document.execCommand('copy');
+    document.body.removeChild(ta);
+  }
+  btn.classList.add('copied');
+  showToast('নম্বর কপি হয়েছে');
+  setTimeout(()=> btn.classList.remove('copied'), 1500);
+});
+
 function currentOrderItems(){
   return [{ id: checkoutItem.id || null, type: checkoutType || null, name: itemLabel(checkoutType, checkoutItem), price: Number(checkoutItem.price || 0), qty: 1 }];
 }
