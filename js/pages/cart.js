@@ -56,6 +56,15 @@ function renderCart(){
 renderCart();
 onUserReady(()=> renderCart());
 
+/* If we arrived here via a detail page's "এখনই কিনুন" (Buy Now) button
+   (cart.html?checkout=1), skip straight to the checkout modal instead of
+   making the person tap "চেকআউট করুন" again. */
+if(new URLSearchParams(window.location.search).get('checkout') === '1'){
+  onUserReady(()=>{
+    if(getCart().length > 0) document.getElementById('openCheckoutBtn').click();
+  });
+}
+
 /* ---------- Checkout modal ---------- */
 const overlay = document.getElementById('checkoutOverlay');
 const stepMethod = document.getElementById('checkoutStepMethod');
