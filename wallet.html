@@ -68,6 +68,13 @@
           <option value="Other">অন্যান্য</option>
         </select>
       </div>
+      <div class="merchant-number-box" id="merchantNumberBox" style="display:none;">
+        <span class="merchant-number-label" id="merchantNumberLabel">bKash নম্বর</span>
+        <div class="merchant-number-row">
+          <span class="merchant-number-value" id="merchantNumberValue">—</span>
+          <button type="button" class="merchant-number-copy" id="merchantNumberCopy">কপি</button>
+        </div>
+      </div>
       <div class="form-field"><label>ট্রানজেকশন আইডি</label><input type="text" id="depTxnId" required placeholder="যেমন: 8N7A2K9X1Q"></div>
       <div class="form-field"><label>নোট (ঐচ্ছিক)</label><input type="text" id="depNote" placeholder="অতিরিক্ত তথ্য"></div>
       <button type="submit" class="btn-primary" style="width:100%; border:none; cursor:pointer;">ডিপোজিট রিকোয়েস্ট পাঠান</button>
