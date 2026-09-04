@@ -59,8 +59,10 @@ loadHomepageSettings();
 /* ---------- Courses + products (home preview grids, 1 page's worth) ---------- */
 let coursesData = [];
 let productsData = [];
+let videosData = [];
 async function boot(){
   coursesData = await loadCollectionGrid('courses', 'courseGrid', { type:'courses', emptyText:'এখনো কোনো কোর্স যোগ করা হয়নি।' });
+  videosData = await loadCollectionGrid('videos', 'videoGrid', { type:'videos', emptyText:'এখনো কোনো ভিডিও যোগ করা হয়নি।' });
   productsData = await loadCollectionGrid('products', 'productGrid', { type:'products', emptyText:'এখনো কোনো প্রোডাক্ট যোগ করা হয়নি।' });
   renderCategoryChips();
 }
