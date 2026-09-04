@@ -923,6 +923,13 @@
   .manual-pay-box{background:var(--bg); border:1px dashed var(--line); border-radius:14px; padding:16px; margin-bottom:18px; text-align:center;}
   .manual-pay-box p{font-size:0.88rem; color:var(--muted); margin-bottom:10px; line-height:1.6;}
   .manual-pay-number{font-family:'Fraunces',serif; font-size:1.5rem; font-weight:700; color:var(--coral); letter-spacing:0.02em;}
+  .manual-pay-number-row{display:flex; align-items:center; justify-content:center; gap:10px;}
+  .manual-pay-copy-btn{
+    flex:0 0 auto; width:34px; height:34px; border-radius:10px; border:1px solid var(--line); background:var(--surface);
+    color:var(--muted); display:flex; align-items:center; justify-content:center; cursor:pointer; transition:all .15s ease;
+  }
+  .manual-pay-copy-btn:hover{border-color:var(--coral); color:var(--coral);}
+  .manual-pay-copy-btn.copied{border-color:var(--coral); background:var(--coral); color:#fff;}
 
 
   @media (max-width:640px){
