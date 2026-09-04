@@ -362,7 +362,7 @@
   .ticket-status{font-size:0.72rem; font-weight:800; color:#fff; padding:3px 10px; border-radius:100px; white-space:nowrap;}
 
   /* Wallet page redesign */
-  .wallet-page-wrap{max-width:460px; margin:0 auto; padding:28px 20px 100px;}
+  .wallet-page-wrap{max-width:460px; margin:0 auto; padding:0 20px 100px;}
 
   .wallet-hero{
     position:relative; overflow:hidden; background:linear-gradient(135deg,#1C1B29,#3A2E4D); color:#fff;
