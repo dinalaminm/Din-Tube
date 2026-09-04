@@ -915,8 +915,8 @@
   .foot-simple .logo{font-size:1.3rem;}
   .foot-simple .foot-socials{margin-top:0;}
   .foot-simple-links{display:flex; align-items:center; gap:12px; font-size:0.88rem;}
-  .foot-simple-links a{color:rgba(255,255,255,0.75); transition:.15s;}
-  .foot-simple-links a:hover{color:var(--gold);}
+  .foot-simple-links a{color:#5B9DFF; transition:.15s;}
+  .foot-simple-links a:hover{color:#8FBCFF;}
   .foot-simple-links span{color:rgba(255,255,255,0.3);}
   .foot-bottom-simple{width:100%; max-width:320px; margin:0 auto; padding-top:18px; border-top:1px solid rgba(255,255,255,0.1); font-size:0.8rem; color:rgba(255,255,255,0.45);}
   .foot-top{display:grid; grid-template-columns:1.3fr 1.6fr 1fr; gap:40px; padding-bottom:36px;}
@@ -924,7 +924,7 @@
   .foot-tagline{max-width:280px; font-size:0.9rem; line-height:1.7; margin-top:2px;}
   .foot-socials{display:flex; gap:10px; margin-top:20px;}
   .foot-socials a{
-    width:34px; height:34px; border-radius:50%; display:flex; align-items:center; justify-content:center;
+    width:40px; height:40px; border-radius:50%; display:flex; align-items:center; justify-content:center;
     background:rgba(255,255,255,0.08); color:rgba(255,255,255,0.85); transition:.15s;
   }
   .foot-socials a:hover{background:var(--coral); color:#fff; transform:translateY(-2px);}
