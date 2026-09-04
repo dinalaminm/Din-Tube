@@ -62,9 +62,12 @@
   .avatar-btn{
     flex:0 0 auto; width:38px; height:38px; border-radius:50%; display:flex; align-items:center; justify-content:center;
     background:var(--coral); color:#fff; font-weight:800; font-size:0.95rem; text-transform:uppercase;
+    overflow:hidden;
   }
   .avatar-btn.guest{background:var(--surface-2); color:var(--muted); border:1.5px solid var(--line);}
-  .avatar-btn svg{width:19px; height:19px;}
+  .avatar-btn svg.guest-icon{width:19px; height:19px;}
+  .avatar-btn svg:not(.guest-icon){width:100%; height:100%; display:block;}
+  .avatar-btn img{width:100%; height:100%; object-fit:cover; border-radius:50%; display:block;}
 
   /* HERO */
   .hero{
@@ -387,7 +390,9 @@
     display:flex; align-items:center; gap:16px; background:var(--surface); border:1px solid var(--line);
     border-radius:16px; padding:20px; margin-bottom:20px; text-align:left;
   }
-  .profile-avatar{width:64px; height:64px; border-radius:50%; background:linear-gradient(140deg,var(--gold),var(--coral)); flex:0 0 auto; display:flex; align-items:center; justify-content:center; color:#fff; font-weight:800; font-size:1.4rem;}
+  .profile-avatar{width:64px; height:64px; border-radius:50%; background:linear-gradient(140deg,var(--gold),var(--coral)); flex:0 0 auto; display:flex; align-items:center; justify-content:center; color:#fff; font-weight:800; font-size:1.4rem; overflow:hidden;}
+  .profile-avatar svg{width:100%; height:100%; display:block;}
+  .profile-avatar img{width:100%; height:100%; object-fit:cover; border-radius:50%; display:block;}
 
   /* Profile page — commercial header card */
   .profile-hero{
