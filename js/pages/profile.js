@@ -1,4 +1,4 @@
-import { auth, signOut, onUserReady } from '../common.js';
+import { auth, signOut, onUserReady, cartoonAvatarSVG } from '../common.js';
 
 document.getElementById('goLoginBtn').addEventListener('click', ()=> window.location.href = 'login.html');
 document.getElementById('logoutBtn').addEventListener('click', async ()=>{
@@ -12,7 +12,7 @@ onUserReady((user, profile)=>{
     const displayName = user.displayName || user.email;
     document.getElementById('profileName').textContent = displayName;
     document.getElementById('profileHandle').textContent = user.email;
-    document.getElementById('profileAvatar').textContent = displayName.charAt(0).toUpperCase();
+    document.getElementById('profileAvatar').innerHTML = cartoonAvatarSVG(displayName);
     document.getElementById('profileLoggedOut').style.display = 'none';
     document.getElementById('profileLoggedIn').style.display = 'block';
     document.getElementById('dashWalletBalance').textContent = '৳' + Number(profile?.walletBalance || 0).toLocaleString('en-US');
