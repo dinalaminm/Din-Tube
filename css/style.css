@@ -264,6 +264,16 @@
   /* Simple content pages */
   .simple-page{max-width:640px; margin:0 auto; padding:60px 24px 100px; text-align:center;}
   .page-profile .simple-page{padding-top:0;}
+
+  /* Auth-check loading state (avoids a "please log in" flash while
+     Firebase resolves the session on each fresh page load) */
+  .profile-loading{display:flex; align-items:center; justify-content:center; padding:80px 0;}
+  .spinner{
+    width:32px; height:32px; border-radius:50%;
+    border:3px solid var(--line); border-top-color:var(--coral);
+    animation:spin .7s linear infinite;
+  }
+  @keyframes spin{ to{ transform:rotate(360deg); } }
   .simple-page h1{font-size:1.9rem; margin-bottom:12px;}
   .simple-page p{color:var(--muted); margin-bottom:26px; line-height:1.6;}
   .form-field{margin-bottom:16px; text-align:left;}
