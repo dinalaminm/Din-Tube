@@ -59,7 +59,7 @@
     padding:10px 24px; max-width:1180px; margin:0 auto; gap:14px;
     min-height:52px;
   }
-  .logo{font-family:'Fraunces',serif; font-weight:800; font-size:1.28rem; letter-spacing:-0.01em; color:var(--text); text-shadow:0 1px 0 rgba(255,255,255,0.6); transition:opacity .2s ease;}
+  .logo{font-family:'Fraunces',serif; font-weight:800; font-size:1.28rem; letter-spacing:-0.01em; color:var(--text); text-shadow:0 1px 0 rgba(255,255,255,0.6); transition:opacity .2s ease; white-space:nowrap; flex:0 0 auto;}
   .logo:hover{opacity:0.82;}
   .logo span{
     color:var(--coral);
