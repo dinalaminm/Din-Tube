@@ -272,23 +272,30 @@ export function requireAuth(){
   });
 }
 
+/* Deterministically picks a "male" or "female" cartoon style for a given
+   name so the same user always gets the same look, without trying to
+   actually infer gender from the name itself. */
+export function cartoonAvatarUrl(name){
+  let hash = 0;
+  for(let i=0;i<name.length;i++){ hash = (hash*31 + name.charCodeAt(i)) >>> 0; }
+  const isFemale = hash % 2 === 0;
+  const top = isFemale
+    ? ['longHairStraight','longHairCurly','longHairBun','longHairBigHair'][hash % 4]
+    : ['shortHairShortFlat','shortHairShortCurly','shortHairTheCaesar','shortHairFrizzle'][hash % 4];
+  const params = new URLSearchParams({
+    seed: name || 'user',
+    top,
+    radius: '50'
+  });
+  return `https://api.dicebear.com/9.x/avataaars/svg?${params.toString()}`;
+}
+
 function applyHeaderAuthState(user, profile){
-  const loginBtn = document.getElementById('loginBtn');
-  if(loginBtn){
-    if(user){
-      const displayName = user.displayName || user.email;
-      loginBtn.textContent = displayName.length > 10 ? displayName.slice(0,10)+'…' : displayName;
-      loginBtn.href = 'profile.html';
-    } else {
-      loginBtn.textContent = 'লগ ইন';
-      loginBtn.href = 'login.html';
-    }
-  }
   const avatarBtn = document.getElementById('avatarBtn');
   if(avatarBtn){
     if(user){
       const displayName = (user.displayName || user.email || '').trim();
-      avatarBtn.textContent = displayName ? displayName.charAt(0) : '?';
+      avatarBtn.innerHTML = `<img src="${cartoonAvatarUrl(displayName)}" alt="প্রোফাইল" loading="lazy">`;
       avatarBtn.href = 'profile.html';
       avatarBtn.classList.remove('guest');
       avatarBtn.setAttribute('aria-label', 'প্রোফাইল');
