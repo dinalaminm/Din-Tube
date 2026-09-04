@@ -7,6 +7,7 @@ document.getElementById('logoutBtn').addEventListener('click', async ()=>{
 });
 
 onUserReady((user, profile)=>{
+  document.getElementById('profileLoading').style.display = 'none';
   if(user){
     const displayName = user.displayName || user.email;
     document.getElementById('profileName').textContent = displayName;
