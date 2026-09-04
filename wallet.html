@@ -93,7 +93,10 @@
         </div>
         <div class="form-field"><label>ট্রানজেকশন আইডি</label><input type="text" id="depTxnId" required placeholder="যেমন: 8N7A2K9X1Q"></div>
         <div class="form-field"><label>নোট (ঐচ্ছিক)</label><input type="text" id="depNote" placeholder="অতিরিক্ত তথ্য"></div>
-        <button type="submit" class="btn-primary" style="width:100%; border:none; cursor:pointer;">ডিপোজিট রিকোয়েস্ট পাঠান</button>
+        <button type="submit" class="btn-primary btn-deposit" id="depositSubmitBtn" style="width:100%; border:none; cursor:pointer;">
+          <span class="btn-text">ডিপোজিট রিকোয়েস্ট পাঠান</span>
+          <span class="btn-spinner" id="depositSpinner" hidden></span>
+        </button>
         <div class="form-msg" id="depositMsg"></div>
       </form>
     </div>
@@ -102,6 +105,17 @@
     <div id="walletTxnList" style="margin-top:14px;"><p style="color:var(--muted);">লোড হচ্ছে...</p></div>
   </div>
 </main>
+
+<div class="modal-overlay" id="depositSuccessOverlay" style="display:none;">
+  <div class="modal-card success-modal">
+    <div class="success-icon">
+      <svg viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+    </div>
+    <h3>রিকোয়েস্ট পাঠানো হয়েছে!</h3>
+    <p>অ্যাডমিন আপনার ট্রানজেকশনটি যাচাই করার পর ব্যালেন্স যোগ হয়ে যাবে।</p>
+    <button type="button" class="btn-primary" id="depositSuccessOkBtn" style="width:100%; border:none; cursor:pointer;">ঠিক আছে</button>
+  </div>
+</div>
 
 
 
