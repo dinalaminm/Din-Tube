@@ -698,6 +698,18 @@
   .skel-detail-img{ aspect-ratio:16/9; border-radius:18px; margin-bottom:18px; }
   .skel-detail-line{ height:14px; border-radius:7px; margin-bottom:12px; }
   .skel-detail-line.w-80{ width:80%; height:24px; }
+
+  /* Shimmer on a dark background (wallet balance hero) */
+  .skeleton-dark{
+    position:relative; overflow:hidden; background:rgba(255,255,255,0.08);
+    background-image:linear-gradient(90deg, rgba(255,255,255,0.08) 0px, rgba(255,255,255,0.22) 40px, rgba(255,255,255,0.08) 80px);
+    background-size:600px 100%;
+    animation:shimmer 1.4s ease-in-out infinite;
+    border-radius:8px;
+  }
+  .skel-amount{ display:inline-block; width:130px; height:32px; vertical-align:middle; }
+  .skel-merchant-number{ display:inline-block; width:150px; height:21px; }
+  .skel-merchant-hint{ display:inline-block; width:110px; height:12px; margin-top:4px; }
   .skel-detail-line.w-50{ width:50%; }
   .skel-detail-line.w-100{ width:100%; }
   .skel-detail-line.w-30{ width:30%; height:30px; margin-top:18px; }
