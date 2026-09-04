@@ -1,6 +1,6 @@
 import {
   db, doc, getDoc, collection, getDocs,
-  extractYouTubeId, itemLabel, itemBg, renderCard, addToCart, showToast,
+  extractYouTubeId, itemLabel, itemBg, renderCard, addToCart,
   onUserReady, getOwnedItemIds
 } from '../common.js';
 
@@ -144,23 +144,25 @@ function renderDetail(item, owned){
   buyBtn.disabled = false;
   buyBtn.style.opacity = '1';
   if((type === 'products' || type === 'software') && item.downloadUrl && owned){
+    buyBtn.style.display = 'block';
+    buyNowBtn.style.display = 'none';
     buyBtn.textContent = 'ডাউনলোড করুন';
     buyBtn.onclick = ()=> window.open(item.downloadUrl, '_blank');
-    buyNowBtn.style.display = 'none';
   } else if(type === 'videos' && owned){
+    buyBtn.style.display = 'block';
+    buyNowBtn.style.display = 'none';
     buyBtn.textContent = 'কেনা হয়ে গেছে ✓';
     buyBtn.onclick = null;
     buyBtn.disabled = true;
     buyBtn.style.opacity = '0.6';
-    buyNowBtn.style.display = 'none';
   } else {
-    buyBtn.textContent = type === 'courses' ? 'কোর্সে ভর্তি হন' : (type === 'videos' ? 'কিনুন' : 'কার্টে যোগ করুন');
-    buyBtn.onclick = ()=>{
-      addToCart({ id: item.id, type, name: itemLabel(type, item), price: Number(item.price || 0), grad: itemBg(item, 0) });
-      showToast(itemLabel(type, item) + ' কার্টে যোগ হয়েছে');
-    };
-    buyNowBtn.style.display = 'block';
-    buyNowBtn.textContent = 'এখনই কিনুন';
+    // Not owned yet — a single, prominent "Buy Now" action that adds the
+    // item to the cart and takes the person straight to the payment method
+    // screen, instead of a separate "add to cart" step.
+    buyBtn.style.display = 'none';
+    buyNowBtn.style.display = 'flex';
+    const label = type === 'courses' ? 'কোর্সে ভর্তি হন' : (type === 'videos' ? 'এখনই কিনুন' : 'এখনই কিনুন');
+    buyNowBtn.innerHTML = `<svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2 3 14h8l-1 8 10-12h-8l1-8Z"/></svg><span>${label}</span>`;
     buyNowBtn.onclick = ()=>{
       addToCart({ id: item.id, type, name: itemLabel(type, item), price: Number(item.price || 0), grad: itemBg(item, 0) });
       window.location.href = 'cart.html?checkout=1';
