@@ -348,6 +348,22 @@ function getCachedWalletBalance(){
 function cacheWalletBalance(balance){
   try{ localStorage.setItem(WALLET_BALANCE_CACHE_KEY, JSON.stringify({ balance })); }catch(e){ /* ignore */ }
 }
+/* Header chip has limited width, so amounts of ৳10,000+ are shown compactly
+   (৳52K, ৳3.2L) instead of the full figure — the exact amount is always on
+   wallet.html. Kept separate from wallet.js's own display, which always
+   shows the full number. */
+function formatCompactBalance(n){
+  n = Number(n) || 0;
+  if(n >= 100000){
+    const v = n / 100000;
+    return '৳' + (Number.isInteger(v) ? v : v.toFixed(1)) + 'L';
+  }
+  if(n >= 10000){
+    const v = n / 1000;
+    return '৳' + (Number.isInteger(v) ? v : v.toFixed(1)) + 'K';
+  }
+  return '৳' + n.toLocaleString('en-US');
+}
 
 function primeAvatarFromCache(){
   const avatarBtn = document.getElementById('avatarBtn');
@@ -369,7 +385,8 @@ function primeAvatarFromCache(){
   if(chip && bal){
     const cachedBalance = getCachedWalletBalance();
     if(cachedBalance !== null){
-      bal.textContent = '৳' + cachedBalance.toLocaleString('en-US');
+      bal.textContent = formatCompactBalance(cachedBalance);
+      bal.title = '৳' + cachedBalance.toLocaleString('en-US');
       chip.style.display = 'flex';
     }
   }
@@ -416,7 +433,8 @@ function updateHeaderWallet(user, profile){
   if(!chip || !bal) return;
   if(user){
     const balance = Number(profile?.walletBalance || 0);
-    bal.textContent = '৳' + balance.toLocaleString('en-US');
+    bal.textContent = formatCompactBalance(balance);
+    bal.title = '৳' + balance.toLocaleString('en-US');
     chip.style.display = 'flex';
     cacheWalletBalance(balance);
   } else {
