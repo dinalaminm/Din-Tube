@@ -118,7 +118,12 @@
       <button type="button" id="checkoutBackBtn" class="pm-back">← পেমেন্ট মেথড বদলান</button>
       <div class="manual-pay-box">
         <p id="manualPayInstruction"></p>
-        <div class="manual-pay-number" id="manualPayNumber"></div>
+        <div class="manual-pay-number-row">
+          <span class="manual-pay-number" id="manualPayNumber"></span>
+          <button type="button" class="manual-pay-copy-btn" id="manualPayCopyBtn" aria-label="নম্বর কপি করুন" title="কপি করুন">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15H4a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v1"/></svg>
+          </button>
+        </div>
       </div>
       <div class="form-field"><label>ট্রানজেকশন আইডি</label><input type="text" id="manualTxnId" required placeholder="যেমন: 8N7A2K9X1Q"></div>
       <button type="button" class="btn-primary" id="manualSubmitBtn" style="width:100%; border:none; cursor:pointer;">অর্ডার কনফার্ম করুন</button>
