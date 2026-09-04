@@ -518,6 +518,36 @@ async function loadAnnouncement(){
   }
 }
 
+/* ---------- Footer social links (Firestore: settings/social) ---------- */
+async function loadFooterSocialLinks(){
+  const map = {
+    facebook: document.getElementById('footFacebook'),
+    youtube: document.getElementById('footYoutube'),
+    instagram: document.getElementById('footInstagram'),
+    whatsapp: document.getElementById('footWhatsapp')
+  };
+  if(!map.facebook && !map.youtube && !map.instagram && !map.whatsapp) return; // no footer on this page
+  try{
+    const snap = await getDoc(doc(db, 'settings', 'social'));
+    const data = snap.exists() ? snap.data() : {};
+    for(const key in map){
+      const el = map[key];
+      if(!el) continue;
+      const url = (data[key] || '').trim();
+      if(url){
+        el.href = url;
+        el.target = '_blank';
+        el.rel = 'noopener';
+        el.style.display = '';
+      }else{
+        el.style.display = 'none';
+      }
+    }
+  }catch(err){
+    console.error('loadFooterSocialLinks error:', err);
+  }
+}
+
 /* ---------- Shared card renderer — links to detail.html?type=..&id=.. (real URL) ---------- */
 /* ---------- Skeleton loading placeholders ---------- */
 export function renderSkeletonCards(gridId, count){
@@ -634,6 +664,7 @@ export async function getOwnedItemIds(uid){
 function initChrome(){
   updateCartBadge();
   loadAnnouncement();
+  loadFooterSocialLinks();
   initFooterNewsletter();
 }
 
