@@ -272,22 +272,43 @@ export function requireAuth(){
   });
 }
 
-/* Deterministically picks a "male" or "female" cartoon style for a given
-   name so the same user always gets the same look, without trying to
-   actually infer gender from the name itself. */
-export function cartoonAvatarUrl(name){
+/* Builds a self-contained cartoon face avatar as inline SVG — no external
+   network request, so it always renders even on slow/blocked connections.
+   The look (male/female-styled hair, skin tone, hair color, background)
+   is derived deterministically from the name's hash, so the same name
+   always gets the same face. */
+function nameHash(name){
   let hash = 0;
-  for(let i=0;i<name.length;i++){ hash = (hash*31 + name.charCodeAt(i)) >>> 0; }
+  const str = name || 'user';
+  for(let i=0;i<str.length;i++){ hash = (hash*31 + str.charCodeAt(i)) >>> 0; }
+  return hash;
+}
+
+export function cartoonAvatarSVG(name){
+  const hash = nameHash(name);
   const isFemale = hash % 2 === 0;
-  const top = isFemale
-    ? ['longHairStraight','longHairCurly','longHairBun','longHairBigHair'][hash % 4]
-    : ['shortHairShortFlat','shortHairShortCurly','shortHairTheCaesar','shortHairFrizzle'][hash % 4];
-  const params = new URLSearchParams({
-    seed: name || 'user',
-    top,
-    radius: '50'
-  });
-  return `https://api.dicebear.com/9.x/avataaars/svg?${params.toString()}`;
+  const bgColors = ['#FF7A59','#FFB020','#6C5CE7','#00B894','#0984E3','#E17055'];
+  const skinTones = ['#FFDBAC','#F1C27D','#E0AC69','#C68642','#8D5524'];
+  const hairColors = ['#2C2C2C','#4A2E1E','#6B4226','#1A1A1A','#3B2313'];
+  const bg = bgColors[hash % bgColors.length];
+  const skin = skinTones[(hash >> 3) % skinTones.length];
+  const hairColor = hairColors[(hash >> 5) % hairColors.length];
+
+  const hairShape = isFemale
+    ? `<path d="M20 42c0-16 12-28 30-28s30 12 30 28v14c0 2-1 3-2 3-1-9-4-14-8-14 1 4 1 8 0 12-2-8-6-12-20-12s-18 4-20 12c-1-4-1-8 0-12-4 0-7 5-8 14-1 0-2-1-2-3V42Z" fill="${hairColor}"/>
+       <path d="M18 40c-3 6-4 16-2 26 3 2 6-2 6-8-2-6-3-12-4-18Z" fill="${hairColor}"/>
+       <path d="M82 40c3 6 4 16 2 26-3 2-6-2-6-8 2-6 3-12 4-18Z" fill="${hairColor}"/>`
+    : `<path d="M22 40c0-17 13-29 28-29s28 12 28 29c0 3-1 6-2 8-2-10-6-16-26-16s-24 6-26 16c-1-2-2-5-2-8Z" fill="${hairColor}"/>`;
+
+  return `<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="প্রোফাইল">
+    <circle cx="50" cy="50" r="50" fill="${bg}"/>
+    <circle cx="50" cy="56" r="26" fill="${skin}"/>
+    <path d="M32 60c0 12 8 20 18 20s18-8 18-20" fill="none"/>
+    <ellipse cx="41" cy="58" rx="3" ry="4" fill="#2C2C2C"/>
+    <ellipse cx="59" cy="58" rx="3" ry="4" fill="#2C2C2C"/>
+    <path d="M40 72c4 4 16 4 20 0" stroke="#8B4B3B" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+    ${hairShape}
+  </svg>`;
 }
 
 function applyHeaderAuthState(user, profile){
@@ -295,12 +316,12 @@ function applyHeaderAuthState(user, profile){
   if(avatarBtn){
     if(user){
       const displayName = (user.displayName || user.email || '').trim();
-      avatarBtn.innerHTML = `<img src="${cartoonAvatarUrl(displayName)}" alt="প্রোফাইল" loading="lazy">`;
+      avatarBtn.innerHTML = cartoonAvatarSVG(displayName);
       avatarBtn.href = 'profile.html';
       avatarBtn.classList.remove('guest');
       avatarBtn.setAttribute('aria-label', 'প্রোফাইল');
     } else {
-      avatarBtn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="3.5"/><path d="M4.5 20a7.5 7.5 0 0 1 15 0"/></svg>';
+      avatarBtn.innerHTML = '<svg class="guest-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="3.5"/><path d="M4.5 20a7.5 7.5 0 0 1 15 0"/></svg>';
       avatarBtn.href = 'login.html';
       avatarBtn.classList.add('guest');
       avatarBtn.setAttribute('aria-label', 'লগ ইন');
