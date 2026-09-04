@@ -19,6 +19,11 @@ function showDetailSkeleton(){
   document.getElementById('detailTitle').innerHTML = '<span class="skeleton skel-detail-line w-80" style="display:inline-block;"></span>';
   document.getElementById('detailDesc').innerHTML = '<span class="skeleton skel-detail-line w-100" style="display:block;"></span><span class="skeleton skel-detail-line w-50" style="display:block;"></span>';
   document.getElementById('detailPriceNow').innerHTML = '<span class="skeleton skel-detail-line w-30" style="display:inline-block;"></span>';
+  // The buy button(s) have no text yet at this point and would otherwise show
+  // as a bare solid-color bar during the shimmer — hide them until boot()
+  // fills in the real label and picks which one to show.
+  document.getElementById('detailBuyBtn').style.display = 'none';
+  document.getElementById('detailBuyNowBtn').style.display = 'none';
 }
 function clearDetailImageSkeleton(){
   const imageWrap = document.getElementById('detailImageWrap');
