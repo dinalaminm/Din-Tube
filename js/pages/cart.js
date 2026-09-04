@@ -1,6 +1,6 @@
 import {
-  db, collection, addDoc, doc, serverTimestamp, increment, runTransaction,
-  getCart, saveCart, onUserReady, getCurrentUser, getCurrentProfile
+  db, doc, getDoc, collection, addDoc, serverTimestamp, increment, runTransaction,
+  getCart, saveCart, onUserReady, getCurrentUser, getCurrentProfile, showToast
 } from '../common.js';
 
 function renderCart(){
@@ -8,14 +8,12 @@ function renderCart(){
   const wrap = document.getElementById('cartItemsWrap');
   const emptyMsg = document.getElementById('cartEmptyMsg');
   const totalRow = document.getElementById('cartTotalRow');
-  const checkoutBtn = document.getElementById('checkoutBtn');
-  const walletPayBtn = document.getElementById('walletPayBtn');
+  const openCheckoutBtn = document.getElementById('openCheckoutBtn');
   wrap.innerHTML = '';
   if(cart.length === 0){
     emptyMsg.style.display = 'block';
     totalRow.style.display = 'none';
-    checkoutBtn.style.display = 'none';
-    walletPayBtn.style.display = 'none';
+    openCheckoutBtn.style.display = 'none';
     return;
   }
   emptyMsg.style.display = 'none';
@@ -41,10 +39,7 @@ function renderCart(){
   });
   document.getElementById('cartTotal').textContent = '৳' + total.toLocaleString('en-US');
   totalRow.style.display = 'flex';
-  checkoutBtn.style.display = 'block';
-  walletPayBtn.style.display = 'block';
-  const profile = getCurrentProfile();
-  walletPayBtn.textContent = '👛 ওয়ালেট দিয়ে পরিশোধ করুন (ব্যালেন্স: ৳' + Number(profile?.walletBalance || 0).toLocaleString('en-US') + ')';
+  openCheckoutBtn.style.display = 'block';
   wrap.querySelectorAll('button[data-act]').forEach(btn=>{
     btn.addEventListener('click', ()=>{
       const idx = +btn.dataset.idx;
@@ -61,54 +56,104 @@ function renderCart(){
 renderCart();
 onUserReady(()=> renderCart());
 
-document.getElementById('checkoutBtn').addEventListener('click', async ()=>{
-  const cart = getCart();
-  if(cart.length === 0) return;
-  const msg = document.getElementById('checkoutMsg');
+/* ---------- Checkout modal ---------- */
+const overlay = document.getElementById('checkoutOverlay');
+const stepMethod = document.getElementById('checkoutStepMethod');
+const stepManual = document.getElementById('checkoutStepManual');
+const continueBtn = document.getElementById('checkoutContinueBtn');
+const termsCheckbox = document.getElementById('checkoutTerms');
+let selectedMethod = null;
+
+const MERCHANT_NUMBER_FIELD = { bKash:'bkashNumber', Nagad:'nagadNumber', Rocket:'rocketNumber' };
+let merchantNumbersCache = null;
+async function getMerchantNumbers(){
+  if(merchantNumbersCache) return merchantNumbersCache;
+  try{
+    const snap = await getDoc(doc(db, 'settings', 'payment'));
+    merchantNumbersCache = snap.exists() ? snap.data() : {};
+  }catch(err){
+    console.error('payment settings fetch error:', err);
+    merchantNumbersCache = {};
+  }
+  return merchantNumbersCache;
+}
+
+function resetCheckoutModal(){
+  selectedMethod = null;
+  termsCheckbox.checked = false;
+  document.querySelectorAll('.pm-row').forEach(r => r.classList.remove('selected'));
+  updateContinueState();
+  stepMethod.style.display = 'block';
+  stepManual.style.display = 'none';
+  document.getElementById('checkoutStepMsg').textContent = '';
+  document.getElementById('manualPayMsg').textContent = '';
+  document.getElementById('manualTxnId').value = '';
+}
+
+function updateContinueState(){
+  const enabled = !!selectedMethod && termsCheckbox.checked;
+  continueBtn.disabled = !enabled;
+  continueBtn.style.opacity = enabled ? '1' : '0.5';
+}
+
+document.getElementById('openCheckoutBtn').addEventListener('click', ()=>{
   const currentUser = getCurrentUser();
   if(!currentUser){
-    msg.className = 'form-msg err';
-    msg.textContent = 'অর্ডার করতে আগে লগ ইন করুন।';
+    document.getElementById('checkoutMsg').className = 'form-msg err';
+    document.getElementById('checkoutMsg').textContent = 'চেকআউট করতে আগে লগ ইন করুন।';
     setTimeout(()=> window.location.href = 'login.html', 900);
     return;
   }
+  const cart = getCart();
   const total = cart.reduce((s,c)=> s + c.price * c.qty, 0);
-  msg.className = 'form-msg';
-  msg.textContent = 'অর্ডার প্রসেস হচ্ছে...';
-  try{
-    await addDoc(collection(db, 'orders'), {
-      uid: currentUser.uid,
-      name: currentUser.displayName || '',
-      email: currentUser.email || '',
-      items: cart.map(c => ({ id: c.id || null, type: c.type || null, name: c.name, price: c.price, qty: c.qty })),
-      total,
-      status: 'pending',
-      createdAt: serverTimestamp()
-    });
-    saveCart([]);
-    renderCart();
-    msg.className = 'form-msg ok';
-    msg.textContent = 'অর্ডার সফলভাবে সম্পন্ন হয়েছে, ধন্যবাদ! পেমেন্ট নিশ্চিত হলে অ্যাক্সেস আনলক হবে।';
-    setTimeout(()=>{ msg.textContent=''; }, 5000);
-  }catch(err){
-    msg.className = 'form-msg err';
-    msg.textContent = 'অর্ডার করা যায়নি, আবার চেষ্টা করুন।';
-    console.error('order create error:', err);
+  const itemCount = cart.reduce((s,c)=> s + c.qty, 0);
+  document.getElementById('checkoutItemsLabel').textContent = itemCount + 'টা আইটেম';
+  document.getElementById('checkoutTotalLabel').textContent = '৳' + total.toLocaleString('en-US');
+  const profile = getCurrentProfile();
+  document.getElementById('pmWalletBalance').textContent = 'ব্যালেন্স: ৳' + Number(profile?.walletBalance || 0).toLocaleString('en-US');
+  resetCheckoutModal();
+  overlay.style.display = 'flex';
+});
+
+document.getElementById('checkoutCloseBtn').addEventListener('click', ()=>{ overlay.style.display = 'none'; });
+overlay.addEventListener('click', (e)=>{ if(e.target === overlay) overlay.style.display = 'none'; });
+
+document.querySelectorAll('.pm-row').forEach(row=>{
+  row.addEventListener('click', ()=>{
+    document.querySelectorAll('.pm-row').forEach(r => r.classList.remove('selected'));
+    row.classList.add('selected');
+    selectedMethod = row.dataset.method;
+    updateContinueState();
+  });
+});
+termsCheckbox.addEventListener('change', updateContinueState);
+
+continueBtn.addEventListener('click', async ()=>{
+  if(!selectedMethod) return;
+  if(selectedMethod === 'Wallet'){
+    await payWithWallet();
+  }else{
+    const numbers = await getMerchantNumbers();
+    const number = numbers[MERCHANT_NUMBER_FIELD[selectedMethod]];
+    document.getElementById('manualPayInstruction').textContent = number
+      ? `নিচের ${selectedMethod} নম্বরে "Send Money" করে টাকা পাঠান, তারপর ট্রানজেকশন আইডি বসান।`
+      : `${selectedMethod} নম্বর এখনো যোগ করা হয়নি — অনুগ্রহ করে সাপোর্টে যোগাযোগ করুন।`;
+    document.getElementById('manualPayNumber').textContent = number || '';
+    stepMethod.style.display = 'none';
+    stepManual.style.display = 'block';
   }
 });
 
-document.getElementById('walletPayBtn').addEventListener('click', async ()=>{
-  const cart = getCart();
-  if(cart.length === 0) return;
-  const msg = document.getElementById('checkoutMsg');
+document.getElementById('checkoutBackBtn').addEventListener('click', ()=>{
+  stepManual.style.display = 'none';
+  stepMethod.style.display = 'block';
+});
+
+async function payWithWallet(){
+  const msg = document.getElementById('checkoutStepMsg');
   const currentUser = getCurrentUser();
   const profile = getCurrentProfile();
-  if(!currentUser){
-    msg.className = 'form-msg err';
-    msg.textContent = 'অর্ডার করতে আগে লগ ইন করুন।';
-    setTimeout(()=> window.location.href = 'login.html', 900);
-    return;
-  }
+  const cart = getCart();
   const total = cart.reduce((s,c)=> s + c.price * c.qty, 0);
   if(total > Number(profile?.walletBalance || 0)){
     msg.className = 'form-msg err';
@@ -117,6 +162,7 @@ document.getElementById('walletPayBtn').addEventListener('click', async ()=>{
   }
   msg.className = 'form-msg';
   msg.textContent = 'পেমেন্ট প্রসেস হচ্ছে...';
+  continueBtn.disabled = true;
   const items = cart.map(c => ({ id: c.id || null, type: c.type || null, name: c.name, price: c.price, qty: c.qty }));
   const userRef = doc(db, 'users', currentUser.uid);
   const orderRef = doc(collection(db, 'orders'));
@@ -129,7 +175,7 @@ document.getElementById('walletPayBtn').addEventListener('click', async ()=>{
       tx.update(userRef, { walletBalance: increment(-total) });
       tx.set(orderRef, {
         uid: currentUser.uid, name: currentUser.displayName || '', email: currentUser.email || '',
-        items, total, status: 'completed', paymentMethod: 'wallet', createdAt: serverTimestamp()
+        items, total, status: 'completed', paymentMethod: 'Wallet', createdAt: serverTimestamp()
       });
       tx.set(txnRef, {
         uid: currentUser.uid, type: 'purchase', status: 'completed', amount: total,
@@ -139,12 +185,53 @@ document.getElementById('walletPayBtn').addEventListener('click', async ()=>{
     if(profile) profile.walletBalance = Number(profile.walletBalance || 0) - total;
     saveCart([]);
     renderCart();
-    msg.className = 'form-msg ok';
-    msg.textContent = 'পেমেন্ট সফল হয়েছে! অ্যাক্সেস এখনই আনলক হয়ে গেছে।';
-    setTimeout(()=>{ msg.textContent=''; }, 5000);
+    overlay.style.display = 'none';
+    showToast('পেমেন্ট সফল হয়েছে! অ্যাক্সেস এখনই আনলক হয়ে গেছে।');
   }catch(err){
     msg.className = 'form-msg err';
     msg.textContent = err.message === 'insufficient-balance' ? 'ওয়ালেটে পর্যাপ্ত ব্যালেন্স নেই।' : 'পেমেন্ট ব্যর্থ হয়েছে, আবার চেষ্টা করুন।';
     console.error('wallet payment error:', err);
+  }finally{
+    continueBtn.disabled = false;
+  }
+}
+
+document.getElementById('manualSubmitBtn').addEventListener('click', async ()=>{
+  const msg = document.getElementById('manualPayMsg');
+  const txnId = document.getElementById('manualTxnId').value.trim();
+  const currentUser = getCurrentUser();
+  if(!txnId){
+    msg.className = 'form-msg err';
+    msg.textContent = 'ট্রানজেকশন আইডি দিন।';
+    return;
+  }
+  const cart = getCart();
+  const total = cart.reduce((s,c)=> s + c.price * c.qty, 0);
+  const btn = document.getElementById('manualSubmitBtn');
+  btn.disabled = true;
+  msg.className = 'form-msg';
+  msg.textContent = 'অর্ডার প্রসেস হচ্ছে...';
+  try{
+    await addDoc(collection(db, 'orders'), {
+      uid: currentUser.uid,
+      name: currentUser.displayName || '',
+      email: currentUser.email || '',
+      items: cart.map(c => ({ id: c.id || null, type: c.type || null, name: c.name, price: c.price, qty: c.qty })),
+      total,
+      status: 'pending',
+      paymentMethod: selectedMethod,
+      transactionId: txnId,
+      createdAt: serverTimestamp()
+    });
+    saveCart([]);
+    renderCart();
+    overlay.style.display = 'none';
+    showToast('অর্ডার পাঠানো হয়েছে! পেমেন্ট ভেরিফাই হলে অ্যাক্সেস আনলক হবে।');
+  }catch(err){
+    msg.className = 'form-msg err';
+    msg.textContent = 'অর্ডার করা যায়নি, আবার চেষ্টা করুন।';
+    console.error('manual order create error:', err);
+  }finally{
+    btn.disabled = false;
   }
 });
