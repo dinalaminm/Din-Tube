@@ -143,25 +143,61 @@ export function updateCartBadge(){
 }
 
 /* ---------- Auth state (every page waits on this once) ---------- */
-/* callback(user, profileDoc|null) — profileDoc includes walletBalance, phone, etc. */
+/* callback(user, profileDoc|null) — profileDoc includes walletBalance, phone, etc.
+   Since this is a plain multi-page site, every navigation re-runs this whole
+   module, which used to mean a fresh Firestore read of users/{uid} on every
+   single page view. The profile doc is now cached in localStorage per uid for
+   a short window (PROFILE_CACHE_TTL) so back-to-back page loads reuse it
+   instead of re-fetching. Any code that mutates the live profile object
+   in-place (wallet deduction on checkout, etc.) should call
+   syncProfileCache() right after so the cached copy doesn't go stale. */
+const PROFILE_CACHE_TTL = 2 * 60 * 1000;
+function profileCacheKey(uid){ return 'crv_profile_cache_' + uid; }
+function readProfileCache(uid){
+  try{
+    const raw = localStorage.getItem(profileCacheKey(uid));
+    if(!raw) return null;
+    const { ts, data } = JSON.parse(raw);
+    if(!data || (Date.now() - ts) > PROFILE_CACHE_TTL) return null;
+    return data;
+  }catch(e){ return null; }
+}
+function writeProfileCache(uid, data){
+  try{ localStorage.setItem(profileCacheKey(uid), JSON.stringify({ ts: Date.now(), data })); }catch(e){ /* ignore */ }
+}
+function clearProfileCache(uid){
+  try{ localStorage.removeItem(profileCacheKey(uid)); }catch(e){ /* ignore */ }
+}
+
 let cachedUser = null;
 let cachedProfile = null;
 const readyCallbacks = [];
 let authResolved = false;
 
 onAuthStateChanged(auth, async (user)=>{
+  const prevUid = cachedUser && cachedUser.uid;
   cachedUser = user;
   cachedProfile = null;
+
   if(user){
-    try{
-      const uSnap = await getDoc(doc(db, 'users', user.uid));
-      cachedProfile = uSnap.exists() ? uSnap.data() : {};
-      cachedProfile.walletBalance = Number(cachedProfile.walletBalance || 0);
-    }catch(err){
-      console.error('user profile fetch error:', err);
-      cachedProfile = { walletBalance: 0 };
+    const cached = readProfileCache(user.uid);
+    if(cached){
+      cachedProfile = cached; // fresh enough — skip the Firestore read entirely
+    } else {
+      try{
+        const uSnap = await getDoc(doc(db, 'users', user.uid));
+        cachedProfile = uSnap.exists() ? uSnap.data() : {};
+        cachedProfile.walletBalance = Number(cachedProfile.walletBalance || 0);
+        writeProfileCache(user.uid, cachedProfile);
+      }catch(err){
+        console.error('user profile fetch error:', err);
+        cachedProfile = { walletBalance: 0 };
+      }
     }
+  } else if(prevUid){
+    clearProfileCache(prevUid);
   }
+
   authResolved = true;
   applyHeaderAuthState(user, cachedProfile);
   readyCallbacks.forEach(cb => cb(user, cachedProfile));
@@ -174,6 +210,13 @@ export function onUserReady(cb){
 }
 export function getCurrentUser(){ return cachedUser; }
 export function getCurrentProfile(){ return cachedProfile; }
+/* Call after mutating the object returned by getCurrentProfile() in place
+   (e.g. deducting walletBalance on checkout) so the localStorage cache
+   reflects it immediately instead of serving a stale value on the next
+   page load within the cache window. */
+export function syncProfileCache(){
+  if(cachedUser && cachedProfile) writeProfileCache(cachedUser.uid, cachedProfile);
+}
 
 /* Pages that require login redirect here if the visitor isn't signed in
    once the auth check has actually resolved (avoids a flash-redirect on
