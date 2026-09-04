@@ -142,6 +142,31 @@ export function updateCartBadge(){
   badge.style.display = count > 0 ? 'flex' : 'none';
 }
 
+/* ---------- Favorites / wishlist (persisted in localStorage, same pattern as cart) ---------- */
+const FAV_KEY = 'cr_favorites';
+export function getFavorites(){
+  try{ return JSON.parse(localStorage.getItem(FAV_KEY) || '[]'); }catch(e){ return []; }
+}
+export function saveFavorites(list){
+  try{ localStorage.setItem(FAV_KEY, JSON.stringify(list)); }catch(e){ /* ignore */ }
+}
+export function isFavorite(type, id){
+  return getFavorites().some(f => f.type === type && f.id === id);
+}
+/* Adds/removes {..item, type} from the favorites list. Returns the new state (true = now favorited). */
+export function toggleFavorite(type, item){
+  const list = getFavorites();
+  const idx = list.findIndex(f => f.type === type && f.id === item.id);
+  if(idx > -1){
+    list.splice(idx, 1);
+    saveFavorites(list);
+    return false;
+  }
+  list.push({ ...item, type });
+  saveFavorites(list);
+  return true;
+}
+
 /* ---------- Auth state (every page waits on this once) ---------- */
 /* callback(user, profileDoc|null) — profileDoc includes walletBalance, phone, etc.
    Since this is a plain multi-page site, every navigation re-runs this whole
@@ -328,10 +353,14 @@ export function renderCard(type, item, i){
   el.href = `detail.html?type=${encodeURIComponent(type)}&id=${encodeURIComponent(item.id)}`;
   el.style.textDecoration = 'none';
   el.style.color = 'inherit';
+  const favActive = isFavorite(type, item.id);
   el.innerHTML = `
     <div class="product-img" style="background:${bg}">
       ${badge ? `<div class="badge-sale">${escapeHtml(badge)}</div>` : ''}
       ${type === 'videos' && Number(item.price||0) <= 0 ? `<div class="badge-sale" style="background:#16A34A;">ফ্রি</div>` : ''}
+      <button type="button" class="fav-btn${favActive ? ' active' : ''}" aria-label="ফেভারিটে যোগ করুন">
+        <svg viewBox="0 0 24 24" width="17" height="17" fill="${favActive ? 'currentColor' : 'none'}" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.8 8.6c0 4-6.4 8.8-8.8 10.6-2.4-1.8-8.8-6.6-8.8-10.6a5 5 0 0 1 9-3 5 5 0 0 1 8.6 3Z"/></svg>
+      </button>
     </div>
     <div class="product-body">
       <h4>${escapeHtml(itemLabel(type, item))}</h4>
@@ -342,6 +371,15 @@ export function renderCard(type, item, i){
       </div>
     </div>
   `;
+  const favBtn = el.querySelector('.fav-btn');
+  favBtn.addEventListener('click', (e)=>{
+    e.preventDefault();
+    e.stopPropagation();
+    const nowFav = toggleFavorite(type, item);
+    favBtn.classList.toggle('active', nowFav);
+    favBtn.querySelector('svg').setAttribute('fill', nowFav ? 'currentColor' : 'none');
+    showToast(nowFav ? 'ফেভারিটে যোগ করা হয়েছে' : 'ফেভারিট থেকে সরানো হয়েছে');
+  });
   return el;
 }
 
