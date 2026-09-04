@@ -444,6 +444,33 @@
   .txn-row .txn-amt.credit{color:#16A34A;}
   .txn-row .txn-amt.debit{color:var(--coral);}
 
+  /* Deposit submit button — loading state */
+  .btn-deposit{display:flex; align-items:center; justify-content:center; gap:9px; position:relative;}
+  .btn-deposit:disabled{opacity:0.75; cursor:not-allowed;}
+  .btn-spinner{
+    width:18px; height:18px; border-radius:50%; flex:0 0 auto;
+    border:2.5px solid rgba(255,255,255,0.4); border-top-color:#fff;
+    animation:btn-spin 0.7s linear infinite;
+  }
+  @keyframes btn-spin{ to{ transform:rotate(360deg); } }
+
+  /* Success popup modal */
+  .modal-overlay{
+    position:fixed; inset:0; background:rgba(20,18,30,0.55); display:flex; align-items:center; justify-content:center;
+    padding:20px; z-index:200;
+  }
+  .modal-card{
+    background:#fff; border-radius:20px; padding:30px 26px 26px; max-width:340px; width:100%; text-align:center;
+    box-shadow:0 24px 60px rgba(20,18,30,0.3); animation:modal-pop 0.22s ease;
+  }
+  @keyframes modal-pop{ from{ transform:scale(0.88); opacity:0; } to{ transform:scale(1); opacity:1; } }
+  .success-icon{
+    width:62px; height:62px; border-radius:50%; background:#DCFCE7; color:#16A34A;
+    display:flex; align-items:center; justify-content:center; margin:0 auto 16px;
+  }
+  .success-modal h3{font-size:1.15rem; margin-bottom:8px;}
+  .success-modal p{color:var(--muted); font-size:0.87rem; line-height:1.65; margin-bottom:22px;}
+
   /* Broadcast announcement banner */
   .announcement-banner{
     background:linear-gradient(90deg,#1C1B29,#3A2E4D); color:#fff; padding:12px 18px;
