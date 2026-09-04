@@ -361,16 +361,90 @@
   .ticket-card{border:1px solid var(--line); border-radius:12px; padding:14px; margin-bottom:10px; background:var(--surface);}
   .ticket-status{font-size:0.72rem; font-weight:800; color:#fff; padding:3px 10px; border-radius:100px; white-space:nowrap;}
 
-  /* Wallet */
+  /* Wallet page redesign */
+  .wallet-page-wrap{max-width:460px; margin:0 auto; padding:28px 20px 100px;}
+
+  .wallet-hero{
+    position:relative; overflow:hidden; background:linear-gradient(135deg,#1C1B29,#3A2E4D); color:#fff;
+    border-radius:20px; padding:24px; margin-bottom:30px;
+  }
+  .wallet-hero::after{
+    content:''; position:absolute; top:-36px; right:-30px; width:130px; height:130px; border-radius:50%;
+    background:rgba(255,122,69,0.22);
+  }
+  .wallet-hero-top{display:flex; align-items:center; gap:9px; font-size:0.82rem; opacity:0.8; position:relative; z-index:1;}
+  .wallet-hero-icon{width:30px; height:30px; border-radius:9px; background:rgba(255,255,255,0.14); display:flex; align-items:center; justify-content:center; flex:0 0 auto;}
+  .wallet-hero-amount{font-family:'Fraunces',serif; font-size:2.3rem; font-weight:800; margin:10px 0 4px; position:relative; z-index:1;}
+  .wallet-hero-sub{font-size:0.78rem; opacity:0.7; position:relative; z-index:1;}
+
+  .section-title-row{display:flex; align-items:center; gap:8px; margin-bottom:6px;}
+  .section-title-row .dot{width:6px; height:6px; border-radius:50%; background:var(--coral); flex:0 0 auto;}
+  .section-title-row h3{font-size:1.05rem;}
+  .section-sub{color:var(--muted); font-size:0.85rem; margin-bottom:16px; line-height:1.6;}
+
+  .deposit-card{background:var(--surface); border:1px solid var(--line); border-radius:18px; padding:20px; box-shadow:0 2px 18px rgba(28,27,41,0.05);}
+  .field-label{display:block; font-weight:700; font-size:0.85rem; margin-bottom:8px;}
+
+  .pm-chip-row{display:flex; flex-wrap:wrap; gap:8px; margin-bottom:18px;}
+  .pm-chip{border:1.5px solid var(--line); background:#fff; border-radius:100px; padding:9px 16px; font-family:inherit; font-weight:700; font-size:0.83rem; color:var(--text); cursor:pointer; transition:background .15s, border-color .15s, color .15s;}
+  .pm-chip.active{color:#fff; border-color:transparent;}
+  .pm-chip[data-method="bKash"].active{background:#E2136E;}
+  .pm-chip[data-method="Nagad"].active{background:#F6821F;}
+  .pm-chip[data-method="Rocket"].active{background:#8730D6;}
+  .pm-chip[data-method="Bank"].active{background:#1C1B29;}
+  .pm-chip[data-method="Other"].active{background:#767686;}
+
+  .merchant-number-box{
+    display:flex; align-items:center; gap:12px; border:1.5px solid var(--line); border-radius:14px;
+    padding:13px 14px; margin-bottom:18px; cursor:pointer; background:var(--surface-2);
+    transition:background .15s, border-color .15s;
+  }
+  .merchant-number-box[data-method="bKash"]{background:#FDE9F1; border-color:#E2136E;}
+  .merchant-number-box[data-method="Nagad"]{background:#FFEEDC; border-color:#F6821F;}
+  .merchant-number-box[data-method="Rocket"]{background:#F2E6FB; border-color:#8730D6;}
+  .merchant-number-icon{
+    width:40px; height:40px; border-radius:11px; flex:0 0 auto; display:flex; align-items:center; justify-content:center;
+    color:#fff; font-weight:800; font-size:0.95rem; background:#999;
+  }
+  .merchant-number-box[data-method="bKash"] .merchant-number-icon{background:#E2136E;}
+  .merchant-number-box[data-method="Nagad"] .merchant-number-icon{background:#F6821F;}
+  .merchant-number-box[data-method="Rocket"] .merchant-number-icon{background:#8730D6;}
+  .merchant-number-body{flex:1; min-width:0;}
+  .merchant-number-label{display:block; font-weight:700; font-size:0.74rem; color:var(--muted); margin-bottom:2px;}
+  .merchant-number-value{display:block; font-family:'Fraunces',serif; font-size:1.3rem; font-weight:700; letter-spacing:0.03em; color:var(--text); word-break:break-all; line-height:1.25;}
+  .merchant-number-value.muted{font-family:inherit; font-size:0.82rem; font-weight:600; color:var(--muted);}
+  .merchant-number-hint{display:block; font-size:0.71rem; color:var(--muted); margin-top:2px;}
+  .merchant-number-copy{
+    flex:0 0 auto; border:none; background:#fff; color:var(--text); font-family:inherit; font-weight:800; font-size:0.78rem;
+    padding:9px 15px; border-radius:9px; cursor:pointer; box-shadow:0 1px 5px rgba(28,27,41,0.12); transition:background .15s, color .15s;
+  }
+  .merchant-number-copy.copied{background:#16A34A; color:#fff;}
+  .merchant-number-copy:disabled{opacity:0.5; cursor:not-allowed;}
+
+  .amount-input-wrap{position:relative;}
+  .amount-input-wrap .prefix{position:absolute; left:14px; top:50%; transform:translateY(-50%); font-weight:800; color:var(--coral); pointer-events:none;}
+  .amount-input-wrap input{padding-left:30px !important;}
+
   .wallet-balance-card{
     background:linear-gradient(135deg,#1C1B29,#3A2E4D); color:#fff; border-radius:16px; padding:22px 24px;
     display:flex; flex-direction:column; gap:6px; max-width:420px;
   }
   .wallet-balance-card span{font-size:0.85rem; opacity:0.8;}
   .wallet-balance-card strong{font-size:2rem; font-weight:800;}
-  .txn-row{display:flex; justify-content:space-between; align-items:center; gap:10px; border:1px solid var(--line); border-radius:12px; padding:14px; margin-bottom:10px; background:var(--surface);}
-  .txn-row .txn-amt.credit{color:#16A34A; font-weight:800;}
-  .txn-row .txn-amt.debit{color:var(--coral); font-weight:800;}
+  .txn-row{display:flex; align-items:center; gap:12px; border:1px solid var(--line); border-radius:14px; padding:13px 14px; margin-bottom:10px; background:var(--surface);}
+  .txn-icon{width:38px; height:38px; border-radius:11px; flex:0 0 auto; display:flex; align-items:center; justify-content:center;}
+  .txn-icon.deposit{background:#DCFCE7; color:#16A34A;}
+  .txn-icon.purchase{background:#FEE2E2; color:var(--coral);}
+  .txn-icon.refund{background:#EDE9FE; color:#7C3AED;}
+  .txn-info{flex:1; min-width:0;}
+  .txn-meta{color:var(--muted); font-size:0.76rem; margin-top:2px; display:flex; align-items:center; gap:6px; flex-wrap:wrap;}
+  .txn-status-pill{display:inline-block; font-size:0.66rem; font-weight:800; padding:2px 9px; border-radius:100px;}
+  .txn-status-pill.pending{background:#FEF3C7; color:#92400E;}
+  .txn-status-pill.approved, .txn-status-pill.completed{background:#DCFCE7; color:#166534;}
+  .txn-status-pill.rejected{background:#FEE2E2; color:#991B1B;}
+  .txn-row .txn-amt{flex:0 0 auto; font-weight:800;}
+  .txn-row .txn-amt.credit{color:#16A34A;}
+  .txn-row .txn-amt.debit{color:var(--coral);}
 
   /* Broadcast announcement banner */
   .announcement-banner{
@@ -654,14 +728,6 @@
   .manual-pay-box p{font-size:0.88rem; color:var(--muted); margin-bottom:10px; line-height:1.6;}
   .manual-pay-number{font-family:'Fraunces',serif; font-size:1.5rem; font-weight:700; color:var(--coral); letter-spacing:0.02em;}
 
-  .merchant-number-box{background:#FFF7F5; border:1.5px dashed var(--coral); border-radius:12px; padding:12px 14px; margin:-4px 0 16px;}
-  .merchant-number-label{display:block; font-weight:700; font-size:0.8rem; color:var(--muted); margin-bottom:6px;}
-  .merchant-number-row{display:flex; align-items:center; justify-content:space-between; gap:10px;}
-  .merchant-number-value{font-family:'Fraunces',serif; font-size:1.25rem; font-weight:700; color:var(--coral); letter-spacing:0.03em; word-break:break-all;}
-  .merchant-number-value.muted{font-family:inherit; font-size:0.85rem; font-weight:600; color:var(--muted);}
-  .merchant-number-copy{flex-shrink:0; border:1.5px solid var(--coral); background:#fff; color:var(--coral); font-weight:700; font-size:0.82rem; padding:7px 14px; border-radius:8px; cursor:pointer; transition:background 0.15s, color 0.15s;}
-  .merchant-number-copy:hover{background:var(--coral); color:#fff;}
-  .merchant-number-copy:disabled{opacity:0.5; cursor:not-allowed;}
 
   @media (max-width:640px){
     .modal-box{max-height:92vh;}
