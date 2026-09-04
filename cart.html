@@ -52,11 +52,72 @@
     <div class="cart-total-row" id="cartTotalRow" style="display:none;">
       <span>মোট</span><span id="cartTotal">৳0</span>
     </div>
-    <button class="btn-primary" id="walletPayBtn" style="width:100%; border:none; cursor:pointer; display:none; margin-top:10px;">👛 ওয়ালেট দিয়ে পরিশোধ করুন</button>
-    <button class="btn-ghost" id="checkoutBtn" style="width:100%; cursor:pointer; display:none; margin-top:10px;">ম্যানুয়াল অর্ডার করুন (পরে পেমেন্ট)</button>
+    <button class="btn-primary" id="openCheckoutBtn" style="width:100%; border:none; cursor:pointer; display:none; margin-top:10px;">চেকআউট করুন</button>
     <div class="form-msg ok" id="checkoutMsg"></div>
   </div>
 </main>
+
+<div class="modal-overlay" id="checkoutOverlay" style="display:none;">
+  <div class="modal-box">
+    <div class="modal-head">
+      <div>
+        <span class="modal-eyebrow">CHECKOUT</span>
+        <h3 id="checkoutModalTitle">পেমেন্ট মেথড বেছে নিন</h3>
+      </div>
+      <button type="button" id="checkoutCloseBtn" class="modal-close" aria-label="বন্ধ করুন">✕</button>
+    </div>
+
+    <div id="checkoutStepMethod">
+      <div class="order-summary-box">
+        <span>অর্ডার সামারি</span>
+        <div class="order-summary-row"><span id="checkoutItemsLabel"></span><strong id="checkoutTotalLabel"></strong></div>
+      </div>
+
+      <p class="pm-section-label">পেমেন্ট মেথড বেছে নিন</p>
+      <div class="pm-list" id="pmList">
+        <button type="button" class="pm-row" data-method="bKash">
+          <span class="pm-icon" style="background:#E2136E;">৳</span>
+          <span class="pm-info"><strong>bKash</strong><span>মোবাইল ব্যাংকিং · ম্যানুয়াল ভেরিফিকেশন</span></span>
+          <span class="pm-chev">›</span>
+        </button>
+        <button type="button" class="pm-row" data-method="Nagad">
+          <span class="pm-icon" style="background:#F6821F;">৳</span>
+          <span class="pm-info"><strong>Nagad</strong><span>মোবাইল ব্যাংকিং · ম্যানুয়াল ভেরিফিকেশন</span></span>
+          <span class="pm-chev">›</span>
+        </button>
+        <button type="button" class="pm-row" data-method="Rocket">
+          <span class="pm-icon" style="background:#8730D6;">৳</span>
+          <span class="pm-info"><strong>Rocket</strong><span>মোবাইল ব্যাংকিং · ম্যানুয়াল ভেরিফিকেশন</span></span>
+          <span class="pm-chev">›</span>
+        </button>
+        <button type="button" class="pm-row" data-method="Wallet">
+          <span class="pm-icon" style="background:var(--coral);">👛</span>
+          <span class="pm-info"><strong>ওয়ালেট</strong><span id="pmWalletBalance">ব্যালেন্স: ৳0</span></span>
+          <span class="pm-chev">›</span>
+        </button>
+      </div>
+
+      <label class="pm-terms">
+        <input type="checkbox" id="checkoutTerms">
+        <span>আমি <a href="support.html" target="_blank">শর্তাবলী</a>, <a href="support.html" target="_blank">প্রাইভেসি পলিসি</a> ও <a href="support.html" target="_blank">রিটার্ন পলিসি</a> পড়েছি এবং সম্মত আছি।</span>
+      </label>
+
+      <button type="button" class="btn-primary" id="checkoutContinueBtn" style="width:100%; border:none; cursor:pointer; opacity:0.5;" disabled>এগিয়ে যান</button>
+      <div class="form-msg" id="checkoutStepMsg"></div>
+    </div>
+
+    <div id="checkoutStepManual" style="display:none;">
+      <button type="button" id="checkoutBackBtn" class="pm-back">← পেমেন্ট মেথড বদলান</button>
+      <div class="manual-pay-box">
+        <p id="manualPayInstruction"></p>
+        <div class="manual-pay-number" id="manualPayNumber"></div>
+      </div>
+      <div class="form-field"><label>ট্রানজেকশন আইডি</label><input type="text" id="manualTxnId" required placeholder="যেমন: 8N7A2K9X1Q"></div>
+      <button type="button" class="btn-primary" id="manualSubmitBtn" style="width:100%; border:none; cursor:pointer;">অর্ডার কনফার্ম করুন</button>
+      <div class="form-msg" id="manualPayMsg"></div>
+    </div>
+  </div>
+</div>
 
 
 
