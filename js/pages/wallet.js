@@ -107,6 +107,9 @@ document.getElementById('merchantNumberCopy').addEventListener('click', copyMerc
 document.getElementById('depositForm').addEventListener('submit', async (e)=>{
   e.preventDefault();
   const msg = document.getElementById('depositMsg');
+  const submitBtn = document.getElementById('depositSubmitBtn');
+  const btnText = submitBtn.querySelector('.btn-text');
+  const spinner = document.getElementById('depositSpinner');
   const currentUser = getCurrentUser();
   if(!currentUser){ msg.textContent = 'আগে লগ ইন করুন।'; msg.className = 'form-msg err'; return; }
   const amount = Number(document.getElementById('depAmount').value);
@@ -118,22 +121,38 @@ document.getElementById('depositForm').addEventListener('submit', async (e)=>{
     msg.className = 'form-msg err';
     return;
   }
-  msg.textContent = 'পাঠানো হচ্ছে...';
+  msg.textContent = '';
   msg.className = 'form-msg';
+  submitBtn.disabled = true;
+  btnText.textContent = 'পাঠানো হচ্ছে...';
+  spinner.hidden = false;
   try{
     await addDoc(collection(db, 'walletTransactions'), {
       uid: currentUser.uid, type: 'deposit', status: 'pending',
       amount, method, transactionId: txnId, note, createdAt: serverTimestamp()
     });
-    msg.textContent = 'ডিপোজিট রিকোয়েস্ট পাঠানো হয়েছে। অ্যাডমিন যাচাই করার পর ব্যালেন্স যোগ হবে।';
-    msg.className = 'form-msg ok';
     e.target.reset();
+    document.getElementById('depMethod').value = method;
+    updateMerchantNumberBox();
     loadWalletTransactions();
+    document.getElementById('depositSuccessOverlay').style.display = 'flex';
   }catch(err){
     msg.textContent = 'পাঠানো যায়নি, আবার চেষ্টা করুন।';
     msg.className = 'form-msg err';
     console.error('deposit request error:', err);
+  }finally{
+    submitBtn.disabled = false;
+    btnText.textContent = 'ডিপোজিট রিকোয়েস্ট পাঠান';
+    spinner.hidden = true;
   }
+});
+
+function closeDepositSuccessOverlay(){
+  document.getElementById('depositSuccessOverlay').style.display = 'none';
+}
+document.getElementById('depositSuccessOkBtn').addEventListener('click', closeDepositSuccessOverlay);
+document.getElementById('depositSuccessOverlay').addEventListener('click', (e)=>{
+  if(e.target.id === 'depositSuccessOverlay') closeDepositSuccessOverlay();
 });
 
 const txnTypeLabel = { deposit:'ডিপোজিট', purchase:'কেনাকাটা', refund:'রিফান্ড' };
