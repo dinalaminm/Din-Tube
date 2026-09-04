@@ -869,11 +869,13 @@
   @media (prefers-reduced-motion: reduce){
     html{scroll-behavior:auto;}
     .marquee{animation:none;}
-  /* ---------- Checkout payment-method modal ---------- */
-  .modal-overlay{
-    position:fixed; inset:0; background:rgba(20,18,25,0.55); z-index:200;
-    display:flex; align-items:flex-end; justify-content:center;
   }
+
+  /* ---------- Checkout payment-method modal (bottom sheet) ---------- */
+  /* .modal-overlay's base rule (centered popup, used by wallet.html's
+     success modal too) lives earlier in this file — this just overrides
+     the alignment/padding for the checkout sheet specifically. */
+  #checkoutOverlay{ align-items:flex-end; padding:0; }
   .modal-box{
     background:var(--surface); width:100%; max-width:480px; max-height:88vh; overflow-y:auto;
     border-radius:26px 26px 0 0; padding:26px 22px 30px; box-shadow:0 -10px 30px rgba(0,0,0,0.2);
