@@ -335,6 +335,20 @@ export function cartoonAvatarSVG(name){
    flashing the guest icon while we wait for the network round trip. */
 const AVATAR_CACHE_KEY = 'cachedHeaderAvatar';
 
+/* Wallet balance cache — same key wallet.js uses, so the header chip and the
+   wallet page always agree, and the header can show a balance instantly on
+   load instead of waiting for Firestore. */
+const WALLET_BALANCE_CACHE_KEY = 'cr_wallet_balance_cache';
+function getCachedWalletBalance(){
+  try{
+    const cached = JSON.parse(localStorage.getItem(WALLET_BALANCE_CACHE_KEY) || 'null');
+    return (cached && typeof cached.balance === 'number') ? cached.balance : null;
+  }catch(e){ return null; }
+}
+function cacheWalletBalance(balance){
+  try{ localStorage.setItem(WALLET_BALANCE_CACHE_KEY, JSON.stringify({ balance })); }catch(e){ /* ignore */ }
+}
+
 function primeAvatarFromCache(){
   const avatarBtn = document.getElementById('avatarBtn');
   if(!avatarBtn) return;
@@ -348,6 +362,17 @@ function primeAvatarFromCache(){
       avatarBtn.classList.remove('guest');
     }
   }catch(e){ /* ignore */ }
+  // Only prime a wallet balance alongside a known-logged-in avatar — avoids
+  // ever flashing a stale balance to a guest.
+  const chip = document.getElementById('headerWalletChip');
+  const bal = document.getElementById('headerWalletBalance');
+  if(chip && bal){
+    const cachedBalance = getCachedWalletBalance();
+    if(cachedBalance !== null){
+      bal.textContent = '৳' + cachedBalance.toLocaleString('en-US');
+      chip.style.display = 'flex';
+    }
+  }
 }
 primeAvatarFromCache();
 
@@ -377,9 +402,26 @@ function applyHeaderAuthState(user, profile){
       avatarBtn.classList.add('guest');
       avatarBtn.setAttribute('aria-label', 'লগ ইন');
       try{ localStorage.removeItem(AVATAR_CACHE_KEY); }catch(e){ /* ignore */ }
+      try{ localStorage.removeItem(WALLET_BALANCE_CACHE_KEY); }catch(e){ /* ignore */ }
     }
   }
+  updateHeaderWallet(user, profile);
   loadNoticeBadge();
+}
+
+/* ---------- Header wallet balance chip ---------- */
+function updateHeaderWallet(user, profile){
+  const chip = document.getElementById('headerWalletChip');
+  const bal = document.getElementById('headerWalletBalance');
+  if(!chip || !bal) return;
+  if(user){
+    const balance = Number(profile?.walletBalance || 0);
+    bal.textContent = '৳' + balance.toLocaleString('en-US');
+    chip.style.display = 'flex';
+    cacheWalletBalance(balance);
+  } else {
+    chip.style.display = 'none';
+  }
 }
 
 /* ---------- Notice unread badge (shown on home page icon-grid + profile dash-grid + header bell) ---------- */
