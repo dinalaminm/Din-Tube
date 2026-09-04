@@ -38,19 +38,31 @@
   }
   .perf.flip{transform:rotate(180deg);}
 
-  /* NAV */
+  /* NAV — glossy frosted-glass header */
   header{
     position:sticky; top:0; z-index:50;
-    background:rgba(255,255,255,0.92);
-    backdrop-filter:blur(10px);
-    border-bottom:1px solid var(--line);
+    background:linear-gradient(180deg, rgba(255,255,255,0.88), rgba(255,255,255,0.74));
+    backdrop-filter:blur(18px) saturate(180%);
+    -webkit-backdrop-filter:blur(18px) saturate(180%);
+    border-bottom:1px solid rgba(233,233,242,0.7);
+    box-shadow:0 1px 0 rgba(255,255,255,0.7) inset, 0 10px 28px -16px rgba(28,27,41,0.18);
+  }
+  header::before{
+    content:'';
+    position:absolute; left:0; right:0; top:0; height:2px;
+    background:linear-gradient(90deg, transparent, var(--coral) 22%, var(--gold) 50%, var(--coral) 78%, transparent);
+    opacity:0.85;
   }
   nav{
+    position:relative;
     display:flex; align-items:center; justify-content:space-between;
     padding:16px 24px; max-width:1180px; margin:0 auto; gap:12px;
   }
-  .logo{font-family:'Fraunces',serif; font-weight:800; font-size:1.5rem;}
-  .logo span{color:var(--coral);}
+  .logo{font-family:'Fraunces',serif; font-weight:800; font-size:1.5rem; text-shadow:0 1px 0 rgba(255,255,255,0.6);}
+  .logo span{
+    background:linear-gradient(135deg, var(--coral), var(--gold));
+    -webkit-background-clip:text; background-clip:text; color:transparent;
+  }
   .nav-links{display:flex; gap:32px; font-weight:600; font-size:0.95rem;}
   .nav-links a{opacity:0.85; transition:opacity .2s;}
   .nav-links a:hover{opacity:1; color:var(--gold);}
@@ -60,11 +72,21 @@
     border:none; cursor:pointer; flex:0 0 auto;
   }
   .avatar-btn{
+    position:relative;
     flex:0 0 auto; width:38px; height:38px; border-radius:50%; display:flex; align-items:center; justify-content:center;
     background:var(--coral); color:#fff; font-weight:800; font-size:0.95rem; text-transform:uppercase;
     overflow:hidden;
+    border:2px solid rgba(255,255,255,0.85);
+    box-shadow:0 3px 10px -2px rgba(255,59,48,0.35), inset 0 1px 1px rgba(255,255,255,0.4);
+    transition:transform .18s ease, box-shadow .18s ease;
   }
-  .avatar-btn.guest{background:var(--surface-2); color:var(--muted); border:1.5px solid var(--line);}
+  .avatar-btn::after{
+    content:'';
+    position:absolute; inset:0; border-radius:50%; pointer-events:none;
+    background:linear-gradient(140deg, rgba(255,255,255,0.55) 0%, rgba(255,255,255,0.12) 30%, transparent 55%);
+  }
+  .avatar-btn:active{transform:scale(0.93);}
+  .avatar-btn.guest{background:var(--surface-2); color:var(--muted); border:1.5px solid var(--line); box-shadow:0 2px 6px rgba(28,27,41,0.08);}
   .avatar-btn svg.guest-icon{width:19px; height:19px;}
   .avatar-btn svg:not(.guest-icon){width:100%; height:100%; display:block;}
   .avatar-btn img{width:100%; height:100%; object-fit:cover; border-radius:50%; display:block;}
@@ -261,13 +283,20 @@
 
   /* Cart button in header */
   .cart-btn{
-    position:relative; background:none; border:none; cursor:pointer; color:var(--text);
-    display:flex; align-items:center; justify-content:center; padding:6px; flex:0 0 auto;
+    position:relative; cursor:pointer; color:var(--text);
+    display:flex; align-items:center; justify-content:center; flex:0 0 auto;
+    width:38px; height:38px; border-radius:12px;
+    background:linear-gradient(160deg, rgba(255,255,255,0.95), rgba(255,255,255,0.55));
+    border:1px solid rgba(255,255,255,0.8);
+    box-shadow:0 3px 10px -3px rgba(28,27,41,0.18), inset 0 1px 0 rgba(255,255,255,0.9);
+    transition:transform .18s ease, box-shadow .18s ease;
   }
+  .cart-btn:active{transform:scale(0.93);}
   .cart-badge{
-    position:absolute; top:-2px; right:-2px; background:var(--coral); color:#fff;
+    position:absolute; top:-4px; right:-4px; background:var(--coral); color:#fff;
     font-size:0.62rem; font-weight:800; border-radius:100px; min-width:16px; height:16px;
     display:none; align-items:center; justify-content:center; padding:0 3px;
+    box-shadow:0 0 0 2px #fff, 0 2px 5px rgba(255,59,48,0.4);
   }
 
   /* Simple content pages */
