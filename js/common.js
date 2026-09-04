@@ -284,6 +284,21 @@ function applyHeaderAuthState(user, profile){
       loginBtn.href = 'login.html';
     }
   }
+  const avatarBtn = document.getElementById('avatarBtn');
+  if(avatarBtn){
+    if(user){
+      const displayName = (user.displayName || user.email || '').trim();
+      avatarBtn.textContent = displayName ? displayName.charAt(0) : '?';
+      avatarBtn.href = 'profile.html';
+      avatarBtn.classList.remove('guest');
+      avatarBtn.setAttribute('aria-label', 'প্রোফাইল');
+    } else {
+      avatarBtn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="3.5"/><path d="M4.5 20a7.5 7.5 0 0 1 15 0"/></svg>';
+      avatarBtn.href = 'login.html';
+      avatarBtn.classList.add('guest');
+      avatarBtn.setAttribute('aria-label', 'লগ ইন');
+    }
+  }
   loadNoticeBadge();
 }
 
@@ -442,24 +457,8 @@ export async function getOwnedItemIds(uid){
   return ids;
 }
 
-/* ---------- Shared page chrome: mobile menu + burger + active tab + cart badge ---------- */
+/* ---------- Shared page chrome: active tab + cart badge ---------- */
 function initChrome(){
-  const burgerBtn = document.getElementById('burgerBtn');
-  const mobileMenu = document.getElementById('mobileMenu');
-  if(burgerBtn && mobileMenu){
-    burgerBtn.addEventListener('click', ()=>{
-      const isOpen = mobileMenu.classList.toggle('open');
-      burgerBtn.textContent = isOpen ? '✕' : '☰';
-      burgerBtn.setAttribute('aria-expanded', isOpen);
-    });
-    mobileMenu.querySelectorAll('a').forEach(a=>{
-      a.addEventListener('click', ()=>{
-        mobileMenu.classList.remove('open');
-        burgerBtn.textContent = '☰';
-        burgerBtn.setAttribute('aria-expanded', 'false');
-      });
-    });
-  }
   updateCartBadge();
   loadAnnouncement();
   initFooterNewsletter();
