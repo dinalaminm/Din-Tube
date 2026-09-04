@@ -8,7 +8,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700;9..144,900&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/style.css?v=2">
 </head>
-<body>
+<body class="page-mydownloads">
 <div class="toast" id="toast"></div>
 
 <header>
@@ -45,9 +45,14 @@
 </div>
 
 <main class="page-content">
-<div class="simple-page" style="text-align:left;">
+<div class="simple-page dl-page" style="text-align:left;">
     <h1>আমার ডাউনলোড</h1>
-    <div id="myDownloadsList"><p style="color:var(--muted);">লোড হচ্ছে...</p></div>
+    <p class="dl-subtitle">কেনা প্রোডাক্ট ও সফটওয়্যার এখান থেকে ডাউনলোড করুন</p>
+    <div id="myDownloadsList" class="dl-list">
+      <div class="dl-item dl-skel"><div class="skeleton dl-icon-skel"></div><div class="dl-info"><div class="skeleton skel-line w-70" style="height:13px;"></div><div class="skeleton skel-line w-40" style="height:10px; margin-top:9px;"></div></div><div class="skeleton dl-btn-skel"></div></div>
+      <div class="dl-item dl-skel"><div class="skeleton dl-icon-skel"></div><div class="dl-info"><div class="skeleton skel-line w-70" style="height:13px;"></div><div class="skeleton skel-line w-40" style="height:10px; margin-top:9px;"></div></div><div class="skeleton dl-btn-skel"></div></div>
+      <div class="dl-item dl-skel"><div class="skeleton dl-icon-skel"></div><div class="dl-info"><div class="skeleton skel-line w-70" style="height:13px;"></div><div class="skeleton skel-line w-40" style="height:10px; margin-top:9px;"></div></div><div class="skeleton dl-btn-skel"></div></div>
+    </div>
   </div>
 </main>
 
