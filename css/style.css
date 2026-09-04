@@ -391,8 +391,6 @@
   .pm-chip[data-method="bKash"].active{background:#E2136E;}
   .pm-chip[data-method="Nagad"].active{background:#F6821F;}
   .pm-chip[data-method="Rocket"].active{background:#8730D6;}
-  .pm-chip[data-method="Bank"].active{background:#1C1B29;}
-  .pm-chip[data-method="Other"].active{background:#767686;}
 
   .merchant-number-box{
     display:flex; align-items:center; gap:12px; border:1.5px solid var(--line); border-radius:14px;
