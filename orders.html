@@ -8,7 +8,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700;9..144,900&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/style.css">
 </head>
-<body>
+<body class="page-orders">
 <div class="toast" id="toast"></div>
 
 <header>
@@ -46,7 +46,10 @@
 
 <main class="page-content">
 <div class="simple-page" style="text-align:left;">
-    <h1>আমার অর্ডার</h1>
+    <div class="orders-page-head">
+      <h1>আমার অর্ডার</h1>
+      <span class="orders-count" id="ordersCount"></span>
+    </div>
     <div id="myOrdersList"><p style="color:var(--muted);">লোড হচ্ছে...</p></div>
   </div>
 </main>
