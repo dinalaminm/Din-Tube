@@ -2,7 +2,7 @@ import {
   auth, db, doc, setDoc, getDocs, collection, query, where,
   updateProfile, sendPasswordResetEmail, deleteDoc, deleteUser,
   EmailAuthProvider, reauthenticateWithCredential,
-  requireAuth, onUserReady, getCurrentUser, showToast
+  requireAuth, onUserReady, getCurrentUser, getCurrentProfile, syncProfileCache, showToast
 } from '../common.js';
 
 requireAuth();
@@ -27,6 +27,8 @@ document.getElementById('settingsProfileForm').addEventListener('submit', async 
   try{
     await updateProfile(auth.currentUser, { displayName: name });
     await setDoc(doc(db, 'users', currentUser.uid), { name, phone }, { merge: true });
+    const profile = getCurrentProfile();
+    if(profile){ profile.name = name; profile.phone = phone; syncProfileCache(); }
     const loginBtn = document.getElementById('loginBtn');
     if(loginBtn) loginBtn.textContent = name.length > 10 ? name.slice(0,10)+'…' : name;
     msg.textContent = 'সংরক্ষণ করা হয়েছে!';
