@@ -321,10 +321,10 @@
   /* Profile page — commercial header card */
   .profile-hero{
     background:var(--surface); border:1px solid var(--line); border-radius:20px;
-    overflow:hidden; margin-bottom:20px; box-shadow:0 8px 22px rgba(28,27,41,0.06);
+    margin-bottom:20px; box-shadow:0 8px 22px rgba(28,27,41,0.06);
   }
   .profile-hero-banner{
-    height:64px; position:relative;
+    height:64px; position:relative; border-radius:20px 20px 0 0; overflow:hidden;
     background:linear-gradient(120deg,var(--gold),var(--coral));
     background-image:
       radial-gradient(circle at 88% -20%, rgba(255,255,255,0.35), transparent 55%),
@@ -339,7 +339,7 @@
   .profile-hero-body{display:flex; align-items:flex-end; gap:14px; padding:0 20px; margin-top:-30px;}
   .profile-hero-body .profile-avatar{
     width:72px; height:72px; font-size:1.5rem; border:4px solid var(--surface);
-    box-shadow:0 4px 12px rgba(28,27,41,0.14);
+    box-shadow:0 0 0 1px var(--line), 0 4px 12px rgba(28,27,41,0.18);
   }
   .profile-hero-info{padding-bottom:4px; min-width:0;}
   .profile-hero-info h3{font-size:1.15rem; margin-bottom:2px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
@@ -351,18 +351,20 @@
   }
   .profile-chip svg{flex:0 0 auto; color:var(--gold);}
 
-  /* Wallet — featured card spanning the dashboard grid */
-  .wallet-feature-card{
-    grid-column:1 / -1; flex-direction:row !important; align-items:center; gap:14px;
+  /* Wallet — featured card spanning the dashboard grid.
+     Compound selector (.dash-card.wallet-feature-card) so this reliably beats
+     the plain .dash-card rule below regardless of source order/specificity. */
+  .dash-card.wallet-feature-card{
+    grid-column:1 / -1; flex-direction:row; align-items:center; gap:14px;
     background:linear-gradient(135deg,#232235 0%,#2c2a42 55%,var(--coral-dark) 130%);
-    border:none; padding:18px 18px; position:relative; overflow:hidden;
+    border:none; padding:18px; position:relative; overflow:hidden;
     box-shadow:0 10px 22px rgba(28,27,41,0.22);
   }
   .wallet-feature-card::after{
     content:''; position:absolute; top:-40%; right:-10%; width:160px; height:160px; border-radius:50%;
     background:radial-gradient(circle, rgba(255,122,69,0.35), transparent 70%); pointer-events:none;
   }
-  .wallet-feature-card:hover{border-color:transparent; transform:translateY(-2px);}
+  .dash-card.wallet-feature-card:hover{border-color:transparent; transform:translateY(-2px); box-shadow:0 14px 26px rgba(28,27,41,0.3);}
   .wallet-feature-icon{
     position:relative; z-index:1; width:44px; height:44px; border-radius:13px; flex:0 0 auto;
     background:rgba(255,255,255,0.14); color:#fff; display:flex; align-items:center; justify-content:center;
