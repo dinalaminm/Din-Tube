@@ -274,9 +274,11 @@ export function requireAuth(){
 
 /* Builds a self-contained cartoon face avatar as inline SVG — no external
    network request, so it always renders even on slow/blocked connections.
-   The look (male/female-styled hair, skin tone, hair color, background)
-   is derived deterministically from the name's hash, so the same name
-   always gets the same face. */
+   The face fills the entire circular button edge-to-edge (no background
+   ring around it). Hairstyle, colors, and small details (earrings /
+   stubble) are derived deterministically from the name's hash and are
+   visibly different between the "male" and "female" look, so the same
+   name always gets the same, clearly gendered face. */
 function nameHash(name){
   let hash = 0;
   const str = name || 'user';
@@ -287,28 +289,80 @@ function nameHash(name){
 export function cartoonAvatarSVG(name){
   const hash = nameHash(name);
   const isFemale = hash % 2 === 0;
-  const bgColors = ['#FF7A59','#FFB020','#6C5CE7','#00B894','#0984E3','#E17055'];
+  const bgColors = ['#FF7A59','#FFB020','#6C5CE7','#00B894','#0984E3','#E17055','#E84393','#00CEC9'];
   const skinTones = ['#FFDBAC','#F1C27D','#E0AC69','#C68642','#8D5524'];
-  const hairColors = ['#2C2C2C','#4A2E1E','#6B4226','#1A1A1A','#3B2313'];
+  const hairColors = ['#2C2C2C','#4A2E1E','#6B4226','#1A1A1A','#3B2313','#7A4B2A'];
   const bg = bgColors[hash % bgColors.length];
   const skin = skinTones[(hash >> 3) % skinTones.length];
   const hairColor = hairColors[(hash >> 5) % hairColors.length];
+  const hasExtra = (hash >> 7) % 3 === 0; // earrings for women / stubble for men, sometimes
 
-  const hairShape = isFemale
-    ? `<path d="M20 42c0-16 12-28 30-28s30 12 30 28v14c0 2-1 3-2 3-1-9-4-14-8-14 1 4 1 8 0 12-2-8-6-12-20-12s-18 4-20 12c-1-4-1-8 0-12-4 0-7 5-8 14-1 0-2-1-2-3V42Z" fill="${hairColor}"/>
-       <path d="M18 40c-3 6-4 16-2 26 3 2 6-2 6-8-2-6-3-12-4-18Z" fill="${hairColor}"/>
-       <path d="M82 40c3 6 4 16 2 26-3 2-6-2-6-8 2-6 3-12 4-18Z" fill="${hairColor}"/>`
-    : `<path d="M22 40c0-17 13-29 28-29s28 12 28 29c0 3-1 6-2 8-2-10-6-16-26-16s-24 6-26 16c-1-2-2-5-2-8Z" fill="${hairColor}"/>`;
+  const eyebrows = isFemale
+    ? `<path d="M37 50c2-2 7-3 10-1" stroke="#2C2C2C" stroke-width="2" fill="none" stroke-linecap="round"/>
+       <path d="M63 50c-2-2-7-3-10-1" stroke="#2C2C2C" stroke-width="2" fill="none" stroke-linecap="round"/>`
+    : `<path d="M35 49h13" stroke="#2C2C2C" stroke-width="3.5" fill="none" stroke-linecap="round"/>
+       <path d="M52 49h13" stroke="#2C2C2C" stroke-width="3.5" fill="none" stroke-linecap="round"/>`;
 
-  return `<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="প্রোফাইল">
-    <circle cx="50" cy="50" r="50" fill="${bg}"/>
-    <circle cx="50" cy="56" r="26" fill="${skin}"/>
-    <path d="M32 60c0 12 8 20 18 20s18-8 18-20" fill="none"/>
-    <ellipse cx="41" cy="58" rx="3" ry="4" fill="#2C2C2C"/>
-    <ellipse cx="59" cy="58" rx="3" ry="4" fill="#2C2C2C"/>
-    <path d="M40 72c4 4 16 4 20 0" stroke="#8B4B3B" stroke-width="2.5" fill="none" stroke-linecap="round"/>
-    ${hairShape}
+  const face = isFemale
+    ? `<circle cx="50" cy="60" r="50" fill="${skin}"/>
+       <ellipse cx="38" cy="66" rx="6" ry="4" fill="#F4A19E" opacity="0.55"/>
+       <ellipse cx="62" cy="66" rx="6" ry="4" fill="#F4A19E" opacity="0.55"/>
+       ${eyebrows}
+       <path d="M35 56l6 2M65 56l-6 2" stroke="#2C2C2C" stroke-width="1.6" stroke-linecap="round"/>
+       <ellipse cx="40" cy="60" rx="3.2" ry="4.2" fill="#2C2C2C"/>
+       <ellipse cx="60" cy="60" rx="3.2" ry="4.2" fill="#2C2C2C"/>
+       <path d="M41 76c4 4 14 4 18 0" stroke="#C0392B" stroke-width="3" fill="none" stroke-linecap="round"/>
+       ${hasExtra ? `<circle cx="16" cy="66" r="2.6" fill="#FFD700"/><circle cx="84" cy="66" r="2.6" fill="#FFD700"/>` : ''}
+       <path d="M2 30c0-20 20-34 48-34s48 14 48 34c0 8-2 16-5 22-3-14-8-22-16-26 2 5 2 11 0 16-4-10-10-15-27-15s-23 5-27 15c-2-5-2-11 0-16-8 4-13 12-16 26-3-6-5-14-5-22Z" fill="${hairColor}"/>
+       <path d="M-2 28c-5 10-6 30-2 46 4 3 9-3 9-11-3-11-5-23-7-35Z" fill="${hairColor}"/>
+       <path d="M102 28c5 10 6 30 2 46-4 3-9-3-9-11 3-11 5-23 7-35Z" fill="${hairColor}"/>`
+    : `<circle cx="50" cy="60" r="50" fill="${skin}"/>
+       ${eyebrows}
+       <ellipse cx="40" cy="59" rx="3" ry="4" fill="#2C2C2C"/>
+       <ellipse cx="60" cy="59" rx="3" ry="4" fill="#2C2C2C"/>
+       <path d="M41 75c4 3 14 3 18 0" stroke="#8B4B3B" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+       ${hasExtra ? `<path d="M38 80c4 3 20 3 24 0" stroke="#00000022" stroke-width="6" fill="none" stroke-linecap="round"/>` : ''}
+       <path d="M0 26c0-22 20-38 50-38s50 16 50 38c0 6-1 12-3 17-1-16-9-27-47-27s-46 11-47 27c-2-5-3-11-3-17Z" fill="${hairColor}"/>`;
+
+  return `<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="প্রোফাইল" preserveAspectRatio="xMidYMid slice">
+    <rect width="100" height="100" fill="${bg}"/>
+    ${face}
   </svg>`;
+}
+
+/* Local cache of the last rendered avatar so it can be painted immediately
+   on the next visit — before Firebase auth has even resolved — instead of
+   flashing the guest icon while we wait for the network round trip. */
+const AVATAR_CACHE_KEY = 'cachedHeaderAvatar';
+
+function primeAvatarFromCache(){
+  const avatarBtn = document.getElementById('avatarBtn');
+  if(!avatarBtn) return;
+  try{
+    const raw = localStorage.getItem(AVATAR_CACHE_KEY);
+    if(!raw) return;
+    const { svg } = JSON.parse(raw);
+    if(svg){
+      avatarBtn.innerHTML = svg;
+      avatarBtn.href = 'profile.html';
+      avatarBtn.classList.remove('guest');
+    }
+  }catch(e){ /* ignore */ }
+}
+primeAvatarFromCache();
+
+/* Renders + caches the header avatar for a display name. Exported so pages
+   like settings.js can refresh the header the instant the name is edited,
+   without duplicating the caching logic. */
+export function updateHeaderAvatar(displayName){
+  const avatarBtn = document.getElementById('avatarBtn');
+  if(!avatarBtn) return;
+  const svg = cartoonAvatarSVG(displayName);
+  avatarBtn.innerHTML = svg;
+  avatarBtn.href = 'profile.html';
+  avatarBtn.classList.remove('guest');
+  avatarBtn.setAttribute('aria-label', 'প্রোফাইল');
+  try{ localStorage.setItem(AVATAR_CACHE_KEY, JSON.stringify({ name: displayName, svg })); }catch(e){ /* ignore */ }
 }
 
 function applyHeaderAuthState(user, profile){
@@ -316,15 +370,13 @@ function applyHeaderAuthState(user, profile){
   if(avatarBtn){
     if(user){
       const displayName = (user.displayName || user.email || '').trim();
-      avatarBtn.innerHTML = cartoonAvatarSVG(displayName);
-      avatarBtn.href = 'profile.html';
-      avatarBtn.classList.remove('guest');
-      avatarBtn.setAttribute('aria-label', 'প্রোফাইল');
+      updateHeaderAvatar(displayName);
     } else {
       avatarBtn.innerHTML = '<svg class="guest-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="3.5"/><path d="M4.5 20a7.5 7.5 0 0 1 15 0"/></svg>';
       avatarBtn.href = 'login.html';
       avatarBtn.classList.add('guest');
       avatarBtn.setAttribute('aria-label', 'লগ ইন');
+      try{ localStorage.removeItem(AVATAR_CACHE_KEY); }catch(e){ /* ignore */ }
     }
   }
   loadNoticeBadge();
