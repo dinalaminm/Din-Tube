@@ -322,6 +322,7 @@
   .simple-page{max-width:640px; margin:0 auto; padding:60px 24px 100px; text-align:center;}
   .page-profile .simple-page{padding-top:0;}
   .page-mydownloads .simple-page{padding-top:0;}
+  .page-download .simple-page{padding-top:0;}
 
   /* ---------- My Downloads page ---------- */
   .dl-page h1{font-size:1.55rem; margin-bottom:6px;}
@@ -346,6 +347,7 @@
   .dl-info{flex:1; min-width:0;}
   .dl-info b{display:block; font-size:0.94rem; font-weight:800; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
   .dl-info span{font-size:0.76rem; color:var(--muted);}
+  .dl-tag{display:inline-block; padding:3px 9px; border-radius:100px; background:var(--surface-2); color:var(--muted); font-size:0.68rem; font-weight:700; margin-top:3px;}
   .dl-btn{
     display:flex; align-items:center; gap:6px; flex-shrink:0;
     padding:9px 15px; border-radius:10px; font-size:0.8rem; font-weight:800;
