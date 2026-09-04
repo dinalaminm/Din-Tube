@@ -52,44 +52,66 @@
       <button class="btn-primary" id="goLoginBtn" style="border:none; cursor:pointer;">লগ ইন করুন</button>
     </div>
     <div id="profileLoggedIn" style="display:none; text-align:left;">
-      <div class="profile-card">
-        <div class="profile-avatar" id="profileAvatar"></div>
-        <div>
-          <h3 id="profileName" style="font-size:1.2rem;">ইউজার</h3>
-          <span style="color:var(--muted); font-size:0.9rem;" id="profileHandle"></span>
-          <div style="color:var(--muted); font-size:0.78rem; margin-top:4px;">যোগদান: <span id="profileJoined">—</span></div>
+
+      <div class="profile-hero">
+        <div class="profile-hero-banner">
+          <a class="profile-edit-btn" href="settings.html" aria-label="প্রোফাইল সেটিংস">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.6 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.6a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1Z"/></svg>
+          </a>
+        </div>
+        <div class="profile-hero-body">
+          <div class="profile-avatar" id="profileAvatar"></div>
+          <div class="profile-hero-info">
+            <h3 id="profileName">ইউজার</h3>
+            <span class="profile-handle" id="profileHandle"></span>
+          </div>
+        </div>
+        <div class="profile-hero-foot">
+          <span class="profile-chip">
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+            যোগদান: <span id="profileJoined">—</span>
+          </span>
         </div>
       </div>
 
       <div class="dash-grid">
-        <a class="dash-card" href="wallet.html">
-          <span class="dash-icon">👛</span>
-          <span>ওয়ালেট: <strong id="dashWalletBalance">৳0</strong></span>
+        <a class="dash-card wallet-feature-card" href="wallet.html">
+          <span class="wallet-feature-icon">
+            <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="6" width="18" height="13" rx="2"/><path d="M16 12h2M3 10h18"/></svg>
+          </span>
+          <span class="wallet-feature-text">
+            <em>ওয়ালেট ব্যালেন্স</em>
+            <strong id="dashWalletBalance">৳0</strong>
+          </span>
+          <svg class="wallet-feature-chevron" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 6 6 6-6 6"/></svg>
         </a>
         <a class="dash-card" href="settings.html">
-          <span class="dash-icon">⚙️</span>
+          <span class="dash-icon ic-more"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.6 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.6a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1Z"/></svg></span>
           <span>প্রোফাইল সেটিংস</span>
         </a>
         <a class="dash-card" href="support.html">
-          <span class="dash-icon">🎫</span>
+          <span class="dash-icon ic-support"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 13v-1a8 8 0 0 1 16 0v1"/><rect x="2.5" y="13" width="5" height="6" rx="1.5"/><rect x="16.5" y="13" width="5" height="6" rx="1.5"/><path d="M20 19v1a2 2 0 0 1-2 2h-3"/></svg></span>
           <span>আমার সাপোর্ট টিকিট</span>
         </a>
         <a class="dash-card" href="notice.html">
           <span class="dash-badge" id="dashNoticeBadge"></span>
-          <span class="dash-icon">🔔</span>
+          <span class="dash-icon ic-notice"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8a6 6 0 0 0-12 0c0 5-2 6-2 6h16s-2-1-2-6"/><path d="M10.5 21a1.7 1.7 0 0 0 3 0"/></svg></span>
           <span>নোটিফিকেশন</span>
         </a>
         <a class="dash-card" href="orders.html">
-          <span class="dash-icon">🧾</span>
+          <span class="dash-icon ic-product"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2h9l5 5v13a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2Z"/><path d="M9 13h6M9 17h6M9 9h2"/></svg></span>
           <span>আমার অর্ডার</span>
         </a>
         <a class="dash-card" href="mydownloads.html">
-          <span class="dash-icon">⬇️</span>
+          <span class="dash-icon ic-download"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 16a4.5 4.5 0 0 1-1-8.9 5.5 5.5 0 0 1 10.7-2A4.5 4.5 0 0 1 17.5 16"/><path d="M12 11v8m0 0-3-3m3 3 3-3"/></svg></span>
           <span>আমার ডাউনলোড</span>
         </a>
       </div>
 
-      <button class="btn-ghost" id="logoutBtn" style="cursor:pointer; width:100%; text-align:center; margin-top:22px;">লগ আউট করুন</button>
+      <button class="btn-ghost logout-btn" id="logoutBtn" style="cursor:pointer; width:100%; margin-top:22px;">
+        <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5M21 12H9"/></svg>
+        লগ আউট করুন
+      </button>
     </div>
   </div>
 </main>
