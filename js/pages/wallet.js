@@ -1,6 +1,6 @@
 import {
-  db, collection, addDoc, getDocs, query, where, serverTimestamp,
-  requireAuth, onUserReady, getCurrentUser, escapeHtml, renderSkeletonList
+  db, collection, addDoc, getDocs, doc, getDoc, query, where, serverTimestamp,
+  requireAuth, onUserReady, getCurrentUser, escapeHtml, renderSkeletonList, showToast
 } from '../common.js';
 
 requireAuth();
@@ -9,6 +9,67 @@ onUserReady((user, profile)=>{
   if(!user) return;
   document.getElementById('walletBalanceDisplay').textContent = '৳' + Number(profile?.walletBalance || 0).toLocaleString('en-US');
   loadWalletTransactions();
+});
+
+/* ---------- Merchant number (from admin settings/payment) ---------- */
+const MERCHANT_NUMBER_FIELD = { bKash:'bkashNumber', Nagad:'nagadNumber', Rocket:'rocketNumber' };
+let merchantNumbersCache = null;
+async function getMerchantNumbers(){
+  if(merchantNumbersCache) return merchantNumbersCache;
+  try{
+    const snap = await getDoc(doc(db, 'settings', 'payment'));
+    merchantNumbersCache = snap.exists() ? snap.data() : {};
+  }catch(err){
+    console.error('payment settings fetch error:', err);
+    merchantNumbersCache = {};
+  }
+  return merchantNumbersCache;
+}
+
+async function updateMerchantNumberBox(){
+  const method = document.getElementById('depMethod').value;
+  const box = document.getElementById('merchantNumberBox');
+  const label = document.getElementById('merchantNumberLabel');
+  const valueEl = document.getElementById('merchantNumberValue');
+  const copyBtn = document.getElementById('merchantNumberCopy');
+  const field = MERCHANT_NUMBER_FIELD[method];
+  if(!field){ box.style.display = 'none'; return; }
+  box.style.display = 'block';
+  label.textContent = method + ' নম্বর';
+  valueEl.textContent = 'লোড হচ্ছে...';
+  valueEl.className = 'merchant-number-value muted';
+  copyBtn.disabled = true;
+  const numbers = await getMerchantNumbers();
+  const number = numbers[field];
+  if(number){
+    valueEl.textContent = number;
+    valueEl.className = 'merchant-number-value';
+    copyBtn.disabled = false;
+  }else{
+    valueEl.textContent = `${method} নম্বর এখনো যোগ করা হয়নি`;
+    valueEl.className = 'merchant-number-value muted';
+    copyBtn.disabled = true;
+  }
+}
+
+document.getElementById('depMethod').addEventListener('change', updateMerchantNumberBox);
+updateMerchantNumberBox();
+
+document.getElementById('merchantNumberCopy').addEventListener('click', async ()=>{
+  const number = document.getElementById('merchantNumberValue').textContent.trim();
+  if(!number) return;
+  try{
+    await navigator.clipboard.writeText(number);
+    showToast('নম্বর কপি হয়েছে!');
+  }catch(err){
+    const temp = document.createElement('textarea');
+    temp.value = number;
+    document.body.appendChild(temp);
+    temp.select();
+    try{ document.execCommand('copy'); showToast('নম্বর কপি হয়েছে!'); }
+    catch(e){ showToast('কপি করা যায়নি।'); }
+    document.body.removeChild(temp);
+  }
 });
 
 document.getElementById('depositForm').addEventListener('submit', async (e)=>{
