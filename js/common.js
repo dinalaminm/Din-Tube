@@ -660,6 +660,30 @@ export async function getOwnedItemIds(uid){
   return ids;
 }
 
+/* ---------- Game access helper — games are time-limited (plan-based), not
+   permanent like courses/products, so this returns the most recent
+   completed-purchase date per game instead of a simple owned/not-owned set.
+   Callers add the game's own planDays to compute the actual expiry. ---------- */
+export async function getGamePurchaseDates(uid){
+  const map = new Map(); // gameId -> latest purchase Date
+  try{
+    const q = query(collection(db, 'orders'), where('uid', '==', uid));
+    const snap = await getDocs(q);
+    snap.forEach(d=>{
+      const o = d.data();
+      if(o.status !== 'completed') return;
+      const purchasedAt = o.createdAt && o.createdAt.toDate ? o.createdAt.toDate() : null;
+      if(!purchasedAt) return;
+      (o.items || []).forEach(it=>{
+        if(it.type !== 'games' || !it.id) return;
+        const existing = map.get(it.id);
+        if(!existing || purchasedAt > existing) map.set(it.id, purchasedAt);
+      });
+    });
+  }catch(err){ console.error('getGamePurchaseDates error:', err); }
+  return map;
+}
+
 /* ---------- Shared page chrome: active tab + cart badge ---------- */
 function initChrome(){
   updateCartBadge();
