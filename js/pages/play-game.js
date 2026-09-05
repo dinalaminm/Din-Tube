@@ -7,6 +7,19 @@ const titleEl = document.getElementById('pgTitle');
 const expiryEl = document.getElementById('pgExpiry');
 const content = document.getElementById('pgContent');
 
+// Many pasted game pages assume they're the whole page and use height:100%
+// on their own containers, but never actually reset html/body to fill the
+// viewport (the exact same bug our own wrapper page had). We can't touch
+// the game author's markup, so we inject that one reset rule into whatever
+// <head> the game has (or add one) — this alone fixes most "not full
+// screen" cases without touching the game's own layout/canvas.
+function withFullscreenReset(html){
+  const reset = '<style>html,body{margin:0;padding:0;width:100%;height:100%;overflow:hidden;}</style>';
+  if(/<head[^>]*>/i.test(html)) return html.replace(/<head[^>]*>/i, (m)=> m + reset);
+  if(/<html[^>]*>/i.test(html)) return html.replace(/<html[^>]*>/i, (m)=> m + '<head>' + reset + '</head>');
+  return reset + html;
+}
+
 function showGate(heading, message, showBuyBtn){
   content.innerHTML = `
     <div class="pg-gate">
@@ -78,7 +91,7 @@ async function boot(){
     iframe.setAttribute('allowfullscreen', '');
     // srcdoc is set as a property (not an HTML attribute string) so the
     // game's own markup/quotes can't break out of the iframe tag.
-    iframe.srcdoc = game.gameHtml;
+    iframe.srcdoc = withFullscreenReset(game.gameHtml);
     wrap.appendChild(iframe);
     content.innerHTML = '';
     content.appendChild(wrap);
