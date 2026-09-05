@@ -366,18 +366,20 @@
   .dl-empty p{font-size:0.88rem; line-height:1.6;}
   .dl-error{color:var(--coral);}
 
-  /* ---------- Games page — compact buy/play button (product-card is small,
-     so the hero-sized .btn-primary pill looked oversized here) ---------- */
-  .game-btn{
-    display:block; width:calc(100% - 6px); box-sizing:border-box; text-align:center; margin:8px auto 0;
-    padding:6px 10px; border-radius:8px; font-size:0.72rem; font-weight:700;
-    background:linear-gradient(135deg, var(--coral), var(--gold)); color:#fff;
-    border:none; cursor:pointer;
-    box-shadow:0 3px 8px -3px rgba(255,59,48,0.35);
-    transition:transform .15s ease, box-shadow .15s ease;
+  /* ---------- Games page — play/buy overlay button centered on the thumbnail
+     (replaces a separate full-width button below the card) ---------- */
+  .game-thumb{position:relative; cursor:pointer;}
+  .game-play-overlay{
+    position:absolute; top:50%; left:50%; transform:translate(-50%, -50%);
+    width:52px; height:52px; border-radius:50%;
+    background:rgba(20,18,30,0.55); backdrop-filter:blur(2px);
+    display:flex; align-items:center; justify-content:center;
+    box-shadow:0 4px 14px rgba(0,0,0,0.25);
+    transition:transform .15s ease, background .15s ease;
   }
-  .game-btn:hover{transform:translateY(-1px); box-shadow:0 5px 12px -3px rgba(255,59,48,0.45);}
-  .game-btn:active{transform:scale(0.97);}
+  .game-play-overlay svg{margin-left:3px;} /* optical centering for the play triangle */
+  .game-thumb:hover .game-play-overlay{transform:translate(-50%, -50%) scale(1.08); background:rgba(255,59,48,0.85);}
+  .game-thumb:active .game-play-overlay{transform:translate(-50%, -50%) scale(0.95);}
 
   /* Auth-check loading state (avoids a "please log in" flash while
      Firebase resolves the session on each fresh page load) — a skeleton
