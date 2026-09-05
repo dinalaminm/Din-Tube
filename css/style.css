@@ -266,6 +266,7 @@
   .icon-tile .ic svg{width:22px; height:22px;}
   .icon-tile span{font-weight:700; font-size:0.85rem; color:var(--text);}
   .ic-live{background:#FFE3E1; color:#FF3B30;}
+  .ic-game{background:#FFE3E1; color:#FF3B30;}
   .ic-premium{background:#F1E9FF; color:#8B5CF6;}
   .ic-course{background:#E3F1FF; color:#2F80ED;}
   .ic-product{background:#E6F9EE; color:#16A34A;}
