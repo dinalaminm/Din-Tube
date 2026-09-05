@@ -56,9 +56,15 @@ function render(){
     el.className = 'product-card';
     el.style.cursor = 'default';
     const bg = itemBg(game, i);
+    const action = info.active ? 'play' : 'buy';
     el.innerHTML = `
-      <div class="product-img" style="background:${game.imageUrl ? `url('${game.imageUrl}') center/cover` : bg};">
-        ${info.active ? `<div class="badge-sale" style="background:#16A34A;">অ্যাক্টিভ</div>` : ''}
+      <div class="game-thumb" data-action="${action}" data-id="${game.id}">
+        <div class="product-img" style="background:${game.imageUrl ? `url('${game.imageUrl}') center/cover` : bg};">
+          ${info.active ? `<div class="badge-sale" style="background:#16A34A;">অ্যাক্টিভ</div>` : ''}
+        </div>
+        <div class="game-play-overlay" title="${info.active ? 'প্লে করুন' : (purchaseDates.has(game.id) ? 'মেয়াদ শেষ — আবার কিনুন' : 'কিনুন')}">
+          <svg viewBox="0 0 24 24" width="22" height="22" fill="#fff"><path d="M8 5.5v13l11-6.5-11-6.5Z"/></svg>
+        </div>
       </div>
       <div class="product-body">
         <h4>${escapeHtml(game.name || '')}</h4>
@@ -67,22 +73,19 @@ function render(){
           ? `<p style="color:#16A34A; font-size:0.78rem; margin:4px 0 0;">মেয়াদ আছে — ${fmtDate(info.expiresAt)} পর্যন্ত</p>`
           : `<div class="price-row"><span class="price-now">৳${Number(game.price || 0).toLocaleString('en-US')}</span>${game.oldPrice ? `<span class="price-old">৳${Number(game.oldPrice).toLocaleString('en-US')}</span>` : ''}</div>`
         }
-        <button type="button" class="game-btn" data-action="${info.active ? 'play' : 'buy'}" data-id="${game.id}">
-          ${info.active ? 'প্লে করুন' : (purchaseDates.has(game.id) ? 'মেয়াদ শেষ — আবার কিনুন' : 'কিনুন')}
-        </button>
       </div>
     `;
     grid.appendChild(el);
   });
 
-  grid.querySelectorAll('[data-action="play"]').forEach(btn=>{
-    btn.addEventListener('click', ()=>{
-      window.location.href = `play-game.html?id=${encodeURIComponent(btn.dataset.id)}`;
+  grid.querySelectorAll('.game-thumb[data-action="play"]').forEach(el=>{
+    el.addEventListener('click', ()=>{
+      window.location.href = `play-game.html?id=${encodeURIComponent(el.dataset.id)}`;
     });
   });
-  grid.querySelectorAll('[data-action="buy"]').forEach(btn=>{
-    btn.addEventListener('click', ()=>{
-      const game = games.find(g => g.id === btn.dataset.id);
+  grid.querySelectorAll('.game-thumb[data-action="buy"]').forEach(el=>{
+    el.addEventListener('click', ()=>{
+      const game = games.find(g => g.id === el.dataset.id);
       if(game) openCheckout(game);
     });
   });
