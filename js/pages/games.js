@@ -67,7 +67,7 @@ function render(){
           ? `<p style="color:#16A34A; font-size:0.78rem; margin:4px 0 0;">মেয়াদ আছে — ${fmtDate(info.expiresAt)} পর্যন্ত</p>`
           : `<div class="price-row"><span class="price-now">৳${Number(game.price || 0).toLocaleString('en-US')}</span>${game.oldPrice ? `<span class="price-old">৳${Number(game.oldPrice).toLocaleString('en-US')}</span>` : ''}</div>`
         }
-        <button type="button" class="btn-primary" style="width:100%; margin-top:10px; border:none; cursor:pointer;" data-action="${info.active ? 'play' : 'buy'}" data-id="${game.id}">
+        <button type="button" class="game-btn" data-action="${info.active ? 'play' : 'buy'}" data-id="${game.id}">
           ${info.active ? 'প্লে করুন' : (purchaseDates.has(game.id) ? 'মেয়াদ শেষ — আবার কিনুন' : 'কিনুন')}
         </button>
       </div>
