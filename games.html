@@ -3,47 +3,140 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>গেম | Creator Rivo</title>
+<title>গেমস | Creator Rivo</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700;9..144,900&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/style.css?v=2">
-<style>
-  html, body{height:100%; margin:0; overflow:hidden;}
-  #pgContent{height:calc(100% - 52px);}
-  .pg-bar{
-    display:flex; align-items:center; gap:10px; height:52px; padding:0 14px;
-    background:var(--surface); border-bottom:1px solid var(--line); box-sizing:border-box;
-  }
-  .pg-back{
-    width:34px; height:34px; border-radius:50%; display:flex; align-items:center; justify-content:center;
-    background:var(--surface-2); color:var(--text); flex-shrink:0;
-  }
-  .pg-title{font-weight:800; font-size:0.95rem; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; flex:1;}
-  .pg-expiry{font-size:0.72rem; color:var(--muted); white-space:nowrap; flex-shrink:0;}
-  .pg-frame-wrap{position:relative; width:100%; height:100%; background:#000;}
-  .pg-frame-wrap iframe{width:100%; height:100%; border:0; display:block;}
-  .pg-gate{
-    height:100%; display:flex; flex-direction:column; align-items:center; justify-content:center;
-    text-align:center; padding:32px 24px; gap:14px; box-sizing:border-box;
-  }
-  .pg-gate svg{width:52px; height:52px; opacity:0.3;}
-  .pg-gate h2{font-size:1.1rem; margin:0;}
-  .pg-gate p{color:var(--muted); font-size:0.88rem; max-width:280px; margin:0;}
-</style>
 </head>
 <body>
 <div class="toast" id="toast"></div>
 
-<div class="pg-bar">
-  <a href="games.html" class="pg-back" aria-label="ফিরে যান">
-    <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 6l-6 6 6 6"/></svg>
-  </a>
-  <span class="pg-title" id="pgTitle">লোড হচ্ছে...</span>
-  <span class="pg-expiry" id="pgExpiry"></span>
+<header>
+  <nav>
+    <div class="logo">Creator <span>Rivo</span></div>
+    <div class="nav-links">
+      <a href="all-courses.html">কোর্স</a>
+      <a href="all-products.html">প্রোডাক্ট</a>
+      <a href="games.html">গেমস</a>
+      <a href="index.html#reviews">রিভিউ</a>
+    </div>
+    <a class="wallet-chip" id="headerWalletChip" href="wallet.html" aria-label="ওয়ালেট ব্যালেন্স">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7a2 2 0 0 1 2-2h13a1 1 0 0 1 1 1v3"/><path d="M3 7v10a2 2 0 0 0 2 2h14a1 1 0 0 0 1-1v-4"/><path d="M16 12h4v4h-4a2 2 0 0 1 0-4Z"/></svg>
+      <span id="headerWalletBalance">৳0</span>
+    </a>
+    <a class="cart-btn" id="cartBtn" href="orders.html" aria-label="অর্ডার">
+      <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8h12l1 12.5a1 1 0 0 1-1 1.5H6a1 1 0 0 1-1-1.5L6 8Z"/><path d="M9 8V6a3 3 0 0 1 6 0v2"/></svg>
+      <span class="cart-badge" id="cartBadge">0</span>
+    </a>
+    <a class="cart-btn" id="headerNoticeBtn" href="notice.html" aria-label="নোটিফিকেশন">
+      <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8a6 6 0 0 0-12 0c0 5-2 6-2 6h16s-2-1-2-6"/><path d="M10.5 21a1.7 1.7 0 0 0 3 0"/></svg>
+      <span class="cart-badge" id="headerNoticeBadge">0</span>
+    </a>
+    <a class="avatar-btn" id="avatarBtn" href="login.html" aria-label="প্রোফাইল"></a>
+  </nav>
+</header>
+
+<div id="announcementBanner" class="announcement-banner" style="display:none;">
+  <div class="announcement-text">
+    <strong id="annBannerTitle"></strong>
+    <span id="annBannerMessage"></span>
+  </div>
+  <button type="button" id="announcementDismiss" aria-label="বন্ধ করুন">✕</button>
 </div>
 
-<div id="pgContent"></div>
+<main class="page-content">
+<div class="wrap" style="padding-top:0; padding-bottom:100px;">
+    <div class="bar-head">
+      <div class="left"><div class="bar"></div><h2>সব <em>গেমস</em></h2></div>
+    </div>
+    <div class="product-grid" id="gamesGrid"></div>
+  </div>
+</main>
 
-<script type="module" src="js/pages/play-game.js"></script>
+<div class="modal-overlay" id="checkoutOverlay" style="display:none;">
+  <div class="modal-box">
+    <div class="modal-head">
+      <div>
+        <span class="modal-eyebrow">CHECKOUT</span>
+        <h3 id="checkoutModalTitle">পেমেন্ট মেথড বেছে নিন</h3>
+      </div>
+      <button type="button" id="checkoutCloseBtn" class="modal-close" aria-label="বন্ধ করুন">✕</button>
+    </div>
+
+    <div id="checkoutStepMethod">
+      <div class="order-summary-box">
+        <span>অর্ডার সামারি</span>
+        <div class="order-summary-row"><span id="checkoutItemsLabel"></span><strong id="checkoutTotalLabel"></strong></div>
+      </div>
+
+      <p class="pm-section-label">পেমেন্ট মেথড বেছে নিন</p>
+      <div class="pm-list" id="pmList">
+        <button type="button" class="pm-row" data-method="bKash">
+          <span class="pm-icon" style="background:rgba(226,19,110,0.12); color:#E2136E;">
+            <svg viewBox="0 0 24 24" width="21" height="21" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="7" y="2" width="10" height="20" rx="2.5"/><path d="M11 18h2"/></svg>
+          </span>
+          <span class="pm-info"><strong>bKash</strong><span>মোবাইল ব্যাংকিং · ম্যানুয়াল ভেরিফিকেশন</span></span>
+          <span class="pm-chev"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m9 6 6 6-6 6"/></svg></span>
+        </button>
+        <button type="button" class="pm-row" data-method="Nagad">
+          <span class="pm-icon" style="background:rgba(246,130,31,0.12); color:#F6821F;">
+            <svg viewBox="0 0 24 24" width="21" height="21" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="7" y="2" width="10" height="20" rx="2.5"/><path d="M11 18h2"/></svg>
+          </span>
+          <span class="pm-info"><strong>Nagad</strong><span>মোবাইল ব্যাংকিং · ম্যানুয়াল ভেরিফিকেশন</span></span>
+          <span class="pm-chev"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m9 6 6 6-6 6"/></svg></span>
+        </button>
+        <button type="button" class="pm-row" data-method="Rocket">
+          <span class="pm-icon" style="background:rgba(135,48,214,0.12); color:#8730D6;">
+            <svg viewBox="0 0 24 24" width="21" height="21" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></svg>
+          </span>
+          <span class="pm-info"><strong>Rocket</strong><span>মোবাইল ব্যাংকিং · ম্যানুয়াল ভেরিফিকেশন</span></span>
+          <span class="pm-chev"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m9 6 6 6-6 6"/></svg></span>
+        </button>
+        <button type="button" class="pm-row" data-method="Wallet">
+          <span class="pm-icon" style="background:rgba(255,59,48,0.12); color:var(--coral);">
+            <svg viewBox="0 0 24 24" width="21" height="21" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 12V8H6a2 2 0 0 1-2-2c0-1.1.9-2 2-2h12v4"/><path d="M4 6v12c0 1.1.9 2 2 2h14v-4"/><path d="M18 12a2 2 0 0 0 0 4h4v-4Z"/></svg>
+          </span>
+          <span class="pm-info"><strong>ওয়ালেট</strong><span id="pmWalletBalance">ব্যালেন্স: ৳0</span></span>
+          <span class="pm-chev"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m9 6 6 6-6 6"/></svg></span>
+        </button>
+      </div>
+
+      <label class="pm-terms">
+        <input type="checkbox" id="checkoutTerms">
+        <span>আমি <a href="support.html" target="_blank">শর্তাবলী</a>, <a href="support.html" target="_blank">প্রাইভেসি পলিসি</a> ও <a href="support.html" target="_blank">রিটার্ন পলিসি</a> পড়েছি এবং সম্মত আছি।</span>
+      </label>
+
+      <button type="button" class="btn-primary" id="checkoutContinueBtn" style="width:100%; border:none; cursor:pointer; opacity:0.5;" disabled>এগিয়ে যান</button>
+      <div class="form-msg" id="checkoutStepMsg"></div>
+    </div>
+
+    <div id="checkoutStepManual" style="display:none;">
+      <button type="button" id="checkoutBackBtn" class="pm-back">← পেমেন্ট মেথড বদলান</button>
+      <div class="manual-pay-box">
+        <p id="manualPayInstruction"></p>
+        <div class="manual-pay-number-row">
+          <span class="manual-pay-number" id="manualPayNumber"></span>
+          <button type="button" class="manual-pay-copy-btn" id="manualPayCopyBtn" aria-label="নম্বর কপি করুন" title="কপি করুন">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15H4a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v1"/></svg>
+          </button>
+        </div>
+      </div>
+      <div class="form-field"><label>ট্রানজেকশন আইডি</label><input type="text" id="manualTxnId" required placeholder="যেমন: 8N7A2K9X1Q"></div>
+      <button type="button" class="btn-primary" id="manualSubmitBtn" style="width:100%; border:none; cursor:pointer;">অর্ডার কনফার্ম করুন</button>
+      <div class="form-msg" id="manualPayMsg"></div>
+    </div>
+  </div>
+</div>
+
+<script type="module" src="js/pages/games.js"></script>
+
+<nav class="tabbar">
+  <a data-tab="content" href="index.html"><span class="ic"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M10 9.5v5l4.5-2.5Z" fill="currentColor" stroke="none"/></svg></span>কনটেন্ট</a>
+  <a data-tab="course" href="all-courses.html"><span class="ic"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 9.5 12 5l10 4.5-10 4.5-10-4.5Z"/><path d="M6 11.5V17c0 1.4 2.7 2.5 6 2.5s6-1.1 6-2.5v-5.5"/></svg></span>কোর্স</a>
+  <a data-tab="product" href="all-products.html"><span class="ic"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8h12l1 12.5a1 1 0 0 1-1 1.5H6a1 1 0 0 1-1-1.5L6 8Z"/><path d="M9 8V6a3 3 0 0 1 6 0v2"/></svg></span>প্রোডাক্ট</a>
+  <a data-tab="download" href="download.html"><span class="ic"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 16a4.5 4.5 0 0 1-1-8.9 5.5 5.5 0 0 1 10.7-2A4.5 4.5 0 0 1 17.5 16"/><path d="M12 11v8m0 0-3-3m3 3 3-3"/></svg></span>ডাউনলোড</a>
+  <a data-tab="profile" href="profile.html"><span class="ic"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="3.5"/><path d="M4.5 20a7.5 7.5 0 0 1 15 0"/></svg></span>প্রোফাইল</a>
+</nav>
+
 </body>
 </html>
