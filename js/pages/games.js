@@ -62,8 +62,9 @@ function render(){
         <div class="product-img" style="background:${game.imageUrl ? `url('${game.imageUrl}') center/cover` : bg};">
           ${info.active ? `<div class="badge-sale" style="background:#16A34A;">অ্যাক্টিভ</div>` : ''}
         </div>
-        <div class="game-play-overlay" title="${info.active ? 'প্লে করুন' : (purchaseDates.has(game.id) ? 'মেয়াদ শেষ — আবার কিনুন' : 'কিনুন')}">
-          <svg viewBox="0 0 24 24" width="22" height="22" fill="#fff"><path d="M8 5.5v13l11-6.5-11-6.5Z"/></svg>
+        <div class="game-play-overlay">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="#fff"><path d="M8 5.5v13l11-6.5-11-6.5Z"/></svg>
+          <span>${info.active ? 'PLAY' : (purchaseDates.has(game.id) ? 'আবার কিনুন' : 'কিনুন')}</span>
         </div>
       </div>
       <div class="product-body">
