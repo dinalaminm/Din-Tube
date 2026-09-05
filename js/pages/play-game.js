@@ -65,16 +65,23 @@ async function boot(){
       showGate('মেয়াদ শেষ হয়ে গেছে', 'এই গেমটির প্ল্যানের মেয়াদ শেষ হয়ে গেছে। আবার খেলতে হলে নতুন করে কিনুন।', true);
       return;
     }
-    if(!game.htmlFileUrl){
-      showGate('গেম ফাইল পাওয়া যায়নি', 'অ্যাডমিন এখনো এই গেমের ফাইল যোগ করেননি।', false);
+    if(!game.gameHtml){
+      showGate('গেম কোড পাওয়া যায়নি', 'অ্যাডমিন এখনো এই গেমের HTML কোড যোগ করেননি।', false);
       return;
     }
     expiryEl.textContent = 'মেয়াদ: ' + fmtDate(expiresAt);
-    content.innerHTML = `
-      <div class="pg-frame-wrap">
-        <iframe src="${game.htmlFileUrl}" sandbox="allow-scripts allow-same-origin allow-forms allow-pointer-lock allow-popups" allow="fullscreen; autoplay; gamepad" allowfullscreen></iframe>
-      </div>
-    `;
+    const wrap = document.createElement('div');
+    wrap.className = 'pg-frame-wrap';
+    const iframe = document.createElement('iframe');
+    iframe.setAttribute('sandbox', 'allow-scripts allow-same-origin allow-forms allow-pointer-lock allow-popups');
+    iframe.setAttribute('allow', 'fullscreen; autoplay; gamepad');
+    iframe.setAttribute('allowfullscreen', '');
+    // srcdoc is set as a property (not an HTML attribute string) so the
+    // game's own markup/quotes can't break out of the iframe tag.
+    iframe.srcdoc = game.gameHtml;
+    wrap.appendChild(iframe);
+    content.innerHTML = '';
+    content.appendChild(wrap);
   });
 }
 
