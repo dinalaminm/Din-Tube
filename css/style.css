@@ -386,6 +386,75 @@
   .dl-empty p{font-size:0.88rem; line-height:1.6;}
   .dl-error{color:var(--coral);}
 
+  /* ---------- Premium page ---------- */
+  .premium-hero{
+    background:linear-gradient(160deg, #171426, #0F0D1C); border-radius:20px;
+    padding:44px 24px; text-align:center; color:#fff;
+  }
+  .premium-hero-lock{
+    width:64px; height:64px; border-radius:50%; margin:0 auto 18px;
+    background:rgba(255,255,255,0.08); display:flex; align-items:center; justify-content:center;
+  }
+  .premium-hero p{font-size:1.05rem; font-weight:700; margin-bottom:20px;}
+  .premium-hero-btn{
+    padding:12px 28px; border-radius:100px; border:none; cursor:pointer;
+    background:linear-gradient(135deg, var(--coral), var(--gold)); color:#fff;
+    font-weight:800; font-size:0.92rem;
+    box-shadow:0 8px 20px -6px rgba(255,59,48,0.5);
+  }
+  .premium-playlists{display:grid; grid-template-columns:repeat(2,1fr); gap:14px;}
+  .playlist-card{cursor:pointer; text-decoration:none; color:inherit; display:block;}
+  .playlist-thumb{
+    position:relative; aspect-ratio:16/10; border-radius:16px; overflow:hidden;
+    background:linear-gradient(150deg,var(--surface-2),var(--bg));
+  }
+  .playlist-count-badge{
+    position:absolute; top:8px; left:8px; background:var(--coral); color:#fff;
+    font-size:0.65rem; font-weight:800; padding:3px 8px; border-radius:6px;
+  }
+  .playlist-lock-badge{
+    position:absolute; top:8px; right:8px; width:26px; height:26px; border-radius:50%;
+    background:rgba(0,0,0,0.55); display:flex; align-items:center; justify-content:center; color:#fff;
+  }
+  .playlist-lock-badge svg{width:13px; height:13px;}
+  .playlist-play{
+    position:absolute; top:50%; left:50%; transform:translate(-50%, -50%);
+    width:44px; height:44px; border-radius:50%; background:rgba(255,59,48,0.9);
+    display:flex; align-items:center; justify-content:center; color:#fff;
+  }
+  .playlist-title{margin-top:8px; font-size:0.85rem; font-weight:700; line-height:1.4;}
+
+  .premium-plans-list{display:flex; flex-direction:column; gap:16px; max-width:420px;}
+  .plan-card{
+    background:var(--surface); border:1.5px solid var(--line); border-radius:18px; overflow:hidden;
+    padding:26px 22px; text-align:center; position:relative;
+  }
+  .plan-card.popular{border-color:#16A34A;}
+  .plan-ribbon{
+    position:absolute; top:0; left:0; right:0; background:#16A34A; color:#fff;
+    font-size:0.7rem; font-weight:800; letter-spacing:0.06em; padding:6px; text-align:center;
+  }
+  .plan-card.popular .plan-body{padding-top:22px;}
+  .plan-eyebrow{color:#16A34A; font-size:0.72rem; font-weight:800; letter-spacing:0.05em;}
+  .plan-title-row{display:flex; align-items:center; justify-content:center; gap:8px; margin:6px 0 12px;}
+  .plan-title-row h3{font-size:1.3rem;}
+  .plan-discount{background:rgba(255,59,48,0.1); color:var(--coral); font-size:0.72rem; font-weight:800; padding:3px 9px; border-radius:8px;}
+  .plan-price-row{margin-bottom:14px;}
+  .plan-price{font-size:2rem; font-weight:900; color:var(--coral); font-family:'Fraunces',serif;}
+  .plan-old-price{font-size:1.1rem; color:var(--muted); text-decoration:line-through; margin-left:8px;}
+  .plan-tags{display:flex; gap:8px; justify-content:center; margin-bottom:16px; flex-wrap:wrap;}
+  .plan-tag{font-size:0.72rem; font-weight:700; padding:5px 11px; border-radius:100px; border:1.5px solid var(--line); color:var(--muted);}
+  .plan-tag.access{background:rgba(22,163,74,0.08); border-color:rgba(22,163,74,0.3); color:#16A34A;}
+  .plan-features{list-style:none; text-align:left; margin-bottom:20px; display:flex; flex-direction:column; gap:10px;}
+  .plan-features li{display:flex; align-items:flex-start; gap:8px; font-size:0.86rem; color:var(--text);}
+  .plan-features li::before{content:''; width:7px; height:7px; border-radius:50%; background:#16A34A; margin-top:6px; flex-shrink:0;}
+  .plan-subscribe-btn{
+    width:100%; padding:14px; border-radius:12px; border:none; cursor:pointer;
+    background:linear-gradient(135deg, var(--coral), var(--gold)); color:#fff; font-weight:800; font-size:0.95rem;
+    box-shadow:0 10px 22px -8px rgba(255,59,48,0.45);
+  }
+  .plan-active-note{color:#16A34A; font-weight:700; font-size:0.85rem; padding:12px; background:rgba(22,163,74,0.08); border-radius:10px;}
+
   /* ---------- Games page — play/buy overlay button centered on the thumbnail
      (replaces a separate full-width button below the card) ---------- */
   .game-thumb{position:relative; cursor:pointer;}
