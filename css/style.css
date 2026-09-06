@@ -267,6 +267,26 @@
   .icon-tile span{font-weight:700; font-size:0.85rem; color:var(--text);}
   .ic-live{background:#FFE3E1; color:#FF3B30;}
   .ic-game{background:#FFE3E1; color:#FF3B30;}
+  .ic-videopack{background:#E3F1FF; color:#2F80ED;}
+
+  /* ---------- Video Packs page — qty tier chips + delivered-link rows ---------- */
+  .vp-tiers{display:flex; gap:6px; margin-top:8px;}
+  .vp-tier{
+    flex:1; text-align:center; padding:6px 4px; border-radius:8px; border:1.5px solid var(--line);
+    background:var(--surface); cursor:pointer; transition:.15s;
+  }
+  .vp-tier b{display:block; font-size:0.72rem; font-weight:800;}
+  .vp-tier span{display:block; font-size:0.68rem; color:var(--muted); margin-top:1px;}
+  .vp-tier.selected{border-color:var(--coral); background:rgba(255,59,48,0.06);}
+  .vp-tier.selected b{color:var(--coral);}
+  .vp-tier.disabled{opacity:0.4; cursor:not-allowed;}
+  .vp-stock{font-size:0.7rem; color:var(--muted); margin-top:6px;}
+  .vp-stock.out{color:var(--coral); font-weight:700;}
+  .delivered-link-row{
+    display:flex; align-items:center; justify-content:space-between; gap:10px;
+    padding:9px 12px; border-radius:10px; background:var(--surface-2); font-size:0.82rem; font-weight:700;
+  }
+  .delivered-link-row a{color:var(--coral); text-decoration:none; font-weight:800; font-size:0.78rem;}
   .ic-premium{background:#F1E9FF; color:#8B5CF6;}
   .ic-course{background:#E3F1FF; color:#2F80ED;}
   .ic-product{background:#E6F9EE; color:#16A34A;}
@@ -700,6 +720,12 @@
   .receipt-total-row .lbl{font-size:0.88rem; color:var(--muted); font-weight:600;}
   .receipt-total-row .amount{font-family:'Fraunces',serif; font-weight:800; font-size:1.5rem; color:var(--coral);}
   .receipt-meta{font-size:0.78rem; color:var(--muted); line-height:1.6; margin-top:8px;}
+  .receipt-links{margin-top:10px; padding-top:10px; border-top:1px dashed var(--line); display:flex; flex-direction:column; gap:6px;}
+  .receipt-links-label{font-size:0.76rem; color:var(--muted); font-weight:700;}
+  .receipt-link-btn{
+    display:inline-block; align-self:flex-start; padding:6px 12px; border-radius:8px;
+    background:rgba(255,59,48,0.08); color:var(--coral); text-decoration:none; font-size:0.78rem; font-weight:800;
+  }
 
   .orders-empty{text-align:center; padding:56px 20px; color:var(--muted);}
   .orders-empty svg{color:var(--line); margin-bottom:14px;}
