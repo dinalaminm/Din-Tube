@@ -87,6 +87,14 @@ function renderList(){
       </li>
     `).join('');
     const meta = paymentMetaLine(o);
+    const linksHtml = (o.items || [])
+      .filter(it => Array.isArray(it.deliveredLinks) && it.deliveredLinks.length)
+      .map(it => `
+        <div class="receipt-links">
+          <span class="receipt-links-label">${escapeHtml(it.name)} — ভিডিও লিংক:</span>
+          ${it.deliveredLinks.map((link, idx) => `<a href="${escapeHtml(link)}" target="_blank" rel="noopener" class="receipt-link-btn">ভিডিও ${idx + 1}</a>`).join('')}
+        </div>
+      `).join('');
     return `
       <div class="receipt-card">
         <div class="receipt-perf"></div>
@@ -96,6 +104,7 @@ function renderList(){
             <span class="receipt-status"><span class="dot" style="background:${color};"></span>${label}</span>
           </div>
           <ul class="receipt-items">${itemsHtml}</ul>
+          ${linksHtml}
           <div class="receipt-divider"></div>
           <div class="receipt-total-row">
             <span class="lbl">মোট</span>
