@@ -6,11 +6,10 @@ import {
 
 const grid = document.getElementById('videoPacksGrid');
 let packs = [];
-const selectedQty = new Map(); // packId -> 1 | 5 | 10, defaults to 1
 
 const TIERS = [
   { qty:1, key:'price1', label:'১টি' },
-  { qty:5, key:'price5', label:'৫টি' },
+  { qty:5, key:'price5', label:'৫টি', popular:true },
   { qty:10, key:'price10', label:'১০টি' },
 ];
 
@@ -38,48 +37,62 @@ function render(){
     grid.innerHTML = '<p style="color:var(--muted);">এখনো কোনো ভিডিও প্যাক যোগ করা হয়নি।</p>';
     return;
   }
-  grid.innerHTML = '';
-  packs.forEach((pack, i)=>{
+  grid.innerHTML = packs.map((pack, i)=>{
     const remaining = remainingOf(pack);
-    const qty = selectedQty.get(pack.id) || 1;
     const bg = itemBg(pack, i);
-    const el = document.createElement('div');
-    el.className = 'product-card';
-    el.style.cursor = 'default';
-    el.innerHTML = `
-      <div class="product-img" style="background:${pack.imageUrl ? `url('${pack.imageUrl}') center/cover` : bg};"></div>
-      <div class="product-body">
-        <h4>${escapeHtml(pack.title || '')}</h4>
-        <div class="vp-tiers" data-id="${pack.id}">
-          ${TIERS.map(t=>{
-            const disabled = remaining < t.qty;
-            const sel = qty === t.qty;
-            return `<div class="vp-tier${sel ? ' selected' : ''}${disabled ? ' disabled' : ''}" data-qty="${t.qty}">
-              <b>${t.label}</b><span>৳${Number(pack[t.key] || 0).toLocaleString('en-US')}</span>
-            </div>`;
-          }).join('')}
+    const tierCards = TIERS.map(t=>{
+      const price = Number(pack[t.key] || 0);
+      const unitPrice = Number(pack.price1 || 0);
+      const compareAt = unitPrice * t.qty;
+      const discount = t.qty > 1 && compareAt > price ? Math.round((1 - price / compareAt) * 100) : null;
+      const outOfStock = remaining < t.qty;
+      return `
+        <div class="plan-card${t.popular ? ' popular' : ''}${outOfStock ? ' out-of-stock' : ''}">
+          ${t.popular ? `<div class="plan-ribbon">সেরা অফার</div>` : ''}
+          <div class="plan-body">
+            <div class="plan-eyebrow">ভিডিও প্যাক</div>
+            <div class="plan-title-row">
+              <h3>${t.label}</h3>
+              ${discount ? `<span class="plan-discount">-${discount}%</span>` : ''}
+            </div>
+            <div class="plan-price-row">
+              <span class="plan-price">৳${price.toLocaleString('en-US')}</span>
+              ${discount ? `<span class="plan-old-price">৳${compareAt.toLocaleString('en-US')}</span>` : ''}
+            </div>
+            <div class="plan-tags">
+              <span class="plan-tag access">${t.qty} টি ভিডিও</span>
+              <span class="plan-tag">${outOfStock ? 'স্টক নেই' : `স্টকে আছে ${remaining} টি`}</span>
+            </div>
+            <ul class="plan-features">
+              <li>${t.qty} টি সম্পূর্ণ গুগল ড্রাইভ লিংক পাবেন</li>
+              <li>পেমেন্টের সাথে সাথেই লিংক পেয়ে যাবেন</li>
+              <li>কোনো মেয়াদ নেই — সারাজীবন ব্যবহার করুন</li>
+            </ul>
+            <button type="button" class="plan-subscribe-btn" data-action="buy" data-id="${pack.id}" data-qty="${t.qty}" ${outOfStock ? 'disabled' : ''}>
+              ${outOfStock ? 'স্টক নেই' : 'কিনুন'}
+            </button>
+          </div>
         </div>
-        <div class="vp-stock${remaining === 0 ? ' out' : ''}">${remaining === 0 ? 'স্টক শেষ' : `স্টকে আছে: ${remaining} টি`}</div>
-        <button type="button" class="game-btn" data-action="buy" data-id="${pack.id}" ${remaining === 0 ? 'disabled style="opacity:0.5; cursor:not-allowed;"' : ''}>
-          কিনুন — ৳${Number(pack[TIERS.find(t=>t.qty===qty).key] || 0).toLocaleString('en-US')}
-        </button>
+      `;
+    }).join('');
+    return `
+      <div class="vp-pack-block">
+        <div class="vp-pack-header">
+          <div class="vp-pack-thumb" style="background:${pack.imageUrl ? `url('${pack.imageUrl}') center/cover` : bg};"></div>
+          <div>
+            <div class="vp-pack-title">${escapeHtml(pack.title || '')}</div>
+            <div class="vp-pack-sub">${remaining === 0 ? 'স্টক শেষ' : `স্টকে আছে: ${remaining} টি ভিডিও`}</div>
+          </div>
+        </div>
+        <div class="vp-tier-cards">${tierCards}</div>
       </div>
     `;
-    grid.appendChild(el);
-  });
+  }).join('');
 
-  grid.querySelectorAll('.vp-tier').forEach(chip=>{
-    chip.addEventListener('click', ()=>{
-      if(chip.classList.contains('disabled')) return;
-      const packId = chip.closest('.vp-tiers').dataset.id;
-      selectedQty.set(packId, Number(chip.dataset.qty));
-      render();
-    });
-  });
   grid.querySelectorAll('[data-action="buy"]').forEach(btn=>{
     btn.addEventListener('click', ()=>{
       const pack = packs.find(p => p.id === btn.dataset.id);
-      if(pack) openCheckout(pack, selectedQty.get(pack.id) || 1);
+      if(pack) openCheckout(pack, Number(btn.dataset.qty));
     });
   });
 }
