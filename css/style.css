@@ -269,19 +269,15 @@
   .ic-game{background:#FFE3E1; color:#FF3B30;}
   .ic-videopack{background:#E3F1FF; color:#2F80ED;}
 
-  /* ---------- Video Packs page — qty tier chips + delivered-link rows ---------- */
-  .vp-tiers{display:flex; gap:6px; margin-top:8px;}
-  .vp-tier{
-    flex:1; text-align:center; padding:6px 4px; border-radius:8px; border:1.5px solid var(--line);
-    background:var(--surface); cursor:pointer; transition:.15s;
-  }
-  .vp-tier b{display:block; font-size:0.72rem; font-weight:800;}
-  .vp-tier span{display:block; font-size:0.68rem; color:var(--muted); margin-top:1px;}
-  .vp-tier.selected{border-color:var(--coral); background:rgba(255,59,48,0.06);}
-  .vp-tier.selected b{color:var(--coral);}
-  .vp-tier.disabled{opacity:0.4; cursor:not-allowed;}
-  .vp-stock{font-size:0.7rem; color:var(--muted); margin-top:6px;}
-  .vp-stock.out{color:var(--coral); font-weight:700;}
+  /* ---------- Video Packs page — plan-card style tiers (matches premium page) ---------- */
+  .vp-pack-block{margin-bottom:36px;}
+  .vp-pack-header{display:flex; align-items:center; gap:12px; margin-bottom:16px;}
+  .vp-pack-thumb{width:56px; height:56px; border-radius:12px; background-size:cover; background-position:center; flex-shrink:0; box-shadow:0 4px 10px rgba(28,27,41,0.1);}
+  .vp-pack-title{font-size:1.05rem; font-weight:800;}
+  .vp-pack-sub{font-size:0.78rem; color:var(--muted); margin-top:2px;}
+  .vp-tier-cards{display:flex; flex-direction:column; gap:16px; max-width:420px;}
+  .vp-tier-cards .plan-card.out-of-stock{opacity:0.55;}
+  .vp-tier-cards .plan-subscribe-btn:disabled{opacity:0.5; cursor:not-allowed;}
   .delivered-link-row{
     display:flex; align-items:center; justify-content:space-between; gap:10px;
     padding:9px 12px; border-radius:10px; background:var(--surface-2); font-size:0.82rem; font-weight:700;
@@ -388,7 +384,7 @@
 
   /* ---------- Premium page ---------- */
   .premium-hero{
-    background:linear-gradient(160deg, #171426, #0F0D1C); border-radius:20px;
+    background:linear-gradient(160deg, #0D1220, #05070D); border-radius:20px;
     padding:44px 24px; text-align:center; color:#fff;
   }
   .premium-hero-lock{
@@ -398,9 +394,9 @@
   .premium-hero p{font-size:1.05rem; font-weight:700; margin-bottom:20px;}
   .premium-hero-btn{
     padding:12px 28px; border-radius:100px; border:none; cursor:pointer;
-    background:linear-gradient(135deg, var(--coral), var(--gold)); color:#fff;
+    background:#16A34A; color:#fff;
     font-weight:800; font-size:0.92rem;
-    box-shadow:0 8px 20px -6px rgba(255,59,48,0.5);
+    box-shadow:0 8px 20px -6px rgba(22,163,74,0.5);
   }
   .premium-playlists{display:grid; grid-template-columns:repeat(2,1fr); gap:14px;}
   .playlist-card{cursor:pointer; text-decoration:none; color:inherit; display:block;}
@@ -450,8 +446,12 @@
   .plan-features li::before{content:''; width:7px; height:7px; border-radius:50%; background:#16A34A; margin-top:6px; flex-shrink:0;}
   .plan-subscribe-btn{
     width:100%; padding:14px; border-radius:12px; border:none; cursor:pointer;
-    background:linear-gradient(135deg, var(--coral), var(--gold)); color:#fff; font-weight:800; font-size:0.95rem;
-    box-shadow:0 10px 22px -8px rgba(255,59,48,0.45);
+    background:#16A34A; color:#fff; font-weight:800; font-size:0.95rem;
+    box-shadow:0 10px 22px -8px rgba(22,163,74,0.45);
+  }
+  .plan-card.popular .plan-subscribe-btn{
+    background:linear-gradient(135deg, var(--coral), var(--gold));
+    box-shadow:0 10px 22px -8px rgba(255,59,48,0.5);
   }
   .plan-active-note{color:#16A34A; font-weight:700; font-size:0.85rem; padding:12px; background:rgba(22,163,74,0.08); border-radius:10px;}
 
