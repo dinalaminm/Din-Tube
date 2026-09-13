@@ -41,7 +41,6 @@ onUserReady((user, profile)=>{
    quietly confirms/updates it in the background. Only a first-ever visit with
    nothing cached yet falls back to a shimmer placeholder. */
 const MERCHANT_NUMBER_FIELD = { bKash:'bkashNumber', Nagad:'nagadNumber', Rocket:'rocketNumber' };
-const MERCHANT_ICON_TEXT = { bKash:'bK', Nagad:'N', Rocket:'R' };
 const MERCHANT_NUMBERS_CACHE_KEY = 'cr_merchant_numbers_cache';
 
 function getCachedMerchantNumbers(){
@@ -70,44 +69,56 @@ function fetchMerchantNumbers(){
   return merchantNumbersFetchPromise;
 }
 
+const MERCHANT_USSD = { bKash:'*247#', Nagad:'*167#', Rocket:'*322#' };
+const MERCHANT_SENDMONEY_LABEL = { bKash:'Send Money/Make Payment', Nagad:'Send Money', Rocket:'Send Money' };
+const MERCHANT_BOX_COLOR = { bKash:'#E2136E', Nagad:'#F7941D', Rocket:'#8C3494' };
+
 function renderMerchantNumber(method, numbers){
   const box = document.getElementById('merchantNumberBox');
-  const icon = document.getElementById('merchantNumberIcon');
-  const label = document.getElementById('merchantNumberLabel');
   const valueEl = document.getElementById('merchantNumberValue');
-  const hint = document.getElementById('merchantNumberHint');
   const copyBtn = document.getElementById('merchantNumberCopy');
   const field = MERCHANT_NUMBER_FIELD[method];
-  if(!field){ box.style.display = 'none'; return; }
-  box.style.display = 'flex';
+  if(!field) return;
   box.dataset.method = method;
-  icon.textContent = MERCHANT_ICON_TEXT[method] || method[0];
-  label.textContent = method + ' নম্বর';
   copyBtn.textContent = 'কপি';
   copyBtn.classList.remove('copied');
   const number = numbers ? numbers[field] : null;
   if(number){
     valueEl.textContent = number;
-    valueEl.className = 'merchant-number-value';
-    hint.textContent = 'ট্যাপ করে কপি করুন';
     copyBtn.disabled = false;
   }else if(numbers){
     // Settings have actually loaded and this method genuinely has no number set.
     valueEl.textContent = `${method} নম্বর এখনো যোগ করা হয়নি`;
-    valueEl.className = 'merchant-number-value muted';
-    hint.textContent = 'অনুগ্রহ করে সাপোর্টে যোগাযোগ করুন';
     copyBtn.disabled = true;
   }else{
     // Nothing cached yet (first-ever visit) — shimmer instead of a "লোড হচ্ছে..." label.
-    valueEl.innerHTML = '<span class="skeleton skel-merchant-number"></span>';
-    valueEl.className = 'merchant-number-value';
-    hint.innerHTML = '<span class="skeleton skel-merchant-hint"></span>';
+    valueEl.innerHTML = '<span class="skeleton-dark skel-merchant-number"></span>';
     copyBtn.disabled = true;
   }
 }
 
+function renderMethodInstructions(method){
+  const list = document.getElementById('amInstructions');
+  const ussd = MERCHANT_USSD[method] || '';
+  const sendMoneyLabel = MERCHANT_SENDMONEY_LABEL[method] || 'Send Money';
+  list.innerHTML = `
+    <li>${ussd} ডায়াল করে আপনার ${method} মোবাইল মেনুতে যান অথবা ${method} অ্যাপে যান।</li>
+    <li style="color:#FFEB3B; font-weight:800;">${sendMoneyLabel} - এ ক্লিক করুন।</li>
+    <li>প্রাপক নম্বর হিসেবে নিচের এই নম্বরটি লিখুন</li>
+  `;
+}
+
+function applyMethodColor(method){
+  const color = MERCHANT_BOX_COLOR[method] || MERCHANT_BOX_COLOR.bKash;
+  document.getElementById('amBox').style.background = color;
+  document.getElementById('depositSubmitBtn').style.background = color;
+  document.getElementById('depositSubmitBtn').dataset.method = method;
+}
+
 async function updateMerchantNumberBox(){
   const method = document.getElementById('depMethod').value;
+  applyMethodColor(method);
+  renderMethodInstructions(method);
   renderMerchantNumber(method, merchantNumbersCache); // instant, from cache (or shimmer)
   const fresh = await fetchMerchantNumbers();
   if(document.getElementById('depMethod').value === method){
@@ -195,7 +206,7 @@ document.getElementById('depositForm').addEventListener('submit', async (e)=>{
     console.error('deposit request error:', err);
   }finally{
     submitBtn.disabled = false;
-    btnText.textContent = 'ডিপোজিট রিকোয়েস্ট পাঠান';
+    btnText.textContent = 'VERIFY';
     spinner.hidden = true;
   }
 });
