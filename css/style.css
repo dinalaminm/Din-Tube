@@ -825,42 +825,60 @@
   .section-title-row h3{font-size:1.05rem;}
   .section-sub{color:var(--muted); font-size:0.85rem; margin-bottom:16px; line-height:1.6;}
 
-  .deposit-card{background:var(--surface); border:1px solid var(--line); border-radius:18px; padding:20px; box-shadow:0 2px 18px rgba(28,27,41,0.05);}
   .field-label{display:block; font-weight:700; font-size:0.85rem; margin-bottom:8px;}
 
-  .pm-chip-row{display:flex; flex-wrap:wrap; gap:8px; margin-bottom:18px;}
-  .pm-chip{border:1.5px solid var(--line); background:#fff; border-radius:100px; padding:9px 16px; font-family:inherit; font-weight:700; font-size:0.83rem; color:var(--text); cursor:pointer; transition:background .15s, border-color .15s, color .15s;}
-  .pm-chip.active{color:#fff; border-color:transparent;}
-  .pm-chip[data-method="bKash"].active{background:#E2136E;}
-  .pm-chip[data-method="Nagad"].active{background:#F6821F;}
-  .pm-chip[data-method="Rocket"].active{background:#8730D6;}
+  /* ---------- Deposit "Add Money" flow (bKash/Nagad/Rocket method cards +
+     a brand-colored instruction box) ---------- */
+  .am-method-grid{display:grid; grid-template-columns:repeat(3,1fr); gap:10px; margin-bottom:18px;}
+  .am-card{
+    position:relative; background:var(--surface); border:1.5px solid var(--line); border-radius:14px;
+    padding:16px 8px; display:flex; flex-direction:column; align-items:center; gap:8px;
+    cursor:pointer; transition:border-color .15s;
+  }
+  .am-card img{width:44px; height:44px; object-fit:contain;}
+  .am-card span:last-child{font-weight:800; font-size:0.85rem;}
+  .am-check{
+    display:none; position:absolute; top:-8px; right:-8px; width:22px; height:22px; border-radius:50%;
+    background:var(--coral); color:#fff; align-items:center; justify-content:center; font-size:0.7rem; font-weight:800;
+  }
+  .am-card.active{border-color:var(--coral); border-width:2px;}
+  .am-card.active .am-check{display:flex;}
+  .am-card[data-method="bKash"].active{border-color:#E2136E;}
+  .am-card[data-method="bKash"].active .am-check{background:#E2136E;}
+  .am-card[data-method="Nagad"].active{border-color:#F7941D;}
+  .am-card[data-method="Nagad"].active .am-check{background:#F7941D;}
+  .am-card[data-method="Rocket"].active{border-color:#8C3494;}
+  .am-card[data-method="Rocket"].active .am-check{background:#8C3494;}
 
-  .merchant-number-box{
-    display:flex; align-items:center; gap:12px; border:1.5px solid var(--line); border-radius:14px;
-    padding:13px 14px; margin-bottom:18px; cursor:pointer; background:var(--surface-2);
-    transition:background .15s, border-color .15s;
+  .am-box{border-radius:18px; padding:22px 18px; color:#fff; transition:background .2s;}
+  .am-field{margin-bottom:14px;}
+  .am-field label{display:block; font-weight:700; font-size:0.82rem; margin-bottom:6px; color:#fff;}
+  .am-input{
+    width:100%; border:none; border-radius:12px; padding:13px 14px; font-family:inherit; font-size:0.95rem;
+    font-weight:700; background:rgba(255,255,255,0.94); color:var(--text); box-sizing:border-box;
   }
-  .merchant-number-box[data-method="bKash"]{background:#FDE9F1; border-color:#E2136E;}
-  .merchant-number-box[data-method="Nagad"]{background:#FFEEDC; border-color:#F6821F;}
-  .merchant-number-box[data-method="Rocket"]{background:#F2E6FB; border-color:#8730D6;}
-  .merchant-number-icon{
-    width:40px; height:40px; border-radius:11px; flex:0 0 auto; display:flex; align-items:center; justify-content:center;
-    color:#fff; font-weight:800; font-size:0.95rem; background:#999;
+  .am-input::placeholder{color:var(--muted); font-weight:600;}
+  .am-list{list-style:none; display:flex; flex-direction:column; gap:8px; margin-bottom:14px;}
+  .am-list li{font-size:0.85rem; line-height:1.5; padding-left:16px; position:relative;}
+  .am-list li::before{content:'●'; position:absolute; left:0; top:0; font-size:0.6rem; opacity:0.85;}
+  .am-num-row{
+    display:flex; align-items:center; gap:10px; background:rgba(0,0,0,0.18); border-radius:12px; padding:13px 14px;
   }
-  .merchant-number-box[data-method="bKash"] .merchant-number-icon{background:#E2136E;}
-  .merchant-number-box[data-method="Nagad"] .merchant-number-icon{background:#F6821F;}
-  .merchant-number-box[data-method="Rocket"] .merchant-number-icon{background:#8730D6;}
-  .merchant-number-body{flex:1; min-width:0;}
-  .merchant-number-label{display:block; font-weight:700; font-size:0.74rem; color:var(--muted); margin-bottom:2px;}
-  .merchant-number-value{display:block; font-family:'Fraunces',serif; font-size:1.3rem; font-weight:700; letter-spacing:0.03em; color:var(--text); word-break:break-all; line-height:1.25;}
-  .merchant-number-value.muted{font-family:inherit; font-size:0.82rem; font-weight:600; color:var(--muted);}
-  .merchant-number-hint{display:block; font-size:0.71rem; color:var(--muted); margin-top:2px;}
-  .merchant-number-copy{
-    flex:0 0 auto; border:none; background:#fff; color:var(--text); font-family:inherit; font-weight:800; font-size:0.78rem;
-    padding:9px 15px; border-radius:9px; cursor:pointer; box-shadow:0 1px 5px rgba(28,27,41,0.12); transition:background .15s, color .15s;
+  .am-num-value{font-family:'Fraunces',serif; font-size:1.15rem; font-weight:800; letter-spacing:0.02em; word-break:break-all; flex:1;}
+  .am-num-hint{font-size:0.72rem; opacity:0.85; flex-shrink:0;}
+  .am-copy-btn{
+    flex:0 0 auto; border:none; background:rgba(255,255,255,0.92); color:var(--text); font-family:inherit; font-weight:800; font-size:0.78rem;
+    padding:8px 14px; border-radius:9px; cursor:pointer; transition:background .15s, color .15s;
   }
-  .merchant-number-copy.copied{background:#16A34A; color:#fff;}
-  .merchant-number-copy:disabled{opacity:0.5; cursor:not-allowed;}
+  .am-copy-btn.copied{background:#16A34A; color:#fff;}
+  .am-copy-btn:disabled{opacity:0.5; cursor:not-allowed;}
+  .am-verify-btn{
+    width:100%; border:none; border-radius:14px; padding:16px; margin-top:14px; cursor:pointer;
+    display:flex; align-items:center; justify-content:center; gap:9px; position:relative;
+    color:#fff; font-family:inherit; font-weight:900; font-size:1.05rem; letter-spacing:0.03em;
+    box-shadow:0 10px 22px -8px rgba(0,0,0,0.35); transition:background .2s;
+  }
+  .am-verify-btn:disabled{opacity:0.75; cursor:not-allowed;}
 
   .amount-input-wrap{position:relative;}
   .amount-input-wrap .prefix{position:absolute; left:14px; top:50%; transform:translateY(-50%); font-weight:800; color:var(--coral); pointer-events:none;}
@@ -887,9 +905,6 @@
   .txn-row .txn-amt.credit{color:#16A34A;}
   .txn-row .txn-amt.debit{color:var(--coral);}
 
-  /* Deposit submit button — loading state */
-  .btn-deposit{display:flex; align-items:center; justify-content:center; gap:9px; position:relative;}
-  .btn-deposit:disabled{opacity:0.75; cursor:not-allowed;}
   .btn-spinner{
     width:18px; height:18px; border-radius:50%; flex:0 0 auto;
     border:2.5px solid rgba(255,255,255,0.4); border-top-color:#fff;
