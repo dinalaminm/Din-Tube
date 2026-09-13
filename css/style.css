@@ -1200,6 +1200,13 @@
      success modal too) lives earlier in this file — this just overrides
      the alignment/padding for the checkout sheet specifically. */
   #checkoutOverlay{ align-items:flex-end; padding:0; }
+  #depositOverlay{ align-items:flex-end; padding:0; }
+  .wallet-deposit-btn{
+    display:flex; align-items:center; justify-content:center; gap:8px; width:100%; max-width:420px;
+    margin-top:20px; padding:15px; border-radius:14px; border:none; cursor:pointer;
+    background:linear-gradient(135deg, var(--coral), var(--gold)); color:#fff; font-family:inherit;
+    font-weight:800; font-size:0.98rem; box-shadow:0 10px 22px -8px rgba(255,59,48,0.45);
+  }
   .modal-box{
     background:var(--surface); width:100%; max-width:480px; max-height:88vh; overflow-y:auto;
     border-radius:26px 26px 0 0; padding:26px 22px 30px; box-shadow:0 -10px 30px rgba(0,0,0,0.2);
