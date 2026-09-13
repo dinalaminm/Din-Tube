@@ -199,6 +199,7 @@ document.getElementById('depositForm').addEventListener('submit', async (e)=>{
     document.getElementById('depMethod').value = method;
     updateMerchantNumberBox();
     loadWalletTransactions();
+    document.getElementById('depositOverlay').style.display = 'none';
     document.getElementById('depositSuccessOverlay').style.display = 'flex';
   }catch(err){
     msg.textContent = 'পাঠানো যায়নি, আবার চেষ্টা করুন।';
@@ -217,6 +218,17 @@ function closeDepositSuccessOverlay(){
 document.getElementById('depositSuccessOkBtn').addEventListener('click', closeDepositSuccessOverlay);
 document.getElementById('depositSuccessOverlay').addEventListener('click', (e)=>{
   if(e.target.id === 'depositSuccessOverlay') closeDepositSuccessOverlay();
+});
+
+/* ---------- Deposit modal open/close ---------- */
+document.getElementById('openDepositBtn').addEventListener('click', ()=>{
+  document.getElementById('depositOverlay').style.display = 'flex';
+});
+document.getElementById('depositCloseBtn').addEventListener('click', ()=>{
+  document.getElementById('depositOverlay').style.display = 'none';
+});
+document.getElementById('depositOverlay').addEventListener('click', (e)=>{
+  if(e.target.id === 'depositOverlay') document.getElementById('depositOverlay').style.display = 'none';
 });
 
 const txnTypeLabel = { deposit:'ডিপোজিট', purchase:'কেনাকাটা', refund:'রিফান্ড' };
