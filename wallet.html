@@ -57,7 +57,27 @@
       <div class="wallet-hero-sub">bKash · Nagad · Rocket দিয়ে সহজে যোগ করুন</div>
     </div>
 
-    <div class="am-method-grid" id="pmChipRow" style="margin-top:24px;">
+    <button type="button" class="wallet-deposit-btn" id="openDepositBtn">
+      <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>
+      ডিপোজিট করুন
+    </button>
+
+    <div class="section-title-row" style="margin-top:32px;"><span class="dot"></span><h3>লেনদেনের ইতিহাস</h3></div>
+    <div id="walletTxnList" style="margin-top:14px;"><p style="color:var(--muted);">লোড হচ্ছে...</p></div>
+  </div>
+</main>
+
+<div class="modal-overlay" id="depositOverlay" style="display:none;">
+  <div class="modal-box">
+    <div class="modal-head">
+      <div>
+        <span class="modal-eyebrow">DEPOSIT</span>
+        <h3>ডিপোজিট করুন</h3>
+      </div>
+      <button type="button" id="depositCloseBtn" class="modal-close" aria-label="বন্ধ করুন">✕</button>
+    </div>
+
+    <div class="am-method-grid" id="pmChipRow">
       <div class="am-card active pm-chip" data-method="bKash">
         <span class="am-check">✓</span>
         <img src="https://i.ibb.co.com/SYN6dMH/20251113-202452.png" alt="bKash">
@@ -113,11 +133,8 @@
       </button>
       <div class="form-msg" id="depositMsg"></div>
     </form>
-
-    <div class="section-title-row" style="margin-top:32px;"><span class="dot"></span><h3>লেনদেনের ইতিহাস</h3></div>
-    <div id="walletTxnList" style="margin-top:14px;"><p style="color:var(--muted);">লোড হচ্ছে...</p></div>
   </div>
-</main>
+</div>
 
 <div class="modal-overlay" id="depositSuccessOverlay" style="display:none;">
   <div class="modal-card success-modal">
