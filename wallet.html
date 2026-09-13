@@ -62,42 +62,62 @@
       নিচে থেকে পেমেন্ট মেথড বাছাই করুন, দেখানো নাম্বারে bKash/Nagad/Rocket দিয়ে টাকা পাঠিয়ে ট্রানজেকশন আইডি বসিয়ে দিন। অ্যাডমিন যাচাই করে ব্যালেন্স যোগ করে দেবে।
     </p>
 
-    <div class="deposit-card">
-      <form id="depositForm">
-        <label class="field-label">পেমেন্ট মেথড</label>
-        <div class="pm-chip-row" id="pmChipRow">
-          <button type="button" class="pm-chip active" data-method="bKash">bKash</button>
-          <button type="button" class="pm-chip" data-method="Nagad">Nagad</button>
-          <button type="button" class="pm-chip" data-method="Rocket">Rocket</button>
-        </div>
-        <input type="hidden" id="depMethod" value="bKash">
-
-        <div class="merchant-number-box" id="merchantNumberBox" data-method="bKash" style="display:none;">
-          <span class="merchant-number-icon" id="merchantNumberIcon">৳</span>
-          <div class="merchant-number-body">
-            <span class="merchant-number-label" id="merchantNumberLabel">bKash নম্বর</span>
-            <span class="merchant-number-value" id="merchantNumberValue">লোড হচ্ছে...</span>
-            <span class="merchant-number-hint" id="merchantNumberHint">ট্যাপ করে কপি করুন</span>
-          </div>
-          <button type="button" class="merchant-number-copy" id="merchantNumberCopy">কপি</button>
-        </div>
-
-        <div class="form-field">
-          <label>পরিমাণ (৳)</label>
-          <div class="amount-input-wrap">
-            <span class="prefix">৳</span>
-            <input type="number" id="depAmount" required min="1" placeholder="৫০০">
-          </div>
-        </div>
-        <div class="form-field"><label>ট্রানজেকশন আইডি</label><input type="text" id="depTxnId" required placeholder="যেমন: 8N7A2K9X1Q"></div>
-        <div class="form-field"><label>নোট (ঐচ্ছিক)</label><input type="text" id="depNote" placeholder="অতিরিক্ত তথ্য"></div>
-        <button type="submit" class="btn-primary btn-deposit" id="depositSubmitBtn" style="width:100%; border:none; cursor:pointer;">
-          <span class="btn-text">ডিপোজিট রিকোয়েস্ট পাঠান</span>
-          <span class="btn-spinner" id="depositSpinner" hidden></span>
-        </button>
-        <div class="form-msg" id="depositMsg"></div>
-      </form>
+    <div class="am-method-grid" id="pmChipRow">
+      <div class="am-card active pm-chip" data-method="bKash">
+        <span class="am-check">✓</span>
+        <img src="https://i.ibb.co.com/SYN6dMH/20251113-202452.png" alt="bKash">
+        <span>bKash</span>
+      </div>
+      <div class="am-card pm-chip" data-method="Rocket">
+        <span class="am-check">✓</span>
+        <img src="https://i.ibb.co.com/r270jkYV/d6621b10013ac98c8b3b3bc7a03fbf6580b5be6ab5e35898b6a7942177963e90-200.jpg" alt="Rocket" style="border-radius:8px;">
+        <span>Rocket</span>
+      </div>
+      <div class="am-card pm-chip" data-method="Nagad">
+        <span class="am-check">✓</span>
+        <img src="https://i.ibb.co.com/Vp3x5kxg/1000022762-removebg-preview.png" alt="Nagad">
+        <span>Nagad</span>
+      </div>
     </div>
+
+    <form id="depositForm">
+      <input type="hidden" id="depMethod" value="bKash">
+
+      <div class="am-box" id="amBox" data-method="bKash">
+        <div class="am-field">
+          <label>পরিমাণ (৳)</label>
+          <input type="number" id="depAmount" class="am-input" required min="1" placeholder="৫০০">
+        </div>
+
+        <ul class="am-list" id="amInstructions"></ul>
+
+        <div class="am-num-row" id="merchantNumberBox" data-method="bKash">
+          <span class="am-num-value" id="merchantNumberValue">লোড হচ্ছে...</span>
+          <span class="am-num-hint">(Send Money)</span>
+          <button type="button" class="am-copy-btn" id="merchantNumberCopy">কপি</button>
+        </div>
+
+        <ul class="am-list" style="margin-top:12px;">
+          <li>নিশ্চিত করতে এখন আপনার মোবাইল মেনু পিন লিখুন।</li>
+          <li>এখন উপরে আপনার Amount ও নিচে Transaction ID দিন, তারপর VERIFY বাটনে ক্লিক করুন।</li>
+        </ul>
+
+        <div class="am-field">
+          <label>ট্রানজেকশন আইডি</label>
+          <input type="text" id="depTxnId" class="am-input" required placeholder="যেমন: 8N7A2K9X1Q">
+        </div>
+        <div class="am-field">
+          <label>নোট (ঐচ্ছিক)</label>
+          <input type="text" id="depNote" class="am-input" placeholder="অতিরিক্ত তথ্য">
+        </div>
+      </div>
+
+      <button type="submit" class="am-verify-btn" id="depositSubmitBtn" data-method="bKash">
+        <span class="btn-text">VERIFY</span>
+        <span class="btn-spinner" id="depositSpinner" hidden></span>
+      </button>
+      <div class="form-msg" id="depositMsg"></div>
+    </form>
 
     <div class="section-title-row" style="margin-top:32px;"><span class="dot"></span><h3>লেনদেনের ইতিহাস</h3></div>
     <div id="walletTxnList" style="margin-top:14px;"><p style="color:var(--muted);">লোড হচ্ছে...</p></div>
