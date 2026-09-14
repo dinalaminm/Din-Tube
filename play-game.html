@@ -27,6 +27,18 @@
     width:34px; height:34px; border-radius:50%; display:flex; align-items:center; justify-content:center;
     background:rgba(20,18,30,0.55); color:#fff; border:none; cursor:pointer; flex-shrink:0;
   }
+  /* While actually in fullscreen, the top overlay bar is hidden entirely —
+     the game's own in-game UI (title, top-right icons, etc.) usually sits
+     in that same top strip, and the two were overlapping/unreadable
+     together. A single small exit button takes its place, tucked in the
+     bottom-right corner where games are far less likely to put controls. */
+  body.is-fullscreen .pg-bar{display:none;}
+  .pg-fullscreen-exit{
+    position:absolute; bottom:14px; right:14px; z-index:6;
+    width:36px; height:36px; border-radius:50%; display:none; align-items:center; justify-content:center;
+    background:rgba(20,18,30,0.5); color:#fff; border:none; cursor:pointer;
+  }
+  body.is-fullscreen .pg-fullscreen-exit{display:flex;}
   .pg-frame-wrap{position:relative; width:100%; height:100%; background:#000;}
   .pg-frame-wrap iframe{width:100%; height:100%; border:0; display:block;}
   .pg-gate{
@@ -53,6 +65,10 @@
 </div>
 
 <div id="pgContent"></div>
+
+<button type="button" class="pg-fullscreen-exit" id="pgFullscreenExitBtn" aria-label="ফুলস্ক্রিন থেকে বের হন">
+  <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 3v3a2 2 0 0 1-2 2H4M21 9h-3a2 2 0 0 1-2-2V4M3 15h3a2 2 0 0 1 2 2v3M15 21v-3a2 2 0 0 1 2-2h3"/></svg>
+</button>
 
 <script type="module" src="js/pages/play-game.js"></script>
 </body>
