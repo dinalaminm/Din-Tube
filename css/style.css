@@ -472,6 +472,20 @@
   .game-thumb:hover .game-play-overlay{transform:translate(-50%, -50%) scale(1.06); background:rgba(255,59,48,0.85);}
   .game-thumb:active .game-play-overlay{transform:translate(-50%, -50%) scale(0.95);}
 
+  .game-meta-row{margin-top:7px;}
+  .game-meta-pill{
+    display:inline-flex; align-items:center; gap:5px;
+    font-size:0.7rem; font-weight:700; color:var(--muted);
+    background:var(--surface-2); border:1px solid var(--line); border-radius:100px; padding:4px 10px;
+  }
+  .game-meta-pill svg{width:12px; height:12px; flex-shrink:0;}
+  .game-status-pill{
+    display:inline-flex; align-items:center; gap:5px; margin-top:8px;
+    font-size:0.7rem; font-weight:800; color:#16A34A;
+    background:rgba(22,163,74,0.1); border-radius:100px; padding:5px 11px;
+  }
+  .game-status-pill svg{width:12px; height:12px; flex-shrink:0;}
+
   /* Auth-check loading state (avoids a "please log in" flash while
      Firebase resolves the session on each fresh page load) — a skeleton
      that mirrors the real hero/wallet/dash-grid layout with a shimmer sweep. */
