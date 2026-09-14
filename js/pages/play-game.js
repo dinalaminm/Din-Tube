@@ -7,6 +7,22 @@ const titleEl = document.getElementById('pgTitle');
 const expiryEl = document.getElementById('pgExpiry');
 const content = document.getElementById('pgContent');
 
+// Some mobile browsers (Kiwi in particular) don't reliably recompute
+// percentage/vh-based heights the instant fullscreen toggles, leaving a
+// blank strip where the address bar used to be. Setting the actual pixel
+// height directly sidesteps that — it's recalculated on every resize and
+// fullscreenchange, which covers both entering/exiting fullscreen and the
+// address bar showing/hiding on scroll.
+function syncViewportHeight(){
+  const h = window.innerHeight + 'px';
+  document.documentElement.style.height = h;
+  document.body.style.height = h;
+  content.style.height = h;
+}
+syncViewportHeight();
+window.addEventListener('resize', syncViewportHeight);
+document.addEventListener('fullscreenchange', syncViewportHeight);
+
 // Many pasted game pages assume they're the whole page and use height:100%
 // on their own containers, but never actually reset html/body to fill the
 // viewport (the exact same bug our own wrapper page had). We can't touch
