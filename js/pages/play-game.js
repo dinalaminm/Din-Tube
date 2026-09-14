@@ -99,3 +99,29 @@ async function boot(){
 }
 
 boot();
+
+/* ---------- Fullscreen toggle — hides the browser's own address bar too,
+   for a truly immersive edge-to-edge game. Requesting fullscreen must
+   happen inside a direct user click (browsers block it otherwise), so
+   this can't be done automatically on page load — the floating button
+   is the reliable way to offer it. ---------- */
+const fullscreenBtn = document.getElementById('pgFullscreenBtn');
+const EXPAND_ICON = '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3H5a2 2 0 0 0-2 2v3M16 3h3a2 2 0 0 1 2 2v3M8 21H5a2 2 0 0 1-2-2v-3M16 21h3a2 2 0 0 0 2-2v-3"/></svg>';
+const COLLAPSE_ICON = '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 3v3a2 2 0 0 1-2 2H4M21 9h-3a2 2 0 0 1-2-2V4M3 15h3a2 2 0 0 1 2 2v3M15 21v-3a2 2 0 0 1 2-2h3"/></svg>';
+
+function updateFullscreenIcon(){
+  fullscreenBtn.innerHTML = document.fullscreenElement ? COLLAPSE_ICON : EXPAND_ICON;
+}
+
+fullscreenBtn.addEventListener('click', async ()=>{
+  try{
+    if(!document.fullscreenElement){
+      await document.documentElement.requestFullscreen();
+    }else{
+      await document.exitFullscreen();
+    }
+  }catch(err){
+    console.error('fullscreen toggle error:', err);
+  }
+});
+document.addEventListener('fullscreenchange', updateFullscreenIcon);
