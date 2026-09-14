@@ -110,7 +110,9 @@ const EXPAND_ICON = '<svg viewBox="0 0 24 24" width="16" height="16" fill="none"
 const COLLAPSE_ICON = '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 3v3a2 2 0 0 1-2 2H4M21 9h-3a2 2 0 0 1-2-2V4M3 15h3a2 2 0 0 1 2 2v3M15 21v-3a2 2 0 0 1 2-2h3"/></svg>';
 
 function updateFullscreenIcon(){
-  fullscreenBtn.innerHTML = document.fullscreenElement ? COLLAPSE_ICON : EXPAND_ICON;
+  const active = !!document.fullscreenElement;
+  fullscreenBtn.innerHTML = active ? COLLAPSE_ICON : EXPAND_ICON;
+  document.body.classList.toggle('is-fullscreen', active);
 }
 
 fullscreenBtn.addEventListener('click', async ()=>{
@@ -122,6 +124,13 @@ fullscreenBtn.addEventListener('click', async ()=>{
     }
   }catch(err){
     console.error('fullscreen toggle error:', err);
+  }
+});
+document.getElementById('pgFullscreenExitBtn').addEventListener('click', async ()=>{
+  try{
+    if(document.fullscreenElement) await document.exitFullscreen();
+  }catch(err){
+    console.error('fullscreen exit error:', err);
   }
 });
 document.addEventListener('fullscreenchange', updateFullscreenIcon);
