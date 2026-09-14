@@ -69,9 +69,14 @@ function render(){
       </div>
       <div class="product-body">
         <h4>${escapeHtml(game.name || '')}</h4>
-        <span style="color:var(--muted); font-size:0.75rem; font-weight:600;">মেয়াদ: ${Number(game.planDays || 0)} দিন</span>
+        <div class="game-meta-row">
+          <span class="game-meta-pill">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4.5" width="18" height="16" rx="2.5"/><path d="M3 9.5h18M8 2.5v4M16 2.5v4"/></svg>
+            ${Number(game.planDays || 0)} দিনের মেয়াদ
+          </span>
+        </div>
         ${info.active
-          ? `<p style="color:#16A34A; font-size:0.78rem; margin:4px 0 0;">মেয়াদ আছে — ${fmtDate(info.expiresAt)} পর্যন্ত</p>`
+          ? `<div class="game-status-pill"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>${fmtDate(info.expiresAt)} পর্যন্ত সক্রিয়</div>`
           : `<div class="price-row"><span class="price-now">৳${Number(game.price || 0).toLocaleString('en-US')}</span>${game.oldPrice ? `<span class="price-old">৳${Number(game.oldPrice).toLocaleString('en-US')}</span>` : ''}</div>`
         }
       </div>
