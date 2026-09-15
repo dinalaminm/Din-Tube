@@ -1,4 +1,4 @@
-import { db, collection, getDocs, doc, getDoc, query, where, requireAuth, onUserReady } from '../common.js';
+import { db, collection, getDocs, doc, getDoc, query, where, requireAuth, onUserReady, escapeHtml } from '../common.js';
 
 const PLAY_ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 5.5v13l11-6.5-11-6.5Z" fill="currentColor" stroke="none"/></svg>';
 const ARROW_ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg>';
@@ -21,10 +21,19 @@ onUserReady(async (user)=>{
 
     const downloadable = []; // products/software with a direct downloadUrl
     const courseItems = [];  // purchased courses/videos -> opened via detail page, not a raw file
+    const videoPackLinks = []; // { packName, link, index } — Google Drive links from videopacks orders
     const lookupCache = {};
     for(const o of orders){
       if(o.status !== 'completed') continue;
       for(const it of (o.items || [])){
+        // Video pack links live directly on the order item (deliveredLinks), so they
+        // survive even if the pack is later deleted/out of stock — no doc lookup needed.
+        if(it.type === 'videopacks' && Array.isArray(it.deliveredLinks) && it.deliveredLinks.length){
+          it.deliveredLinks.forEach((link, idx)=>{
+            videoPackLinks.push({ packName: it.name || 'ভিডিও প্যাক', link, index: idx + 1 });
+          });
+          continue;
+        }
         if(!it.id || !it.type) continue;
         const cacheKey = `${it.type}/${it.id}`;
         if(!(cacheKey in lookupCache)){
@@ -43,7 +52,7 @@ onUserReady(async (user)=>{
       }
     }
 
-    if(downloadable.length === 0 && courseItems.length === 0){
+    if(downloadable.length === 0 && courseItems.length === 0 && videoPackLinks.length === 0){
       wrap.innerHTML = `
         <div class="dl-empty">
           ${EMPTY_ICON}
@@ -74,6 +83,18 @@ onUserReady(async (user)=>{
             <span class="dl-tag">ডাউনলোডের জন্য প্রস্তুত</span>
           </div>
           <a href="${item.downloadUrl}" target="_blank" rel="noopener" class="dl-btn">${DL_BTN_ICON}ডাউনলোড</a>
+        </div>
+      `);
+    });
+    videoPackLinks.forEach(vp => {
+      rows.push(`
+        <div class="dl-item">
+          <div class="dl-icon">${DL_ICON}</div>
+          <div class="dl-info">
+            <b>${escapeHtml(vp.packName)} — ভিডিও ${vp.index}</b>
+            <span class="dl-tag">ডাউনলোডের জন্য প্রস্তুত</span>
+          </div>
+          <a href="${escapeHtml(vp.link)}" target="_blank" rel="noopener" class="dl-btn">${DL_BTN_ICON}লিংক খুলুন</a>
         </div>
       `);
     });
