@@ -1,4 +1,4 @@
-import { db, collection, getDocs, doc, getDoc, query, where, requireAuth, onUserReady } from '../common.js';
+import { db, collection, getDocs, doc, getDoc, query, where, requireAuth, onUserReady, escapeHtml } from '../common.js';
 
 const DL_ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12m0 0-4-4m4 4 4-4"/><path d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/></svg>';
 const DL_BTN_ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12m0 0-4-4m4 4 4-4"/><path d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/></svg>';
@@ -16,10 +16,19 @@ onUserReady(async (user)=>{
     snap.forEach(d => orders.push({ id: d.id, ...d.data() }));
 
     const downloadable = [];
+    const videoPackLinks = []; // { packName, link, index } — Google Drive links from videopacks orders
     const lookupCache = {};
     for(const o of orders){
       if(o.status !== 'completed') continue;
       for(const it of (o.items || [])){
+        // Video pack links live directly on the order item (deliveredLinks), so they
+        // survive even if the pack is later deleted/out of stock — no doc lookup needed.
+        if(it.type === 'videopacks' && Array.isArray(it.deliveredLinks) && it.deliveredLinks.length){
+          it.deliveredLinks.forEach((link, idx)=>{
+            videoPackLinks.push({ packName: it.name || 'ভিডিও প্যাক', link, index: idx + 1 });
+          });
+          continue;
+        }
         if(!it.id || !it.type || (it.type !== 'products' && it.type !== 'software')) continue;
         const cacheKey = `${it.type}/${it.id}`;
         if(!(cacheKey in lookupCache)){
@@ -33,7 +42,7 @@ onUserReady(async (user)=>{
       }
     }
 
-    if(downloadable.length === 0){
+    if(downloadable.length === 0 && videoPackLinks.length === 0){
       wrap.innerHTML = `
         <div class="dl-empty">
           ${DL_EMPTY_ICON}
@@ -41,7 +50,7 @@ onUserReady(async (user)=>{
         </div>`;
       return;
     }
-    wrap.innerHTML = downloadable.map(item => `
+    const rows = downloadable.map(item => `
       <div class="dl-item">
         <div class="dl-icon">${DL_ICON}</div>
         <div class="dl-info">
@@ -50,7 +59,20 @@ onUserReady(async (user)=>{
         </div>
         <a href="${item.downloadUrl}" target="_blank" rel="noopener" class="dl-btn">${DL_BTN_ICON}ডাউনলোড</a>
       </div>
-    `).join('');
+    `);
+    videoPackLinks.forEach(vp => {
+      rows.push(`
+        <div class="dl-item">
+          <div class="dl-icon">${DL_ICON}</div>
+          <div class="dl-info">
+            <b>${escapeHtml(vp.packName)} — ভিডিও ${vp.index}</b>
+            <span>ডাউনলোডের জন্য প্রস্তুত</span>
+          </div>
+          <a href="${escapeHtml(vp.link)}" target="_blank" rel="noopener" class="dl-btn">${DL_BTN_ICON}লিংক খুলুন</a>
+        </div>
+      `);
+    });
+    wrap.innerHTML = rows.join('');
   }catch(err){
     wrap.innerHTML = `
       <div class="dl-empty dl-error">
