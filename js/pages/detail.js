@@ -303,7 +303,14 @@ document.getElementById('manualPayCopyBtn').addEventListener('click', async (e)=
 });
 
 function currentOrderItems(){
-  return [{ id: checkoutItem.id || null, type: checkoutType || null, name: itemLabel(checkoutType, checkoutItem), price: Number(checkoutItem.price || 0), qty: 1 }];
+  const item = { id: checkoutItem.id || null, type: checkoutType || null, name: itemLabel(checkoutType, checkoutItem), price: Number(checkoutItem.price || 0), qty: 1 };
+  // Stamp the download link onto the order item right away for products/software —
+  // the instant-wallet path marks the order 'completed' immediately (no admin
+  // approval step), so this is the only chance to capture it for "আমার ডাউনলোড".
+  if((checkoutType === 'products' || checkoutType === 'software') && checkoutItem.downloadUrl){
+    item.downloadUrl = checkoutItem.downloadUrl;
+  }
+  return [item];
 }
 
 async function payWithWallet(){
