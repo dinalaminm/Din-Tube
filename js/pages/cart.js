@@ -179,6 +179,23 @@ document.getElementById('manualPayCopyBtn').addEventListener('click', async (e)=
   setTimeout(()=> btn.classList.remove('copied'), 1500);
 });
 
+// Products/software need their downloadUrl stamped onto the order item right at
+// purchase time — the wallet path marks the order 'completed' immediately (no
+// admin approval step to catch it later), so this is the only chance to capture
+// it for the buyer's "আমার ডাউনলোড" page.
+async function buildOrderItems(cart){
+  const items = cart.map(c => ({ id: c.id || null, type: c.type || null, name: c.name, price: c.price, qty: c.qty }));
+  for(const it of items){
+    if((it.type === 'products' || it.type === 'software') && it.id){
+      try{
+        const snap = await getDoc(doc(db, it.type, it.id));
+        if(snap.exists() && snap.data().downloadUrl) it.downloadUrl = snap.data().downloadUrl;
+      }catch(e){ /* ignore — falls back to admin-side snapshot / live lookup later */ }
+    }
+  }
+  return items;
+}
+
 async function payWithWallet(){
   const msg = document.getElementById('checkoutStepMsg');
   const currentUser = getCurrentUser();
@@ -193,7 +210,7 @@ async function payWithWallet(){
   msg.className = 'form-msg';
   msg.textContent = 'পেমেন্ট প্রসেস হচ্ছে...';
   continueBtn.disabled = true;
-  const items = cart.map(c => ({ id: c.id || null, type: c.type || null, name: c.name, price: c.price, qty: c.qty }));
+  const items = await buildOrderItems(cart);
   const userRef = doc(db, 'users', currentUser.uid);
   const orderRef = doc(collection(db, 'orders'));
   const txnRef = doc(collection(db, 'walletTransactions'));
