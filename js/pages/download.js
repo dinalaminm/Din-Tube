@@ -8,6 +8,14 @@ const EMPTY_ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" s
 
 const TYPE_LABEL = { courses:'কোর্স', videos:'ভিডিও', products:'প্রোডাক্ট', software:'সফটওয়্যার' };
 
+function formatOrderDateTime(createdAt){
+  if(!createdAt || !createdAt.seconds) return '';
+  const d = new Date(createdAt.seconds * 1000);
+  const datePart = d.toLocaleDateString('bn-BD', { day:'numeric', month:'long', year:'numeric' });
+  const timePart = d.toLocaleTimeString('bn-BD', { hour:'numeric', minute:'2-digit' });
+  return `${datePart}, ${timePart}`;
+}
+
 requireAuth();
 
 onUserReady(async (user)=>{
@@ -21,7 +29,7 @@ onUserReady(async (user)=>{
 
     const downloadable = []; // products/software with a direct downloadUrl
     const courseItems = [];  // purchased courses/videos -> opened via detail page, not a raw file
-    const videoPackLinks = []; // { packName, link, index } — Google Drive links from videopacks orders
+    const videoPackGroups = []; // one entry per purchase: { packName, createdAt, links: [] }
     const lookupCache = {};
     for(const o of orders){
       if(o.status !== 'completed') continue;
@@ -29,9 +37,7 @@ onUserReady(async (user)=>{
         // Video pack links live directly on the order item (deliveredLinks), so they
         // survive even if the pack is later deleted/out of stock — no doc lookup needed.
         if(it.type === 'videopacks' && Array.isArray(it.deliveredLinks) && it.deliveredLinks.length){
-          it.deliveredLinks.forEach((link, idx)=>{
-            videoPackLinks.push({ packName: it.name || 'ভিডিও প্যাক', link, index: idx + 1 });
-          });
+          videoPackGroups.push({ packName: it.name || 'ভিডিও প্যাক', createdAt: o.createdAt, links: it.deliveredLinks });
           continue;
         }
         if(!it.id || !it.type) continue;
@@ -52,7 +58,18 @@ onUserReady(async (user)=>{
       }
     }
 
-    if(downloadable.length === 0 && courseItems.length === 0 && videoPackLinks.length === 0){
+    // Number every purchased video 1, 2, 3... in the order they were bought (oldest
+    // first), then show the groups newest-first so recent purchases stay on top while
+    // each video keeps one consistent, permanent serial number.
+    videoPackGroups.sort((a,b)=> (a.createdAt?.seconds || 0) - (b.createdAt?.seconds || 0));
+    let serialCounter = 0;
+    videoPackGroups.forEach(group => {
+      group.startSerial = serialCounter + 1;
+      serialCounter += group.links.length;
+    });
+    videoPackGroups.reverse();
+
+    if(downloadable.length === 0 && courseItems.length === 0 && videoPackGroups.length === 0){
       wrap.innerHTML = `
         <div class="dl-empty">
           ${EMPTY_ICON}
@@ -62,6 +79,31 @@ onUserReady(async (user)=>{
     }
 
     const rows = [];
+    videoPackGroups.forEach(group => {
+      const dateStr = formatOrderDateTime(group.createdAt);
+      const rangeLabel = group.links.length > 1
+        ? `ভিডিও ${group.startSerial}–${group.startSerial + group.links.length - 1}`
+        : `ভিডিও ${group.startSerial}`;
+      rows.push(`
+        <div class="dl-vp-group">
+          <div class="dl-vp-head">
+            <div class="dl-icon">${DL_ICON}</div>
+            <div class="dl-vp-head-info">
+              <b>${escapeHtml(group.packName)}</b>
+              <span>${rangeLabel} · ${group.links.length} টি ${dateStr ? '· ' + dateStr : ''}</span>
+            </div>
+          </div>
+          <div class="dl-vp-rows">
+            ${group.links.map((link, idx)=> `
+              <div class="dl-vp-row">
+                <span>ভিডিও #${group.startSerial + idx}</span>
+                <a href="${escapeHtml(link)}" target="_blank" rel="noopener">${DL_BTN_ICON}লিংক খুলুন</a>
+              </div>
+            `).join('')}
+          </div>
+        </div>
+      `);
+    });
     courseItems.forEach(item => {
       rows.push(`
         <div class="dl-item">
@@ -83,18 +125,6 @@ onUserReady(async (user)=>{
             <span class="dl-tag">ডাউনলোডের জন্য প্রস্তুত</span>
           </div>
           <a href="${item.downloadUrl}" target="_blank" rel="noopener" class="dl-btn">${DL_BTN_ICON}ডাউনলোড</a>
-        </div>
-      `);
-    });
-    videoPackLinks.forEach(vp => {
-      rows.push(`
-        <div class="dl-item">
-          <div class="dl-icon">${DL_ICON}</div>
-          <div class="dl-info">
-            <b>${escapeHtml(vp.packName)} — ভিডিও ${vp.index}</b>
-            <span class="dl-tag">ডাউনলোডের জন্য প্রস্তুত</span>
-          </div>
-          <a href="${escapeHtml(vp.link)}" target="_blank" rel="noopener" class="dl-btn">${DL_BTN_ICON}লিংক খুলুন</a>
         </div>
       `);
     });
