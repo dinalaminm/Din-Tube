@@ -1,6 +1,7 @@
 import {
   db, doc, getDoc, collection, getDocs,
-  extractYouTubeId, loadCollectionGrid, renderCard
+  extractYouTubeId, loadCollectionGrid, renderCard,
+  itemBg, escapeHtml, renderSkeletonCards
 } from '../common.js';
 
 /* ---------- Homepage promo video + ticker + about (Firestore: settings/homepage) ---------- */
@@ -56,13 +57,53 @@ async function loadHomepageSettings(){
 }
 loadHomepageSettings();
 
+/* ---------- Video content == video packs now: the homepage "ভিডিও কনটেন্ট"
+   preview pulls from the same "videopacks" collection as video-packs.html,
+   as a compact starting-price card. Buying still happens on video-packs.html
+   (tier + stock UI), so every card here just links there. ---------- */
+async function loadVideoPacksPreview(){
+  const grid = document.getElementById('videoGrid');
+  if(!grid) return;
+  renderSkeletonCards('videoGrid', 6);
+  try{
+    const snap = await getDocs(collection(db, 'videopacks'));
+    const packs = [];
+    snap.forEach(d => packs.push({ id: d.id, ...d.data() }));
+    if(packs.length === 0){
+      grid.innerHTML = '<p style="color:var(--muted);">এখনো কোনো ভিডিও প্যাক যোগ করা হয়নি।</p>';
+      return;
+    }
+    grid.innerHTML = packs.map((pack, i)=>{
+      const total = Array.isArray(pack.links) ? pack.links.length : 0;
+      const remaining = Math.max(0, total - Number(pack.assignedCount || 0));
+      const bg = itemBg(pack, i);
+      return `
+        <a class="product-card" href="video-packs.html" style="text-decoration:none; color:inherit;">
+          <div class="product-img" style="background:${pack.imageUrl ? `url('${pack.imageUrl}') center/cover` : bg};">
+            ${remaining === 0 ? `<div class="badge-sale" style="background:#9CA3AF;">স্টক নেই</div>` : ''}
+          </div>
+          <div class="product-body">
+            <h4>${escapeHtml(pack.title || '')}</h4>
+            <span style="color:var(--muted); font-size:0.75rem; font-weight:600;">${remaining === 0 ? 'স্টক শেষ' : `স্টকে আছে ${remaining} টি`}</span>
+            <div class="price-row">
+              <span class="price-now">৳${Number(pack.price1 || 0).toLocaleString('en-US')} থেকে</span>
+            </div>
+          </div>
+        </a>
+      `;
+    }).join('');
+  }catch(err){
+    grid.innerHTML = '<p style="color:var(--coral);">লোড করা যায়নি। Firestore রুলস/কানেকশন চেক করুন।</p>';
+    console.error('videopacks preview load error:', err);
+  }
+}
+
 /* ---------- Courses + products (home preview grids, 1 page's worth) ---------- */
 let coursesData = [];
 let productsData = [];
-let videosData = [];
 async function boot(){
   coursesData = await loadCollectionGrid('courses', 'courseGrid', { type:'courses', emptyText:'এখনো কোনো কোর্স যোগ করা হয়নি।' });
-  videosData = await loadCollectionGrid('videos', 'videoGrid', { type:'videos', emptyText:'এখনো কোনো ভিডিও যোগ করা হয়নি।' });
+  await loadVideoPacksPreview();
   productsData = await loadCollectionGrid('products', 'productGrid', { type:'products', emptyText:'এখনো কোনো প্রোডাক্ট যোগ করা হয়নি।' });
   renderCategoryChips();
 }
