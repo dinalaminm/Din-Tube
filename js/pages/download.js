@@ -30,7 +30,7 @@ onUserReady(async (user)=>{
     const downloadable = []; // products/software with a direct downloadUrl
     const courseItems = [];  // purchased courses/videos -> opened via detail page, not a raw file
     const videoPackGroups = []; // one entry per purchase: { packName, createdAt, links: [] }
-    const lookupCache = {};
+    const lookupCache = {}; // only used as a fallback for older orders saved before downloadUrl was snapshotted
     for(const o of orders){
       if(o.status !== 'completed') continue;
       for(const it of (o.items || [])){
@@ -41,19 +41,28 @@ onUserReady(async (user)=>{
           continue;
         }
         if(!it.id || !it.type) continue;
-        const cacheKey = `${it.type}/${it.id}`;
-        if(!(cacheKey in lookupCache)){
-          try{
-            const dSnap = await getDoc(doc(db, it.type, it.id));
-            lookupCache[cacheKey] = dSnap.exists() ? { id: dSnap.id, ...dSnap.data() } : null;
-          }catch(e){ lookupCache[cacheKey] = null; }
+        if(it.type === 'courses' || it.type === 'videos'){
+          // Everything the "view" link needs (id, type, title) already lives on the
+          // order item itself — no need to re-fetch the course/video doc.
+          courseItems.push({ id: it.id, title: it.name || '', type: it.type });
+          continue;
         }
-        const full = lookupCache[cacheKey];
-        if(!full) continue;
-        if((it.type === 'products' || it.type === 'software') && full.downloadUrl){
-          downloadable.push(full);
-        }else if(it.type === 'courses' || it.type === 'videos'){
-          courseItems.push({ ...full, type: it.type });
+        if(it.type === 'products' || it.type === 'software'){
+          let downloadUrl = it.downloadUrl || null;
+          if(!downloadUrl){
+            // Fallback for orders completed before downloadUrl was snapshotted onto
+            // the item at approval time — look the product up live instead.
+            const cacheKey = `${it.type}/${it.id}`;
+            if(!(cacheKey in lookupCache)){
+              try{
+                const dSnap = await getDoc(doc(db, it.type, it.id));
+                lookupCache[cacheKey] = dSnap.exists() ? { id: dSnap.id, ...dSnap.data() } : null;
+              }catch(e){ lookupCache[cacheKey] = null; }
+            }
+            const full = lookupCache[cacheKey];
+            downloadUrl = full && full.downloadUrl ? full.downloadUrl : null;
+          }
+          if(downloadUrl) downloadable.push({ name: it.name || '', downloadUrl });
         }
       }
     }
