@@ -219,6 +219,22 @@ onAuthStateChanged(auth, async (user)=>{
         cachedProfile = { walletBalance: 0 };
       }
     }
+    // Admin can ban a user from admin.html (sets banned:true on their user doc).
+    // Enforce it here so it applies across every page: force sign-out, refuse
+    // to treat them as logged in, and let them know why.
+    if(cachedProfile && cachedProfile.banned){
+      clearProfileCache(user.uid);
+      try{ await signOut(auth); }catch(e){ /* ignore */ }
+      cachedUser = null;
+      cachedProfile = null;
+      authResolved = true;
+      applyHeaderAuthState(null, null);
+      loadPendingOrderBadge(null);
+      readyCallbacks.forEach(cb => cb(null, null));
+      readyCallbacks.length = 0;
+      alert('আপনার অ্যাকাউন্টটি সাসপেন্ড করা হয়েছে। বিস্তারিত জানতে সাপোর্টে যোগাযোগ করুন।');
+      return;
+    }
   } else if(prevUid){
     clearProfileCache(prevUid);
   }
