@@ -186,7 +186,7 @@ document.getElementById('manualPayCopyBtn').addEventListener('click', async (e)=
 async function buildOrderItems(cart){
   const items = cart.map(c => ({ id: c.id || null, type: c.type || null, name: c.name, price: c.price, qty: c.qty }));
   for(const it of items){
-    if((it.type === 'products' || it.type === 'software') && it.id){
+    if((it.type === 'products' || it.type === 'software' || it.type === 'courses') && it.id){
       try{
         const snap = await getDoc(doc(db, it.type, it.id));
         if(snap.exists() && snap.data().downloadUrl) it.downloadUrl = snap.data().downloadUrl;
