@@ -148,7 +148,7 @@ function renderDetail(item, owned){
   const buyNowBtn = document.getElementById('detailBuyNowBtn');
   buyBtn.disabled = false;
   buyBtn.style.opacity = '1';
-  if((type === 'products' || type === 'software') && item.downloadUrl && owned){
+  if((type === 'products' || type === 'software' || type === 'courses') && item.downloadUrl && owned){
     buyBtn.style.display = 'block';
     buyNowBtn.style.display = 'none';
     buyBtn.textContent = 'ডাউনলোড করুন';
@@ -331,10 +331,10 @@ document.getElementById('manualPayCopyBtn').addEventListener('click', async (e)=
 
 function currentOrderItems(){
   const item = { id: checkoutItem.id || null, type: checkoutType || null, name: itemLabel(checkoutType, checkoutItem), price: Number(checkoutItem.price || 0), qty: 1 };
-  // Stamp the download link onto the order item right away for products/software —
+  // Stamp the download link onto the order item right away for products/software/courses —
   // the instant-wallet path marks the order 'completed' immediately (no admin
   // approval step), so this is the only chance to capture it for "আমার ডাউনলোড".
-  if((checkoutType === 'products' || checkoutType === 'software') && checkoutItem.downloadUrl){
+  if((checkoutType === 'products' || checkoutType === 'software' || checkoutType === 'courses') && checkoutItem.downloadUrl){
     item.downloadUrl = checkoutItem.downloadUrl;
   }
   return [item];
