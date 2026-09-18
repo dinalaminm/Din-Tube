@@ -161,15 +161,16 @@ function renderDetail(item, owned){
     buyBtn.disabled = true;
     buyBtn.style.opacity = '0.6';
   } else {
-    // Not owned yet — a single, prominent "Buy Now" action that opens the
-    // payment-method modal right here on the page (no cart involved). A
-    // submitted order goes straight into Firestore with status 'pending'
-    // (or 'completed' for instant wallet payment).
+    // Not owned yet. Courses/videos/software still go through the in-app
+    // payment-method modal (wallet or manual bKash/Nagad/Rocket). Products are
+    // "contact to buy" only — price is shown for reference, but clicking the
+    // button just opens WhatsApp with the item pre-filled; nothing is charged
+    // and no order is created in Firestore.
     buyBtn.style.display = 'none';
     buyNowBtn.style.display = 'flex';
-    const label = type === 'courses' ? 'কোর্সে ভর্তি হন' : (type === 'videos' ? 'এখনই কিনুন' : 'এখনই কিনুন');
+    const label = type === 'courses' ? 'কোর্সে ভর্তি হন' : (type === 'products' ? 'কিনুন' : 'এখনই কিনুন');
     buyNowBtn.innerHTML = `<svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2 3 14h8l-1 8 10-12h-8l1-8Z"/></svg><span>${label}</span>`;
-    buyNowBtn.onclick = ()=> openCheckout(item, type);
+    buyNowBtn.onclick = type === 'products' ? ()=> redirectToWhatsAppBuy(item) : ()=> openCheckout(item, type);
   }
 
   const labelMap = { courses:'কোর্স', products:'প্রোডাক্ট', software:'সফটওয়্যার', videos:'ভিডিও' };
@@ -186,6 +187,32 @@ async function loadRelated(item){
     snap.forEach(d => { if(d.id !== item.id) pool.push({ id: d.id, ...d.data() }); });
     pool.slice(0, 4).forEach((relItem, i)=> relatedWrap.appendChild(renderCard(type, relItem, i)));
   }catch(err){ console.error('related items error:', err); }
+}
+
+/* ---------- Products: "contact to buy" via WhatsApp (no payment in-app) ---------- */
+let whatsappUrlCache = null;
+async function redirectToWhatsAppBuy(item){
+  if(!getCurrentUser()){
+    window.location.href = 'login.html';
+    return;
+  }
+  if(whatsappUrlCache === null){
+    try{
+      const snap = await getDoc(doc(db, 'settings', 'social'));
+      whatsappUrlCache = snap.exists() ? (snap.data().whatsapp || '') : '';
+    }catch(err){
+      console.error('whatsapp settings fetch error:', err);
+      whatsappUrlCache = '';
+    }
+  }
+  if(!whatsappUrlCache){
+    showToast('হোয়াটসঅ্যাপ নম্বর সেট করা নেই — সাপোর্টে যোগাযোগ করুন।');
+    return;
+  }
+  const price = '৳' + Number(item.price || 0).toLocaleString('en-US');
+  const text = `আমি "${itemLabel('products', item)}" (${price}) প্রোডাক্টটি কিনতে চাই।`;
+  const sep = whatsappUrlCache.includes('?') ? '&' : '?';
+  window.open(whatsappUrlCache + sep + 'text=' + encodeURIComponent(text), '_blank');
 }
 
 /* ---------- Buy-now checkout modal (single item, no cart involved) ---------- */
