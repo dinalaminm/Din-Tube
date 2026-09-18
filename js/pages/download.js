@@ -41,17 +41,17 @@ onUserReady(async (user)=>{
           continue;
         }
         if(!it.id || !it.type) continue;
-        if(it.type === 'courses' || it.type === 'videos'){
+        if(it.type === 'videos'){
           // Everything the "view" link needs (id, type, title) already lives on the
-          // order item itself — no need to re-fetch the course/video doc.
+          // order item itself — no need to re-fetch the video doc.
           courseItems.push({ id: it.id, title: it.name || '', type: it.type });
           continue;
         }
-        if(it.type === 'products' || it.type === 'software'){
+        if(it.type === 'products' || it.type === 'software' || it.type === 'courses'){
           let downloadUrl = it.downloadUrl || null;
           if(!downloadUrl){
             // Fallback for orders completed before downloadUrl was snapshotted onto
-            // the item at approval time — look the product up live instead.
+            // the item at approval time — look the product/course up live instead.
             const cacheKey = `${it.type}/${it.id}`;
             if(!(cacheKey in lookupCache)){
               try{
@@ -62,7 +62,12 @@ onUserReady(async (user)=>{
             const full = lookupCache[cacheKey];
             downloadUrl = full && full.downloadUrl ? full.downloadUrl : null;
           }
-          if(downloadUrl) downloadable.push({ name: it.name || '', downloadUrl });
+          if(downloadUrl){
+            downloadable.push({ name: it.name || '', downloadUrl });
+          } else if(it.type === 'courses'){
+            // No drive link set on this course — fall back to the in-app "view" page.
+            courseItems.push({ id: it.id, title: it.name || '', type: it.type });
+          }
         }
       }
     }
