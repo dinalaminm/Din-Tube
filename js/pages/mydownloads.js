@@ -35,7 +35,7 @@ onUserReady(async (user)=>{
           videoPackGroups.push({ packName: it.name || 'ভিডিও প্যাক', createdAt: o.createdAt, links: it.deliveredLinks });
           continue;
         }
-        if(!it.id || !it.type || (it.type !== 'products' && it.type !== 'software')) continue;
+        if(!it.id || !it.type || (it.type !== 'products' && it.type !== 'software' && it.type !== 'courses')) continue;
         const cacheKey = `${it.type}/${it.id}`;
         if(!(cacheKey in lookupCache)){
           try{
