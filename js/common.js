@@ -701,21 +701,6 @@ export async function getGamePurchaseDates(uid){
   return map;
 }
 
-/* ---------- Premium subscription status — site-wide, unlike per-item
-   ownership, so it's stored directly on the user doc as premiumExpiresAt
-   rather than derived from orders on every check. ---------- */
-export async function getPremiumStatus(uid){
-  try{
-    const snap = await getDoc(doc(db, 'users', uid));
-    const expiresAt = snap.exists() && snap.data().premiumExpiresAt && snap.data().premiumExpiresAt.toDate
-      ? snap.data().premiumExpiresAt.toDate() : null;
-    return { active: !!expiresAt && expiresAt.getTime() > Date.now(), expiresAt };
-  }catch(err){
-    console.error('getPremiumStatus error:', err);
-    return { active:false, expiresAt:null };
-  }
-}
-
 /* ---------- Shared page chrome: active tab + cart badge ---------- */
 function initChrome(){
   updateCartBadge();
