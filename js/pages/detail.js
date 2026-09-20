@@ -171,9 +171,9 @@ function renderDetail(item, owned){
   const imageEl = document.getElementById('detailImage');
   const lockedWrap = document.getElementById('detailLockedWrap');
 
-  const hasVideo = (type === 'courses' || type === 'videos') && item.videoId;
+  const hasVideo = (type === 'courses' || type === 'videos' || type === 'products') && item.videoId;
 
-  if(hasVideo && (type === 'courses' || owned)){
+  if(hasVideo && (type === 'courses' || type === 'products' || owned)){
     videoFrame.src = 'https://www.youtube.com/embed/' + extractYouTubeId(item.videoId);
     videoWrap.style.display = 'block';
     imageWrap.style.display = 'none';
