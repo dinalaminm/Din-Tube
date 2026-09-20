@@ -1,8 +1,9 @@
 import {
-  db, collection, getDocs, doc, getDoc, addDoc, serverTimestamp, increment, runTransaction,
+  db, collection, getDocs, doc, getDoc, addDoc, serverTimestamp, increment, runTransaction, query, where,
   onUserReady, getCurrentUser, getCurrentProfile, syncProfileCache,
   itemBg, escapeHtml, showToast, renderSkeletonCards
 } from '../common.js';
+import { limit } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
 
 const grid = document.getElementById('videoPacksGrid');
 let packs = [];
@@ -14,7 +15,11 @@ const TIERS = [
 ];
 
 function remainingOf(pack){
-  const total = Array.isArray(pack.links) ? pack.links.length : 0;
+  // system === 'v2': প্রতিটা ভিডিও আলাদা রেকর্ড (videoStock), প্যাকে শুধু গণনা থাকে।
+  // পুরনো প্যাকে links অ্যারে আর assignedCount দিয়ে হিসাব চলে।
+  const total = pack.system === 'v2'
+    ? Number(pack.totalCount || 0)
+    : (Array.isArray(pack.links) ? pack.links.length : 0);
   return Math.max(0, total - Number(pack.assignedCount || 0));
 }
 
@@ -240,6 +245,24 @@ function showDeliveredLinks(links){
   stepSuccess.style.display = 'block';
 }
 
+/* নতুন সিস্টেমের প্যাকে বাকি থাকা কিছু ভিডিও এলোমেলো করে তুলে আনে। আসল বরাদ্দ হয়
+   নিচের transaction-এর ভেতরে, যেখানে প্রতিটা ভিডিও আবার যাচাই হয় — তাই একই ভিডিও
+   দুজন কিনলেও দুজন পায় না। */
+async function pickStockPool(packId, qty){
+  const snap = await getDocs(query(
+    collection(db, 'videoStock'),
+    where('packId', '==', packId),
+    where('status', '==', 'available'),
+    limit(qty + 20)
+  ));
+  const refs = snap.docs.map(d => d.ref);
+  for(let i = refs.length - 1; i > 0; i--){
+    const j = Math.floor(Math.random() * (i + 1));
+    [refs[i], refs[j]] = [refs[j], refs[i]];
+  }
+  return refs;
+}
+
 async function payWithWallet(){
   const msg = document.getElementById('checkoutStepMsg');
   const currentUser = getCurrentUser();
@@ -260,28 +283,59 @@ async function payWithWallet(){
   const txnRef = doc(collection(db, 'walletTransactions'));
   try{
     let deliveredLinks;
-    await runTransaction(db, async (tx)=>{
-      const uSnap = await tx.get(userRef);
-      const packSnap = await tx.get(packRef);
-      if(!packSnap.exists()) throw new Error('pack-missing');
-      const bal = Number((uSnap.exists() ? uSnap.data().walletBalance : 0) || 0);
-      if(bal < total) throw new Error('insufficient-balance');
-      const pack = packSnap.data();
-      const links = Array.isArray(pack.links) ? pack.links : [];
-      const assigned = Number(pack.assignedCount || 0);
-      if(links.length - assigned < qty) throw new Error('out-of-stock');
-      deliveredLinks = links.slice(assigned, assigned + qty);
-      tx.update(userRef, { walletBalance: increment(-total) });
-      tx.update(packRef, { assignedCount: assigned + qty });
-      tx.set(orderRef, {
-        uid: currentUser.uid, name: currentUser.displayName || '', email: currentUser.email || '',
-        items: [currentOrderItem(deliveredLinks)], total, status: 'completed', paymentMethod: 'Wallet', createdAt: serverTimestamp()
-      });
-      tx.set(txnRef, {
-        uid: currentUser.uid, type: 'purchase', status: 'completed', amount: total,
-        orderId: orderRef.id, note: 'ওয়ালেট দিয়ে ভিডিও প্যাক কেনা', createdAt: serverTimestamp()
-      });
-    });
+    for(let attempt = 1; ; attempt++){
+      const useStock = checkoutItem.pack.system === 'v2';
+      const pool = useStock ? await pickStockPool(checkoutItem.pack.id, qty) : [];
+      if(useStock && pool.length < qty) throw new Error('out-of-stock');
+      try{
+        await runTransaction(db, async (tx)=>{
+          // সব পড়া আগে, লেখা পরে (Firestore transaction-এর নিয়ম)
+          const uSnap = await tx.get(userRef);
+          const packSnap = await tx.get(packRef);
+          if(!packSnap.exists()) throw new Error('pack-missing');
+          const pack = packSnap.data();
+          if((pack.system === 'v2') !== useStock){
+            checkoutItem.pack.system = pack.system; // অ্যাডমিন এইমাত্র প্যাকটা নতুন সিস্টেমে এনেছে
+            throw new Error('stock-race');
+          }
+          const poolSnaps = useStock ? await Promise.all(pool.map(r => tx.get(r))) : [];
+          const bal = Number((uSnap.exists() ? uSnap.data().walletBalance : 0) || 0);
+          if(bal < total) throw new Error('insufficient-balance');
+
+          if(useStock){
+            const free = poolSnaps.filter(s => s.exists() && s.data().status === 'available' && s.data().packId === checkoutItem.pack.id);
+            if(free.length < qty) throw new Error('stock-race');
+            const picked = free.slice(0, qty);
+            deliveredLinks = picked.map(s => s.data().url);
+            picked.forEach(s => tx.update(s.ref, {
+              status: 'assigned', uid: currentUser.uid, buyerEmail: currentUser.email || '',
+              orderId: orderRef.id, assignedAt: serverTimestamp()
+            }));
+            tx.update(packRef, { assignedCount: increment(qty) });
+          } else {
+            const links = Array.isArray(pack.links) ? pack.links : [];
+            const assigned = Number(pack.assignedCount || 0);
+            if(links.length - assigned < qty) throw new Error('out-of-stock');
+            deliveredLinks = links.slice(assigned, assigned + qty);
+            tx.update(packRef, { assignedCount: assigned + qty });
+          }
+          tx.update(userRef, { walletBalance: increment(-total) });
+          tx.set(orderRef, {
+            uid: currentUser.uid, name: currentUser.displayName || '', email: currentUser.email || '',
+            items: [currentOrderItem(deliveredLinks)], total, status: 'completed', paymentMethod: 'Wallet', createdAt: serverTimestamp()
+          });
+          tx.set(txnRef, {
+            uid: currentUser.uid, type: 'purchase', status: 'completed', amount: total,
+            orderId: orderRef.id, note: 'ওয়ালেট দিয়ে ভিডিও প্যাক কেনা', createdAt: serverTimestamp()
+          });
+        });
+        break;
+      }catch(e){
+        // অন্য কেউ একই মুহূর্তে একই ভিডিও নিয়ে নিলে নতুন তালিকা নিয়ে আবার চেষ্টা
+        if(e && e.message === 'stock-race' && attempt < 4) continue;
+        throw e;
+      }
+    }
     if(profile){ profile.walletBalance = Number(profile.walletBalance || 0) - total; syncProfileCache(); }
     // Reflect the new stock locally so the card updates without a refetch.
     checkoutItem.pack.assignedCount = Number(checkoutItem.pack.assignedCount || 0) + qty;
@@ -291,6 +345,7 @@ async function payWithWallet(){
     msg.className = 'form-msg err';
     msg.textContent = err.message === 'insufficient-balance' ? 'ওয়ালেটে পর্যাপ্ত ব্যালেন্স নেই।'
       : err.message === 'out-of-stock' ? 'দুঃখিত, এই মুহূর্তে পর্যাপ্ত স্টক নেই।'
+      : err.message === 'stock-race' ? 'এই মুহূর্তে অনেকে কিনছেন — আবার চেষ্টা করুন।'
       : 'পেমেন্ট ব্যর্থ হয়েছে, আবার চেষ্টা করুন।';
     console.error('wallet payment error:', err);
   }finally{
