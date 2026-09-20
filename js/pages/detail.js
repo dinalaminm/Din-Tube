@@ -10,6 +10,88 @@ const id = params.get('id');
 
 const COLLECTION_BY_TYPE = { courses:'courses', products:'products', software:'software', videos:'videos' };
 
+/* ---------- Physical products: delivery-details order flow ---------- */
+const DELIVERY_COUNTRIES = ['Bangladesh'];              // এখানে দেশ যোগ করলেই ড্রপডাউনে আসবে
+const DEFAULT_DELIVERY_DAYS = { inside: 5, outside: 10 }; // প্রোডাক্টে দিন সেট না থাকলে এটা দেখাবে
+let pendingDelivery = null; // { country, phone, address } — Buy Now চাপার পর চেকআউটে যায়
+
+// productType সেট থাকলে সেটাই; না থাকলে ডাউনলোড লিংক ছাড়া প্রোডাক্ট = ফিজিক্যাল
+function isPhysicalProduct(item){
+  if(type !== 'products') return false;
+  if(item.productType) return item.productType === 'physical';
+  return !item.downloadUrl;
+}
+
+function normalizeBdPhone(raw){
+  let d = String(raw || '').replace(/\D/g, '');
+  if(d.length === 13 && d.startsWith('8801')) d = d.slice(2);
+  return d;
+}
+
+function readDeliveryForm(){
+  const country = document.getElementById('delCountry').value;
+  const phoneRaw = document.getElementById('delPhone').value.trim();
+  const address = document.getElementById('delAddress').value.trim();
+  if(!country) return { ok:false, field:'delCountry', message:'Please select your country.' };
+  const phone = country === 'Bangladesh' ? normalizeBdPhone(phoneRaw) : phoneRaw.replace(/[^\d+]/g, '');
+  if(country === 'Bangladesh' ? !/^01[3-9]\d{8}$/.test(phone) : phone.replace(/\D/g, '').length < 7){
+    return { ok:false, field:'delPhone', message:'Please enter a valid contact number (01XXXXXXXXX).' };
+  }
+  if(address.length < 10) return { ok:false, field:'delAddress', message:'Please enter your full delivery address.' };
+  return { ok:true, data:{ country, phone, address } };
+}
+
+function setupPhysicalUI(item){
+  document.body.classList.add('pz-page');
+  document.getElementById('detailCard').classList.add('pz-card');
+
+  // Physical Product / N in stock badges
+  const stock = typeof item.stock === 'number' ? item.stock : null;
+  const badges = document.getElementById('detailBadges');
+  let html = '<span class="pz-badge pz-physical">Physical Product</span>';
+  if(stock !== null) html += stock > 0
+    ? `<span class="pz-badge pz-stock">${stock} in stock</span>`
+    : '<span class="pz-badge pz-out">Out of stock</span>';
+  badges.innerHTML = html;
+  badges.style.display = 'flex';
+
+  // 50% OFF · Save ৳400
+  const price = Number(item.price || 0), old = Number(item.oldPrice || 0);
+  const badgeEl = document.getElementById('detailDiscountBadge');
+  if(old > price){
+    badgeEl.textContent = `${Math.round((old - price) / old * 100)}% OFF · Save ৳${(old - price).toLocaleString('en-US')}`;
+    badgeEl.style.display = 'inline-block';
+  } else {
+    badgeEl.style.display = 'none';
+  }
+
+  // Delivery details card
+  const inside = Number(item.deliveryInside) > 0 ? Number(item.deliveryInside) : DEFAULT_DELIVERY_DAYS.inside;
+  const outside = Number(item.deliveryOutside) > 0 ? Number(item.deliveryOutside) : DEFAULT_DELIVERY_DAYS.outside;
+  document.getElementById('deliveryEstimate').innerHTML =
+    `Estimated delivery: <strong>Inside Dhaka — ${inside} days; Outside Dhaka — ${outside} days</strong>.`;
+  const countrySel = document.getElementById('delCountry');
+  if(!countrySel.options.length){
+    countrySel.innerHTML = DELIVERY_COUNTRIES.map(c => `<option value="${c}">${c}</option>`).join('');
+  }
+  document.getElementById('deliveryError').textContent = '';
+  document.getElementById('deliveryCard').style.display = 'block';
+
+  // Related Product + View All
+  document.getElementById('detailMoreHeading').innerHTML = 'Related <em>Product</em>';
+  document.getElementById('detailViewAll').style.display = 'block';
+}
+
+function resetPhysicalUI(){
+  document.body.classList.remove('pz-page');
+  document.getElementById('detailCard').classList.remove('pz-card');
+  document.getElementById('detailBadges').style.display = 'none';
+  document.getElementById('deliveryCard').style.display = 'none';
+  document.getElementById('detailViewAll').style.display = 'none';
+  const buyNow = document.getElementById('detailBuyNowBtn');
+  buyNow.className = 'btn-buynow';
+}
+
 function showDetailSkeleton(){
   const imageWrap = document.getElementById('detailImageWrap');
   if(imageWrap){
@@ -144,11 +226,36 @@ function renderDetail(item, owned){
     badgeEl.style.display = 'none';
   }
 
+  const isPhysical = isPhysicalProduct(item);
+  if(isPhysical) setupPhysicalUI(item); else resetPhysicalUI();
+
   const buyBtn = document.getElementById('detailBuyBtn');
   const buyNowBtn = document.getElementById('detailBuyNowBtn');
   buyBtn.disabled = false;
   buyBtn.style.opacity = '1';
-  if((type === 'products' || type === 'software' || type === 'courses') && item.downloadUrl && owned){
+  if(isPhysical){
+    // ফিজিক্যাল প্রোডাক্ট: ডেলিভারির তথ্য নিয়ে অর্ডার — "owned" ধারণা এখানে নেই, আবার অর্ডার করা যায়
+    const soldOut = typeof item.stock === 'number' && item.stock <= 0;
+    buyBtn.style.display = 'none';
+    buyNowBtn.className = 'pz-buy';
+    buyNowBtn.style.cssText = 'display:flex;';
+    buyNowBtn.textContent = soldOut ? 'Out of Stock' : 'Buy Now';
+    buyNowBtn.disabled = soldOut;
+    buyNowBtn.onclick = soldOut ? null : ()=>{
+      if(!getCurrentUser()){ window.location.href = 'login.html'; return; }
+      const res = readDeliveryForm();
+      const errEl = document.getElementById('deliveryError');
+      if(!res.ok){
+        errEl.textContent = res.message;
+        const f = document.getElementById(res.field);
+        if(f){ f.focus(); f.scrollIntoView({ behavior:'smooth', block:'center' }); }
+        return;
+      }
+      errEl.textContent = '';
+      pendingDelivery = res.data;
+      openCheckout(item, 'products');
+    };
+  } else if((type === 'products' || type === 'software' || type === 'courses') && item.downloadUrl && owned){
     buyBtn.style.display = 'block';
     buyNowBtn.style.display = 'none';
     buyBtn.textContent = 'ডাউনলোড করুন';
@@ -174,7 +281,9 @@ function renderDetail(item, owned){
   }
 
   const labelMap = { courses:'কোর্স', products:'প্রোডাক্ট', software:'সফটওয়্যার', videos:'ভিডিও' };
-  document.getElementById('detailMoreLabel').textContent = labelMap[type] || '';
+  if(!isPhysical){
+    document.getElementById('detailMoreHeading').innerHTML = 'আরও <em id="detailMoreLabel">' + (labelMap[type] || '') + '</em>';
+  }
   loadRelated(item);
 }
 
@@ -329,8 +438,25 @@ document.getElementById('manualPayCopyBtn').addEventListener('click', async (e)=
   setTimeout(()=> btn.classList.remove('copied'), 1500);
 });
 
+/* ফিজিক্যাল প্রোডাক্ট অর্ডার = ডেলিভারি তথ্য আছে + স্টক ট্র্যাক করা থাকলে অর্ডারের সময়ই ১টা কমে */
+function isPhysicalOrder(){
+  return checkoutType === 'products' && !!checkoutItem && isPhysicalProduct(checkoutItem) && !!pendingDelivery;
+}
+
+// transaction-এর ভেতরে: স্টক ট্র্যাক করা থাকলে যাচাই করে ১ কমায় (পড়া আগে, লেখা পরে — তাই productSnap আগে নিতে হয়)
+function reserveStock(tx, productRef, productSnap, items){
+  if(!productSnap.exists()) throw new Error('product-missing');
+  const st = productSnap.data().stock;
+  if(typeof st === 'number'){
+    if(st < 1) throw new Error('out-of-stock');
+    tx.update(productRef, { stock: increment(-1) });
+    items[0].stockReserved = true;
+  }
+}
+
 function currentOrderItems(){
   const item = { id: checkoutItem.id || null, type: checkoutType || null, name: itemLabel(checkoutType, checkoutItem), price: Number(checkoutItem.price || 0), qty: 1 };
+  if(isPhysicalOrder()) item.physical = true;
   // Stamp the download link onto the order item right away for products/software/courses —
   // the instant-wallet path marks the order 'completed' immediately (no admin
   // approval step), so this is the only chance to capture it for "আমার ডাউনলোড".
@@ -354,18 +480,26 @@ async function payWithWallet(){
   msg.textContent = 'পেমেন্ট প্রসেস হচ্ছে...';
   continueBtn.disabled = true;
   const items = currentOrderItems();
+  const physical = isPhysicalOrder();
+  const productRef = physical ? doc(db, 'products', checkoutItem.id) : null;
   const userRef = doc(db, 'users', currentUser.uid);
   const orderRef = doc(collection(db, 'orders'));
   const txnRef = doc(collection(db, 'walletTransactions'));
   try{
     await runTransaction(db, async (tx)=>{
       const uSnap = await tx.get(userRef);
+      const pSnap = physical ? await tx.get(productRef) : null;
       const bal = Number((uSnap.exists() ? uSnap.data().walletBalance : 0) || 0);
       if(bal < total) throw new Error('insufficient-balance');
+      if(physical) reserveStock(tx, productRef, pSnap, items);
       tx.update(userRef, { walletBalance: increment(-total) });
       tx.set(orderRef, {
         uid: currentUser.uid, name: currentUser.displayName || '', email: currentUser.email || '',
-        items, total, status: 'completed', paymentMethod: 'Wallet', createdAt: serverTimestamp()
+        items, total,
+        // ফিজিক্যাল অর্ডার: টাকা পরিশোধ হয়েছে ('paid'), পণ্য পৌঁছালে অ্যাডমিন 'সম্পন্ন' করবে
+        status: physical ? 'paid' : 'completed',
+        paymentMethod: 'Wallet', createdAt: serverTimestamp(),
+        ...(physical ? { delivery: pendingDelivery } : {})
       });
       tx.set(txnRef, {
         uid: currentUser.uid, type: 'purchase', status: 'completed', amount: total,
@@ -374,11 +508,13 @@ async function payWithWallet(){
     });
     if(profile){ profile.walletBalance = Number(profile.walletBalance || 0) - total; syncProfileCache(); }
     overlay.style.display = 'none';
-    showToast('পেমেন্ট সফল হয়েছে! অ্যাক্সেস এখনই আনলক হয়ে গেছে।');
+    showToast(physical ? 'অর্ডার সফল হয়েছে! আপনার ঠিকানায় ডেলিভারি দেওয়া হবে।' : 'পেমেন্ট সফল হয়েছে! অ্যাক্সেস এখনই আনলক হয়ে গেছে।');
     boot();
   }catch(err){
     msg.className = 'form-msg err';
-    msg.textContent = err.message === 'insufficient-balance' ? 'ওয়ালেটে পর্যাপ্ত ব্যালেন্স নেই।' : 'পেমেন্ট ব্যর্থ হয়েছে, আবার চেষ্টা করুন।';
+    msg.textContent = err.message === 'insufficient-balance' ? 'ওয়ালেটে পর্যাপ্ত ব্যালেন্স নেই।'
+      : err.message === 'out-of-stock' ? 'দুঃখিত, প্রোডাক্টটির স্টক শেষ হয়ে গেছে।'
+      : 'পেমেন্ট ব্যর্থ হয়েছে, আবার চেষ্টা করুন।';
     console.error('wallet payment error:', err);
   }finally{
     continueBtn.disabled = false;
@@ -400,22 +536,39 @@ document.getElementById('manualSubmitBtn').addEventListener('click', async ()=>{
   msg.className = 'form-msg';
   msg.textContent = 'অর্ডার প্রসেস হচ্ছে...';
   try{
-    await addDoc(collection(db, 'orders'), {
+    const items = currentOrderItems();
+    const physical = isPhysicalOrder();
+    const orderData = {
       uid: currentUser.uid,
       name: currentUser.displayName || '',
       email: currentUser.email || '',
-      items: currentOrderItems(),
+      items,
       total,
       status: 'pending',
       paymentMethod: selectedMethod,
       transactionId: txnId,
       createdAt: serverTimestamp()
-    });
+    };
+    if(physical){
+      orderData.delivery = pendingDelivery;
+      const productRef = doc(db, 'products', checkoutItem.id);
+      const orderRef = doc(collection(db, 'orders'));
+      await runTransaction(db, async (tx)=>{
+        const pSnap = await tx.get(productRef);
+        reserveStock(tx, productRef, pSnap, items);
+        tx.set(orderRef, orderData);
+      });
+    } else {
+      await addDoc(collection(db, 'orders'), orderData);
+    }
     overlay.style.display = 'none';
-    showToast('অর্ডার পাঠানো হয়েছে! পেমেন্ট ভেরিফাই হলে অ্যাক্সেস আনলক হবে — "আমার অর্ডার"-এ পেন্ডিং হিসেবে দেখা যাবে।');
+    showToast(physical
+      ? 'অর্ডার পাঠানো হয়েছে! পেমেন্ট ভেরিফাই হলে ডেলিভারির ব্যবস্থা করা হবে — "আমার অর্ডার"-এ পেন্ডিং হিসেবে দেখা যাবে।'
+      : 'অর্ডার পাঠানো হয়েছে! পেমেন্ট ভেরিফাই হলে অ্যাক্সেস আনলক হবে — "আমার অর্ডার"-এ পেন্ডিং হিসেবে দেখা যাবে।');
+    if(physical) boot();
   }catch(err){
     msg.className = 'form-msg err';
-    msg.textContent = 'অর্ডার করা যায়নি, আবার চেষ্টা করুন।';
+    msg.textContent = err.message === 'out-of-stock' ? 'দুঃখিত, প্রোডাক্টটির স্টক শেষ হয়ে গেছে।' : 'অর্ডার করা যায়নি, আবার চেষ্টা করুন।';
     console.error('manual order create error:', err);
   }finally{
     btn.disabled = false;
