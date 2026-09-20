@@ -360,6 +360,8 @@
     color:#fff; box-shadow:0 4px 10px -3px rgba(255,59,48,0.4);
   }
   .dl-icon svg{width:21px; height:21px;}
+  .dl-icon.dl-has-img{position:relative; overflow:hidden; width:54px; height:54px; border-radius:14px;}
+  .dl-icon.dl-has-img img{position:absolute; inset:0; width:100%; height:100%; object-fit:cover; display:block; background:var(--surface-2);}
   .dl-icon-skel{width:44px; height:44px; border-radius:12px; flex-shrink:0;}
   .dl-info{flex:1; min-width:0;}
   .dl-info b{display:block; font-size:0.94rem; font-weight:800; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
