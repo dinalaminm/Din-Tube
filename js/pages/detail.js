@@ -106,6 +106,7 @@ function showDetailSkeleton(){
   // fills in the real label and picks which one to show.
   document.getElementById('detailBuyBtn').style.display = 'none';
   document.getElementById('detailBuyNowBtn').style.display = 'none';
+  document.getElementById('detailWhatsappBtn').style.display = 'none';
 }
 function clearDetailImageSkeleton(){
   const imageWrap = document.getElementById('detailImageWrap');
@@ -268,16 +269,27 @@ function renderDetail(item, owned){
     buyBtn.disabled = true;
     buyBtn.style.opacity = '0.6';
   } else {
-    // Not owned yet. Courses/videos/software still go through the in-app
-    // payment-method modal (wallet or manual bKash/Nagad/Rocket). Products are
-    // "contact to buy" only — price is shown for reference, but clicking the
-    // button just opens WhatsApp with the item pre-filled; nothing is charged
-    // and no order is created in Firestore.
+    // Not owned yet. Every type goes through the in-app payment-method modal
+    // (wallet or manual bKash/Nagad/Rocket). For products there is also a
+    // separate WhatsApp button below (see the block after this chain) — the
+    // buy button itself never jumps straight to WhatsApp.
     buyBtn.style.display = 'none';
     buyNowBtn.style.display = 'flex';
     const label = type === 'courses' ? 'কোর্সে ভর্তি হন' : (type === 'products' ? 'কিনুন' : 'এখনই কিনুন');
     buyNowBtn.innerHTML = `<svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2 3 14h8l-1 8 10-12h-8l1-8Z"/></svg><span>${label}</span>`;
-    buyNowBtn.onclick = type === 'products' ? ()=> redirectToWhatsAppBuy(item) : ()=> openCheckout(item, type);
+    buyNowBtn.onclick = ()=> openCheckout(item, type);
+  }
+
+  // প্রোডাক্টের কিনুন/Buy Now বাটনের নিচে আলাদা WhatsApp বাটন (ডাউনলোড-আনলক হওয়া ডিজিটাল প্রোডাক্টে নয়)
+  const waBtn = document.getElementById('detailWhatsappBtn');
+  const showWa = type === 'products' && (isPhysical || !(item.downloadUrl && owned));
+  if(showWa){
+    document.getElementById('detailWhatsappLabel').textContent = isPhysical ? 'Order on WhatsApp' : 'WhatsApp-এ অর্ডার করুন';
+    waBtn.style.display = 'flex';
+    waBtn.onclick = ()=> redirectToWhatsAppBuy(item);
+  } else {
+    waBtn.style.display = 'none';
+    waBtn.onclick = null;
   }
 
   const labelMap = { courses:'কোর্স', products:'প্রোডাক্ট', software:'সফটওয়্যার', videos:'ভিডিও' };
@@ -298,13 +310,9 @@ async function loadRelated(item){
   }catch(err){ console.error('related items error:', err); }
 }
 
-/* ---------- Products: "contact to buy" via WhatsApp (no payment in-app) ---------- */
+/* ---------- Products: WhatsApp button (opens a chat with the product pre-filled) ---------- */
 let whatsappUrlCache = null;
 async function redirectToWhatsAppBuy(item){
-  if(!getCurrentUser()){
-    window.location.href = 'login.html';
-    return;
-  }
   if(whatsappUrlCache === null){
     try{
       const snap = await getDoc(doc(db, 'settings', 'social'));
