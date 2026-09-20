@@ -4,6 +4,12 @@ const DL_ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stro
 const DL_BTN_ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12m0 0-4-4m4 4 4-4"/><path d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/></svg>';
 const DL_EMPTY_ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M7 16a4.5 4.5 0 0 1-1-8.9 5.5 5.5 0 0 1 10.7-2A4.5 4.5 0 0 1 17.5 16"/><path d="M12 11v8m0 0-3-3m3 3 3-3"/></svg>';
 
+// আইটেমের ছবি থাকলে আইকনের জায়গায় ছবি; ছবি না থাকলে/লোড না হলে আগের আইকনই থাকে
+function iconBox(fallbackSvg, imageUrl){
+  if(!imageUrl) return `<div class="dl-icon">${fallbackSvg}</div>`;
+  return `<div class="dl-icon dl-has-img">${fallbackSvg}<img src="${escapeHtml(imageUrl)}" alt="" loading="lazy" onerror="this.style.display='none'"></div>`;
+}
+
 function formatOrderDateTime(createdAt){
   if(!createdAt || !createdAt.seconds) return '';
   const d = new Date(createdAt.seconds * 1000);
@@ -97,7 +103,7 @@ onUserReady(async (user)=>{
     downloadable.forEach(item => {
       rows.push(`
         <div class="dl-item">
-          <div class="dl-icon">${DL_ICON}</div>
+          ${iconBox(DL_ICON, item.imageUrl)}
           <div class="dl-info">
             <b>${item.name}</b>
             <span>ডাউনলোডের জন্য প্রস্তুত</span>
