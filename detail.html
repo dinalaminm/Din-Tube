@@ -5,8 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>ডিটেইলস | Creator Rivo</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700;9..144,900&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/style.css?v=2">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700;9..144,900&family=Inter:wght@400;500;600;700;800&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css?v=3">
 </head>
 <body>
 <div class="toast" id="toast"></div>
@@ -46,6 +46,7 @@
 
 <main class="page-content">
 <div class="wrap" style="max-width:720px; padding:0 16px 100px; text-align:left;">
+    <div id="detailCard">
     <div id="detailVideoWrap" style="display:none; margin-bottom:20px;">
       <div style="position:relative; padding-top:56.25%; border-radius:16px; overflow:hidden; background:#000;">
         <iframe id="detailVideoFrame" style="position:absolute; inset:0; width:100%; height:100%; border:0;" allow="autoplay; encrypted-media" allowfullscreen></iframe>
@@ -65,17 +66,41 @@
     <div id="detailTags" style="display:flex; gap:8px; margin-bottom:16px; flex-wrap:wrap;"></div>
     <p id="detailDesc" style="color:var(--muted); line-height:1.75; margin-bottom:22px; white-space:pre-line;"></p>
     <div id="detailFeatures" style="margin-bottom:24px; display:flex; flex-direction:column; gap:10px;"></div>
+    <div id="detailBadges" class="pz-badges" style="display:none;"></div>
 
-    <div style="display:flex; align-items:center; gap:12px; margin-bottom:18px; flex-wrap:wrap;">
+    <div class="detail-price-row" id="detailPriceRow">
       <span id="detailPriceNow" style="font-size:1.7rem; font-weight:800; color:var(--coral);"></span>
-      <span id="detailPriceOld" style="color:var(--muted); text-decoration:line-through; font-size:1.15rem;"></span>
-      <span id="detailDiscountBadge" style="background:var(--coral); color:#fff; font-size:0.78rem; font-weight:800; padding:5px 11px; border-radius:6px; display:none;"></span>
+      <span id="detailPriceSub">
+        <span id="detailPriceOld" style="color:var(--muted); text-decoration:line-through; font-size:1.15rem;"></span>
+        <span id="detailDiscountBadge" style="background:var(--coral); color:#fff; font-size:0.78rem; font-weight:800; padding:5px 11px; border-radius:6px; display:none;"></span>
+      </span>
     </div>
+
+    <div class="pz-delivery" id="deliveryCard" style="display:none;">
+      <h3>Delivery details</h3>
+      <p class="pz-est" id="deliveryEstimate"></p>
+      <div class="pz-field">
+        <label for="delCountry">Country <i>*</i></label>
+        <select id="delCountry"></select>
+      </div>
+      <div class="pz-field">
+        <label for="delPhone">Contact Number <i>*</i></label>
+        <input type="tel" id="delPhone" inputmode="numeric" autocomplete="tel" placeholder="01XXXXXXXXX" maxlength="16">
+      </div>
+      <div class="pz-field" style="margin-bottom:0;">
+        <label for="delAddress">Delivery Address <i>*</i></label>
+        <textarea id="delAddress" autocomplete="street-address" placeholder="Full delivery address"></textarea>
+      </div>
+      <p class="pz-err" id="deliveryError"></p>
+    </div>
+
     <button class="btn-buynow" id="detailBuyNowBtn" style="display:none; border:none; cursor:pointer; width:100%; padding:16px; font-size:1.02rem; margin-bottom:12px;"></button>
     <button class="btn-primary" id="detailBuyBtn" style="display:none; border:none; cursor:pointer; width:100%; padding:16px; font-size:1.02rem;"></button>
+    </div><!-- /detailCard -->
 
     <div class="bar-head" style="margin-top:44px;">
-      <div class="left"><div class="bar"></div><h2>আরও <em id="detailMoreLabel">কোর্স</em></h2></div>
+      <div class="left"><div class="bar"></div><h2 id="detailMoreHeading">আরও <em id="detailMoreLabel">কোর্স</em></h2></div>
+      <a id="detailViewAll" href="all-products.html" style="display:none;">View All</a>
     </div>
     <div class="course-row" id="detailRelated"></div>
   </div>
