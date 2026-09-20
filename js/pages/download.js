@@ -8,6 +8,12 @@ const EMPTY_ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" s
 
 const TYPE_LABEL = { courses:'কোর্স', videos:'ভিডিও', products:'প্রোডাক্ট', software:'সফটওয়্যার' };
 
+// আইটেমের ছবি থাকলে আইকনের জায়গায় ছবি; ছবি না থাকলে/লোড না হলে আগের আইকনই থাকে
+function iconBox(fallbackSvg, imageUrl){
+  if(!imageUrl) return `<div class="dl-icon">${fallbackSvg}</div>`;
+  return `<div class="dl-icon dl-has-img">${fallbackSvg}<img src="${escapeHtml(imageUrl)}" alt="" loading="lazy" onerror="this.style.display='none'"></div>`;
+}
+
 function formatOrderDateTime(createdAt){
   if(!createdAt || !createdAt.seconds) return '';
   const d = new Date(createdAt.seconds * 1000);
@@ -63,7 +69,7 @@ onUserReady(async (user)=>{
             downloadUrl = full && full.downloadUrl ? full.downloadUrl : null;
           }
           if(downloadUrl){
-            downloadable.push({ name: it.name || '', downloadUrl });
+            downloadable.push({ name: it.name || '', downloadUrl, type: it.type, id: it.id });
           } else if(it.type === 'courses'){
             // No drive link set on this course — fall back to the in-app "view" page.
             courseItems.push({ id: it.id, title: it.name || '', type: it.type });
@@ -82,6 +88,17 @@ onUserReady(async (user)=>{
       serialCounter += group.links.length;
     });
     videoPackGroups.reverse();
+
+    // প্রতিটা আইটেমের ছবি আনি (একই আইটেম একবারই, সব একসাথে)
+    const imageKeys = [...new Set([...downloadable, ...courseItems].map(x => `${x.type}/${x.id}`))].filter(k => !(k in lookupCache));
+    await Promise.all(imageKeys.map(async k=>{
+      const [t, i] = k.split('/');
+      try{
+        const d = await getDoc(doc(db, t, i));
+        lookupCache[k] = d.exists() ? { id: d.id, ...d.data() } : null;
+      }catch(e){ lookupCache[k] = null; }
+    }));
+    const imageOf = x => (lookupCache[`${x.type}/${x.id}`] || {}).imageUrl || '';
 
     if(downloadable.length === 0 && courseItems.length === 0 && videoPackGroups.length === 0){
       wrap.innerHTML = `
@@ -121,7 +138,7 @@ onUserReady(async (user)=>{
     courseItems.forEach(item => {
       rows.push(`
         <div class="dl-item">
-          <div class="dl-icon">${PLAY_ICON}</div>
+          ${iconBox(PLAY_ICON, imageOf(item))}
           <div class="dl-info">
             <b>${item.title || ''}</b>
             <span class="dl-tag">${TYPE_LABEL[item.type] || ''}</span>
@@ -133,7 +150,7 @@ onUserReady(async (user)=>{
     downloadable.forEach(item => {
       rows.push(`
         <div class="dl-item">
-          <div class="dl-icon">${DL_ICON}</div>
+          ${iconBox(DL_ICON, imageOf(item))}
           <div class="dl-info">
             <b>${item.name || ''}</b>
             <span class="dl-tag">ডাউনলোডের জন্য প্রস্তুত</span>
