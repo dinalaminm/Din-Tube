@@ -1258,3 +1258,62 @@
   @media (max-width:640px){
     .modal-box{max-height:92vh;}
   }
+
+/* ---------- Product order page (physical product + delivery details) ---------- */
+.detail-price-row{display:flex; align-items:center; gap:12px; margin-bottom:18px; flex-wrap:wrap;}
+#detailPriceSub{display:contents;}
+
+body.pz-page{background:linear-gradient(180deg,#E9F2F7 0%,#E9F2F7 60%,#EFF4FA 100%); background-attachment:fixed;}
+.pz-card{
+  background:#fff; border:1.5px solid #C9E7DD; border-radius:22px; padding:14px 12px 14px;
+  font-family:'Inter','Manrope',sans-serif;
+}
+.pz-card #detailDesc{color:#4B5563 !important; font-size:0.95rem; line-height:1.7; margin-bottom:14px !important;}
+.pz-card #detailFeatures:empty{display:none !important;}
+.pz-card #detailTitle{color:#111827;}
+
+.pz-badges{flex-wrap:wrap; gap:10px; margin-bottom:18px;}
+.pz-badge{font-size:0.8rem; font-weight:700; padding:7px 14px; border-radius:10px; border:1px solid; line-height:1.25;}
+.pz-physical{background:#FFFBEB; border-color:#FDE68A; color:#B45309;}
+.pz-stock{background:#ECFDF5; border-color:#A7F3D0; color:#047857;}
+.pz-out{background:#FEF2F2; border-color:#FECACA; color:#B91C1C;}
+
+.pz-card .detail-price-row{flex-direction:column; align-items:flex-start; gap:6px; margin-bottom:20px;}
+.pz-card #detailPriceNow{font-size:2rem !important; font-weight:800 !important; color:#111827 !important; line-height:1.1;}
+.pz-card #detailPriceSub{display:flex; align-items:center; gap:10px; flex-wrap:wrap;}
+.pz-card #detailPriceOld{color:#9CA3AF !important; font-size:0.95rem !important;}
+.pz-card #detailDiscountBadge{background:#F00 !important; color:#fff; font-size:0.8rem !important; font-weight:800 !important; padding:4px 10px !important; border-radius:6px !important;}
+
+.pz-delivery{background:#F3FDF9; border:1.5px solid #C9E7DD; border-radius:18px; padding:14px 13px; margin-bottom:16px; font-family:'Inter','Manrope',sans-serif;}
+.pz-delivery h3{font-family:'Inter','Manrope',sans-serif; font-size:1.05rem; font-weight:700; color:#111827; margin:0 0 10px;}
+.pz-est{font-size:0.86rem; color:#4B5563; line-height:1.55; margin:0 0 14px;}
+.pz-est strong{color:#374151; font-weight:700;}
+.pz-field{margin-bottom:12px; text-align:left;}
+.pz-field label{display:block; font-size:0.86rem; font-weight:500; color:#4B5563; margin-bottom:6px;}
+.pz-field label i{color:#DC2626; font-style:normal; margin-left:3px;}
+.pz-field input, .pz-field select, .pz-field textarea{
+  width:100%; padding:11px 14px; border-radius:12px; border:1px solid #D9EAE5; background:#fff;
+  font-family:inherit; font-size:0.92rem; color:#111827;
+}
+.pz-field input::placeholder, .pz-field textarea::placeholder{color:#9CA3AF;}
+.pz-field select{
+  appearance:none; -webkit-appearance:none; padding-right:38px;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23374151' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat:no-repeat; background-position:right 14px center;
+}
+.pz-field textarea{min-height:88px; resize:vertical;}
+.pz-field input:focus, .pz-field select:focus, .pz-field textarea:focus{outline:none; border-color:#059669;}
+.pz-err{color:#DC2626; font-size:0.8rem; font-weight:600; margin:10px 0 0;}
+.pz-err:empty{display:none;}
+.pz-buy{
+  align-items:center; justify-content:center; width:100%; border:none; cursor:pointer;
+  background:#059669; color:#fff; font-family:'Inter','Manrope',sans-serif; font-weight:700; font-size:1.05rem;
+  height:52px; border-radius:14px;
+}
+.pz-buy:disabled{background:#9CA3AF; cursor:not-allowed;}
+
+body.pz-page .bar-head h2, body.pz-page .bar-head a{font-family:'Inter','Manrope',sans-serif;}
+body.pz-page .bar-head .bar{background:#F00;}
+body.pz-page .bar-head h2{font-weight:800; color:#111827;}
+body.pz-page .bar-head h2 em{color:#F00;}
+body.pz-page .bar-head a{color:#F00; font-weight:700; font-size:0.98rem;}
