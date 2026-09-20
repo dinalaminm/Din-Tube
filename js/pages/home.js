@@ -74,7 +74,7 @@ async function loadVideoPacksPreview(){
       return;
     }
     grid.innerHTML = packs.map((pack, i)=>{
-      const total = Array.isArray(pack.links) ? pack.links.length : 0;
+      const total = pack.system === 'v2' ? Number(pack.totalCount || 0) : (Array.isArray(pack.links) ? pack.links.length : 0);
       const remaining = Math.max(0, total - Number(pack.assignedCount || 0));
       const bg = itemBg(pack, i);
       return `
