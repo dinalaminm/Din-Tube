@@ -1,171 +1,72 @@
-import { db, collection, getDocs, doc, getDoc, query, where, requireAuth, onUserReady, escapeHtml } from '../common.js';
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>আমার ডাউনলোড | Creator Rivo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700;9..144,900&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css?v=5">
+</head>
+<body class="page-download">
+<div class="toast" id="toast"></div>
 
-const PLAY_ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 5.5v13l11-6.5-11-6.5Z" fill="currentColor" stroke="none"/></svg>';
-const ARROW_ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg>';
-const DL_ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12m0 0-4-4m4 4 4-4"/><path d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/></svg>';
-const DL_BTN_ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12m0 0-4-4m4 4 4-4"/><path d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/></svg>';
-const EMPTY_ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M7 16a4.5 4.5 0 0 1-1-8.9 5.5 5.5 0 0 1 10.7-2A4.5 4.5 0 0 1 17.5 16"/><path d="M12 11v8m0 0-3-3m3 3 3-3"/></svg>';
+<header>
+  <nav>
+    <div class="logo">Creator <span>Rivo</span></div>
+    <div class="nav-links">
+      <a href="all-courses.html">কোর্স</a>
+      <a href="all-products.html">প্রোডাক্ট</a>
+      <a href="index.html#how">কীভাবে কাজ করে</a>
+      <a href="index.html#reviews">রিভিউ</a>
+    </div>
+    <a class="wallet-chip" id="headerWalletChip" href="wallet.html" aria-label="ওয়ালেট ব্যালেন্স">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7a2 2 0 0 1 2-2h13a1 1 0 0 1 1 1v3"/><path d="M3 7v10a2 2 0 0 0 2 2h14a1 1 0 0 0 1-1v-4"/><path d="M16 12h4v4h-4a2 2 0 0 1 0-4Z"/></svg>
+      <span id="headerWalletBalance">৳0</span>
+    </a>
+    <a class="cart-btn" id="cartBtn" href="orders.html" aria-label="অর্ডার">
+      <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8h12l1 12.5a1 1 0 0 1-1 1.5H6a1 1 0 0 1-1-1.5L6 8Z"/><path d="M9 8V6a3 3 0 0 1 6 0v2"/></svg>
+      <span class="cart-badge" id="cartBadge">0</span>
+    </a>
+    <a class="cart-btn" id="headerNoticeBtn" href="notice.html" aria-label="নোটিফিকেশন">
+      <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8a6 6 0 0 0-12 0c0 5-2 6-2 6h16s-2-1-2-6"/><path d="M10.5 21a1.7 1.7 0 0 0 3 0"/></svg>
+      <span class="cart-badge" id="headerNoticeBadge">0</span>
+    </a>
+    <a class="avatar-btn" id="avatarBtn" href="login.html" aria-label="প্রোফাইল"></a>
+  </nav>
+</header>
 
-const TYPE_LABEL = { courses:'কোর্স', videos:'ভিডিও', products:'প্রোডাক্ট', software:'সফটওয়্যার' };
+<div id="announcementBanner" class="announcement-banner" style="display:none;">
+  <div class="announcement-text">
+    <strong id="annBannerTitle"></strong>
+    <span id="annBannerMessage"></span>
+  </div>
+  <button type="button" id="announcementDismiss" aria-label="বন্ধ করুন">✕</button>
+</div>
 
-// আইটেমের ছবি থাকলে আইকনের জায়গায় ছবি; ছবি না থাকলে/লোড না হলে আগের আইকনই থাকে
-function iconBox(fallbackSvg, imageUrl){
-  if(!imageUrl) return `<div class="dl-icon">${fallbackSvg}</div>`;
-  return `<div class="dl-icon dl-has-img">${fallbackSvg}<img src="${escapeHtml(imageUrl)}" alt="" loading="lazy" onerror="this.style.display='none'"></div>`;
-}
+<main class="page-content">
+<div class="simple-page dl-page" style="text-align:left;">
+    <h1>আমার ডাউনলোড</h1>
+    <p class="dl-subtitle">কেনা কোর্স, ভিডিও ও প্রোডাক্ট এখান থেকে অ্যাক্সেস করুন</p>
+    <div id="myDownloadsList" class="dl-list">
+      <div class="dl-item dl-skel"><div class="skeleton dl-icon-skel"></div><div class="dl-info"><div class="skeleton skel-line w-70" style="height:13px;"></div><div class="skeleton skel-line w-40" style="height:10px; margin-top:9px;"></div></div><div class="skeleton dl-btn-skel"></div></div>
+      <div class="dl-item dl-skel"><div class="skeleton dl-icon-skel"></div><div class="dl-info"><div class="skeleton skel-line w-70" style="height:13px;"></div><div class="skeleton skel-line w-40" style="height:10px; margin-top:9px;"></div></div><div class="skeleton dl-btn-skel"></div></div>
+      <div class="dl-item dl-skel"><div class="skeleton dl-icon-skel"></div><div class="dl-info"><div class="skeleton skel-line w-70" style="height:13px;"></div><div class="skeleton skel-line w-40" style="height:10px; margin-top:9px;"></div></div><div class="skeleton dl-btn-skel"></div></div>
+    </div>
+  </div>
+</main>
 
-function formatOrderDateTime(createdAt){
-  if(!createdAt || !createdAt.seconds) return '';
-  const d = new Date(createdAt.seconds * 1000);
-  const datePart = d.toLocaleDateString('bn-BD', { day:'numeric', month:'long', year:'numeric' });
-  const timePart = d.toLocaleTimeString('bn-BD', { hour:'numeric', minute:'2-digit' });
-  return `${datePart}, ${timePart}`;
-}
 
-requireAuth();
 
-onUserReady(async (user)=>{
-  if(!user) return;
-  const wrap = document.getElementById('myDownloadsList');
-  try{
-    const q = query(collection(db, 'orders'), where('uid', '==', user.uid));
-    const snap = await getDocs(q);
-    const orders = [];
-    snap.forEach(d => orders.push({ id: d.id, ...d.data() }));
+<script type="module" src="js/pages/download.js?v=2"></script>
 
-    const downloadable = []; // products/software with a direct downloadUrl
-    const courseItems = [];  // purchased courses/videos -> opened via detail page, not a raw file
-    const videoPackGroups = []; // one entry per purchase: { packName, createdAt, links: [] }
-    const lookupCache = {}; // only used as a fallback for older orders saved before downloadUrl was snapshotted
-    for(const o of orders){
-      if(o.status !== 'completed') continue;
-      for(const it of (o.items || [])){
-        // Video pack links live directly on the order item (deliveredLinks), so they
-        // survive even if the pack is later deleted/out of stock — no doc lookup needed.
-        if(it.type === 'videopacks' && Array.isArray(it.deliveredLinks) && it.deliveredLinks.length){
-          videoPackGroups.push({ packName: it.name || 'ভিডিও প্যাক', createdAt: o.createdAt, links: it.deliveredLinks });
-          continue;
-        }
-        if(!it.id || !it.type) continue;
-        if(it.type === 'videos'){
-          // Everything the "view" link needs (id, type, title) already lives on the
-          // order item itself — no need to re-fetch the video doc.
-          courseItems.push({ id: it.id, title: it.name || '', type: it.type });
-          continue;
-        }
-        if(it.type === 'products' || it.type === 'software' || it.type === 'courses'){
-          let downloadUrl = it.downloadUrl || null;
-          if(!downloadUrl){
-            // Fallback for orders completed before downloadUrl was snapshotted onto
-            // the item at approval time — look the product/course up live instead.
-            const cacheKey = `${it.type}/${it.id}`;
-            if(!(cacheKey in lookupCache)){
-              try{
-                const dSnap = await getDoc(doc(db, it.type, it.id));
-                lookupCache[cacheKey] = dSnap.exists() ? { id: dSnap.id, ...dSnap.data() } : null;
-              }catch(e){ lookupCache[cacheKey] = null; }
-            }
-            const full = lookupCache[cacheKey];
-            downloadUrl = full && full.downloadUrl ? full.downloadUrl : null;
-          }
-          if(downloadUrl){
-            downloadable.push({ name: it.name || '', downloadUrl, type: it.type, id: it.id });
-          } else if(it.type === 'courses'){
-            // No drive link set on this course — fall back to the in-app "view" page.
-            courseItems.push({ id: it.id, title: it.name || '', type: it.type });
-          }
-        }
-      }
-    }
+<nav class="tabbar">
+  <a data-tab="content" href="index.html"><span class="ic"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M10 9.5v5l4.5-2.5Z" fill="currentColor" stroke="none"/></svg></span>কনটেন্ট</a>
+  <a data-tab="course" href="all-courses.html"><span class="ic"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 9.5 12 5l10 4.5-10 4.5-10-4.5Z"/><path d="M6 11.5V17c0 1.4 2.7 2.5 6 2.5s6-1.1 6-2.5v-5.5"/></svg></span>কোর্স</a>
+  <a data-tab="product" href="all-products.html"><span class="ic"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8h12l1 12.5a1 1 0 0 1-1 1.5H6a1 1 0 0 1-1-1.5L6 8Z"/><path d="M9 8V6a3 3 0 0 1 6 0v2"/></svg></span>প্রোডাক্ট</a>
+  <a class="active" data-tab="download" href="download.html"><span class="ic"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 16a4.5 4.5 0 0 1-1-8.9 5.5 5.5 0 0 1 10.7-2A4.5 4.5 0 0 1 17.5 16"/><path d="M12 11v8m0 0-3-3m3 3 3-3"/></svg></span>ডাউনলোড</a>
+  <a data-tab="profile" href="profile.html"><span class="ic"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="3.5"/><path d="M4.5 20a7.5 7.5 0 0 1 15 0"/></svg></span>প্রোফাইল</a>
+</nav>
 
-    // Number every purchased video 1, 2, 3... in the order they were bought (oldest
-    // first), then show the groups newest-first so recent purchases stay on top while
-    // each video keeps one consistent, permanent serial number.
-    videoPackGroups.sort((a,b)=> (a.createdAt?.seconds || 0) - (b.createdAt?.seconds || 0));
-    let serialCounter = 0;
-    videoPackGroups.forEach(group => {
-      group.startSerial = serialCounter + 1;
-      serialCounter += group.links.length;
-    });
-    videoPackGroups.reverse();
-
-    // প্রতিটা আইটেমের ছবি আনি (একই আইটেম একবারই, সব একসাথে)
-    const imageKeys = [...new Set([...downloadable, ...courseItems].map(x => `${x.type}/${x.id}`))].filter(k => !(k in lookupCache));
-    await Promise.all(imageKeys.map(async k=>{
-      const [t, i] = k.split('/');
-      try{
-        const d = await getDoc(doc(db, t, i));
-        lookupCache[k] = d.exists() ? { id: d.id, ...d.data() } : null;
-      }catch(e){ lookupCache[k] = null; }
-    }));
-    const imageOf = x => (lookupCache[`${x.type}/${x.id}`] || {}).imageUrl || '';
-
-    if(downloadable.length === 0 && courseItems.length === 0 && videoPackGroups.length === 0){
-      wrap.innerHTML = `
-        <div class="dl-empty">
-          ${EMPTY_ICON}
-          <p>এখনো কোনো ডাউনলোড বা কেনা কোর্স/ভিডিও নেই — অর্ডার সম্পন্ন হলে এখানে দেখা যাবে।</p>
-        </div>`;
-      return;
-    }
-
-    const rows = [];
-    videoPackGroups.forEach(group => {
-      const dateStr = formatOrderDateTime(group.createdAt);
-      const rangeLabel = group.links.length > 1
-        ? `ভিডিও ${group.startSerial}–${group.startSerial + group.links.length - 1}`
-        : `ভিডিও ${group.startSerial}`;
-      rows.push(`
-        <div class="dl-vp-group">
-          <div class="dl-vp-head">
-            <div class="dl-icon">${DL_ICON}</div>
-            <div class="dl-vp-head-info">
-              <b>${escapeHtml(group.packName)}</b>
-              <span>${rangeLabel} · ${group.links.length} টি ${dateStr ? '· ' + dateStr : ''}</span>
-            </div>
-          </div>
-          <div class="dl-vp-rows">
-            ${group.links.map((link, idx)=> `
-              <div class="dl-vp-row">
-                <span>ভিডিও #${group.startSerial + idx}</span>
-                <a href="${escapeHtml(link)}" target="_blank" rel="noopener">${DL_BTN_ICON}লিংক খুলুন</a>
-              </div>
-            `).join('')}
-          </div>
-        </div>
-      `);
-    });
-    courseItems.forEach(item => {
-      rows.push(`
-        <div class="dl-item">
-          ${iconBox(PLAY_ICON, imageOf(item))}
-          <div class="dl-info">
-            <b>${item.title || ''}</b>
-            <span class="dl-tag">${TYPE_LABEL[item.type] || ''}</span>
-          </div>
-          <a href="detail.html?type=${encodeURIComponent(item.type)}&id=${encodeURIComponent(item.id)}" class="dl-btn">${ARROW_ICON}দেখুন</a>
-        </div>
-      `);
-    });
-    downloadable.forEach(item => {
-      rows.push(`
-        <div class="dl-item">
-          ${iconBox(DL_ICON, imageOf(item))}
-          <div class="dl-info">
-            <b>${item.name || ''}</b>
-            <span class="dl-tag">ডাউনলোডের জন্য প্রস্তুত</span>
-          </div>
-          <a href="${item.downloadUrl}" target="_blank" rel="noopener" class="dl-btn">${DL_BTN_ICON}ডাউনলোড</a>
-        </div>
-      `);
-    });
-    wrap.innerHTML = rows.join('');
-  }catch(err){
-    wrap.innerHTML = `
-      <div class="dl-empty dl-error">
-        ${EMPTY_ICON}
-        <p>লোড করা যায়নি। পুনরায় চেষ্টা করুন।</p>
-      </div>`;
-    console.error('download page error:', err);
-  }
-});
+</body>
+</html>
