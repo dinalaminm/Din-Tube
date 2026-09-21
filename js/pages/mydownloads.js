@@ -7,7 +7,8 @@ const DL_EMPTY_ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor
 // আইটেমের ছবি থাকলে আইকনের জায়গায় ছবি; ছবি না থাকলে/লোড না হলে আগের আইকনই থাকে
 function iconBox(fallbackSvg, imageUrl){
   if(!imageUrl) return `<div class="dl-icon">${fallbackSvg}</div>`;
-  return `<div class="dl-icon dl-has-img">${fallbackSvg}<img src="${escapeHtml(imageUrl)}" alt="" loading="lazy" onerror="this.style.display='none'"></div>`;
+  // স্টাইল ইনলাইন রাখা হয়েছে — ব্রাউজারে পুরনো style.css জমা থাকলেও ছবি ঠিক দেখাবে
+  return `<div class="dl-icon dl-has-img" style="position:relative;overflow:hidden;width:54px;height:54px;border-radius:14px;">${fallbackSvg}<img src="${escapeHtml(imageUrl)}" alt="" loading="lazy" style="position:absolute;top:0;left:0;width:100%;height:100%;object-fit:cover;display:block;" onerror="this.style.display='none'"></div>`;
 }
 
 function formatOrderDateTime(createdAt){
