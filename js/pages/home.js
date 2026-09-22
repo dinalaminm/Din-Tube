@@ -59,8 +59,8 @@ loadHomepageSettings();
 
 /* ---------- Video content == video packs now: the homepage "ভিডিও কনটেন্ট"
    preview pulls from the same "videopacks" collection as video-packs.html,
-   as a compact starting-price card. Buying still happens on video-packs.html
-   (tier + stock UI), so every card here just links there. ---------- */
+   as a compact starting-price card. Each card links to that pack's own
+   video-pack-detail.html?id=... page (video, description, buy). ---------- */
 async function loadVideoPacksPreview(){
   const grid = document.getElementById('videoGrid');
   if(!grid) return;
@@ -78,7 +78,7 @@ async function loadVideoPacksPreview(){
       const remaining = Math.max(0, total - Number(pack.assignedCount || 0));
       const bg = itemBg(pack, i);
       return `
-        <a class="product-card" href="video-packs.html" style="text-decoration:none; color:inherit;">
+        <a class="product-card" href="video-pack-detail.html?id=${encodeURIComponent(pack.id)}" style="text-decoration:none; color:inherit;">
           <div class="product-img" style="background:${pack.imageUrl ? `url('${pack.imageUrl}') center/cover` : bg};">
             ${remaining === 0 ? `<div class="badge-sale" style="background:#9CA3AF;">স্টক নেই</div>` : ''}
           </div>
