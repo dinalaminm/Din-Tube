@@ -179,10 +179,12 @@ async function loadTestimonials(){
     [...items, ...items].forEach(t=>{
       const q = document.createElement('div');
       q.className = 'quote';
+      const initial = (t.name || '?').trim().charAt(0).toUpperCase();
+      const avatarStyle = t.avatarUrl ? `background-image:url('${t.avatarUrl.replace(/'/g,"%27")}');` : '';
       q.innerHTML = `
         <p>"${(t.text || '').replace(/</g,'&lt;')}"</p>
         <div class="who">
-          <div class="avatar"></div>
+          <div class="avatar" style="${avatarStyle}">${t.avatarUrl ? '' : initial}</div>
           <div><b>${(t.name || '').replace(/</g,'&lt;')}</b><span>${(t.location || '').replace(/</g,'&lt;')}</span></div>
         </div>
       `;
