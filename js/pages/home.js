@@ -151,6 +151,27 @@ function applyFilters(){
 }
 document.getElementById('globalSearchInput')?.addEventListener('input', applyFilters);
 
+/* নাম না থাকা রিভিউয়ারদের জন্য: নামের ওপর ভিত্তি করে (হ্যাশ) প্রতিবার একই কিন্তু
+   রিভিউভেদে আলাদা একটা পুরুষ/মহিলা অ্যাভাটার এলোমেলোভাবে বেছে নেয়। */
+const AVATAR_COLORS = ['#FF7A45','#FFB020','#22B07D','#3B82F6','#8B5CF6','#F472B6','#14B8A6','#EF4444'];
+const AVATAR_SKIN = '#F2C29B';
+function avatarHash(str){
+  let h = 0;
+  for(let i = 0; i < str.length; i++){ h = (h * 31 + str.charCodeAt(i)) >>> 0; }
+  return h;
+}
+function maleAvatarSvg(bg){
+  return `<svg viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg"><rect width="40" height="40" rx="20" fill="${bg}"/><circle cx="20" cy="17" r="7" fill="${AVATAR_SKIN}"/><path d="M13 15c0-4 3-8 7-8s7 4 7 8c-2-1-4-2-7-2s-5 1-7 2z" fill="#2B2B2B"/><path d="M6 33c1-7 7-12 14-12s13 5 14 12" fill="#374151"/></svg>`;
+}
+function femaleAvatarSvg(bg){
+  return `<svg viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg"><rect width="40" height="40" rx="20" fill="${bg}"/><path d="M11 16c0-5 4-9 9-9s9 4 9 9c0 3-1 5-2 7-1-3-2-5-3-6-1 2-3 3-4 3s-3-1-4-3c-1 1-2 3-3 6-1-2-2-4-2-7z" fill="#2B2B2B"/><circle cx="20" cy="18" r="6.5" fill="${AVATAR_SKIN}"/><path d="M6 34c1-7.5 6.5-13 14-13s13 5.5 14 13" fill="#BE185D"/></svg>`;
+}
+function generatedAvatarSvg(seed){
+  const h = avatarHash(String(seed));
+  const bg = AVATAR_COLORS[h % AVATAR_COLORS.length];
+  return (h % 2 === 0 ? maleAvatarSvg(bg) : femaleAvatarSvg(bg));
+}
+
 /* ---------- Testimonials (Firestore: collection "testimonials") ---------- */
 async function loadTestimonials(){
   const marquee = document.getElementById('marquee');
@@ -179,12 +200,12 @@ async function loadTestimonials(){
     [...items, ...items].forEach(t=>{
       const q = document.createElement('div');
       q.className = 'quote';
-      const guestIcon = '<svg class="avatar-guest-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="3.5"/><path d="M4.5 20a7.5 7.5 0 0 1 15 0"/></svg>';
       const avatarStyle = t.avatarUrl ? `background-image:url('${t.avatarUrl.replace(/'/g,"%27")}');` : '';
+      const avatarInner = t.avatarUrl ? '' : generatedAvatarSvg(t.name || t.location || '?');
       q.innerHTML = `
         <p>"${(t.text || '').replace(/</g,'&lt;')}"</p>
         <div class="who">
-          <div class="avatar${t.avatarUrl ? '' : ' guest'}" style="${avatarStyle}">${t.avatarUrl ? '' : guestIcon}</div>
+          <div class="avatar" style="${avatarStyle}">${avatarInner}</div>
           <div><b>${(t.name || '').replace(/</g,'&lt;')}</b><span>${(t.location || '').replace(/</g,'&lt;')}</span></div>
         </div>
       `;
