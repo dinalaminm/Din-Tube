@@ -154,17 +154,17 @@ document.getElementById('globalSearchInput')?.addEventListener('input', applyFil
 /* নাম না থাকা রিভিউয়ারদের জন্য: নামের ওপর ভিত্তি করে (হ্যাশ) প্রতিবার একই কিন্তু
    রিভিউভেদে আলাদা একটা পুরুষ/মহিলা অ্যাভাটার এলোমেলোভাবে বেছে নেয়। */
 const AVATAR_COLORS = ['#FF7A45','#FFB020','#22B07D','#3B82F6','#8B5CF6','#F472B6','#14B8A6','#EF4444'];
-const AVATAR_SKIN = '#F2C29B';
+const AVATAR_SKIN = '#F4C89A';
 function avatarHash(str){
   let h = 0;
   for(let i = 0; i < str.length; i++){ h = (h * 31 + str.charCodeAt(i)) >>> 0; }
   return h;
 }
 function maleAvatarSvg(bg){
-  return `<svg viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg"><rect width="40" height="40" rx="20" fill="${bg}"/><circle cx="20" cy="17" r="7" fill="${AVATAR_SKIN}"/><path d="M13 15c0-4 3-8 7-8s7 4 7 8c-2-1-4-2-7-2s-5 1-7 2z" fill="#2B2B2B"/><path d="M6 33c1-7 7-12 14-12s13 5 14 12" fill="#374151"/></svg>`;
+  return `<svg viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg"><circle cx="20" cy="20" r="20" fill="${bg}"/><path d="M0 41c0-12.15 8.95-22 20-22s20 9.85 20 22" fill="#2F3542"/><circle cx="20" cy="17.5" r="8" fill="${AVATAR_SKIN}"/><path d="M11.5 16c0-5 3.8-9.5 8.5-9.5s8.5 4.5 8.5 9.5c-2.3-1.7-5.2-2.5-8.5-2.5s-6.2 0.8-8.5 2.5z" fill="#26272B"/></svg>`;
 }
 function femaleAvatarSvg(bg){
-  return `<svg viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg"><rect width="40" height="40" rx="20" fill="${bg}"/><path d="M11 16c0-5 4-9 9-9s9 4 9 9c0 3-1 5-2 7-1-3-2-5-3-6-1 2-3 3-4 3s-3-1-4-3c-1 1-2 3-3 6-1-2-2-4-2-7z" fill="#2B2B2B"/><circle cx="20" cy="18" r="6.5" fill="${AVATAR_SKIN}"/><path d="M6 34c1-7.5 6.5-13 14-13s13 5.5 14 13" fill="#BE185D"/></svg>`;
+  return `<svg viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg"><circle cx="20" cy="20" r="20" fill="${bg}"/><path d="M0 41c0-12.15 8.95-22 20-22s20 9.85 20 22" fill="#9D174D"/><path d="M9.5 15c-0.7 3-0.5 7 1 10.3 0.7-2.6 1.9-4.7 2.9-5.7 1.2 1.9 3.6 3.2 6.6 3.2s5.4-1.3 6.6-3.2c1 1 2.2 3.1 2.9 5.7 1.5-3.3 1.7-7.3 1-10.3-1.2-5.1-5.4-9-10.5-9s-9.3 3.9-10.5 9z" fill="#26272B"/><circle cx="20" cy="18" r="7.3" fill="${AVATAR_SKIN}"/></svg>`;
 }
 function generatedAvatarSvg(seed){
   const h = avatarHash(String(seed));
