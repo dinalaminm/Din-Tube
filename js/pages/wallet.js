@@ -1,6 +1,6 @@
 import {
   db, collection, addDoc, getDocs, doc, getDoc, query, where, serverTimestamp,
-  requireAuth, onUserReady, getCurrentUser, escapeHtml, renderSkeletonList, showToast
+  requireAuth, onUserReady, watchProfileLive, getCurrentUser, escapeHtml, renderSkeletonList, showToast
 } from '../common.js';
 
 requireAuth();
@@ -27,12 +27,23 @@ function cacheWalletBalance(balance){
   else el.innerHTML = '<span class="skeleton-dark skel-amount"></span>';
 })();
 
-onUserReady((user, profile)=>{
+onUserReady((user)=>{
   if(!user) return;
+  loadWalletTransactions();
+});
+
+/* Live balance: admin can approve a deposit at any moment while this page
+   is open, so listen for changes on the profile doc instead of the
+   site-wide cached read (which can lag up to PROFILE_CACHE_TTL behind).
+   Also re-loads the transaction list on change so the deposit's status
+   pill flips from পেন্ডিং to অনুমোদিত without a manual refresh. */
+let firstProfileSnapshot = true;
+watchProfileLive((profile)=>{
   const balance = Number(profile?.walletBalance || 0);
   document.getElementById('walletBalanceDisplay').textContent = '৳' + balance.toLocaleString('en-US');
   cacheWalletBalance(balance);
-  loadWalletTransactions();
+  if(!firstProfileSnapshot) loadWalletTransactions();
+  firstProfileSnapshot = false;
 });
 
 /* ---------- Payment method chips + merchant number (from admin settings/payment) ----------
