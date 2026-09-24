@@ -7,7 +7,7 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import {
   getFirestore, collection, getDocs, doc, getDoc, setDoc, addDoc, updateDoc, deleteDoc,
-  serverTimestamp, query, where, increment, runTransaction
+  serverTimestamp, query, where, increment, runTransaction, onSnapshot
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 import {
   getAuth, onAuthStateChanged, createUserWithEmailAndPassword, signInWithEmailAndPassword,
@@ -31,7 +31,7 @@ export const googleProvider = new GoogleAuthProvider();
 
 export {
   collection, getDocs, doc, getDoc, setDoc, addDoc, updateDoc, deleteDoc,
-  serverTimestamp, query, where, increment, runTransaction,
+  serverTimestamp, query, where, increment, runTransaction, onSnapshot,
   onAuthStateChanged, createUserWithEmailAndPassword, signInWithEmailAndPassword,
   signOut, updateProfile, sendPasswordResetEmail, deleteUser,
   EmailAuthProvider, reauthenticateWithCredential,
@@ -268,6 +268,29 @@ async function loadPendingOrderBadge(user){
 export function onUserReady(cb){
   if(authResolved) cb(cachedUser, cachedProfile);
   else readyCallbacks.push(cb);
+}
+
+/* Live profile listener — bypasses the 2-minute localStorage cache above.
+   Used on pages (wallet.html) where the profile doc can be updated from
+   admin.html at any moment (deposit approval, etc.) and the user is
+   actively watching the page for it, so a stale cached read isn't
+   acceptable there. Keeps cachedProfile/localStorage in sync too, so
+   other code reading getCurrentProfile() or navigating to a new page
+   sees the fresh value immediately instead of waiting out the cache TTL.
+   Call the returned function to unsubscribe (e.g. on page teardown). */
+export function watchProfileLive(cb){
+  let unsub = null;
+  onUserReady((user)=>{
+    if(!user) return;
+    unsub = onSnapshot(doc(db, 'users', user.uid), (snap)=>{
+      const data = snap.exists() ? snap.data() : {};
+      data.walletBalance = Number(data.walletBalance || 0);
+      cachedProfile = data;
+      writeProfileCache(user.uid, data);
+      cb(data);
+    }, (err)=>{ console.error('watchProfileLive error:', err); });
+  });
+  return ()=>{ if(unsub) unsub(); };
 }
 export function getCurrentUser(){ return cachedUser; }
 export function getCurrentProfile(){ return cachedProfile; }
