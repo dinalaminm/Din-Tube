@@ -704,8 +704,29 @@ export async function getOwnedItemIds(uid){
    permanent like courses/products, so this returns the most recent
    completed-purchase date per game instead of a simple owned/not-owned set.
    Callers add the game's own planDays to compute the actual expiry. ---------- */
+/* Games ("Live Stream") subscription periods — fixed 5-tier structure,
+   matching every game/stream in the games collection. Each game doc
+   holds its own price per tier under these `key`s (admin-entered);
+   `hours` is the subscription length used for expiry math. */
+export const GAME_TIERS = [
+  { hours:2,      label:'2 Hours',  key:'price2h'  },
+  { hours:24,     label:'1 Days',   key:'price1d'  },
+  { hours:24*7,   label:'7 Days',   key:'price7d'  },
+  { hours:24*30,  label:'30 Days',  key:'price30d' },
+  { hours:24*60,  label:'60 Days',  key:'price60d' },
+];
+export function gameFromPrice(game){
+  const prices = GAME_TIERS.map(t => Number(game[t.key] || 0)).filter(p => p > 0);
+  if(prices.length) return Math.min(...prices);
+  return Number(game.price || 0); // legacy single-price games predating the tier system
+}
+
 export async function getGamePurchaseDates(uid){
-  const map = new Map(); // gameId -> latest purchase Date
+  // gameId -> { purchasedAt: Date, expiresAt: Date } for the purchase
+  // that leaves the LATEST expiresAt (not simply the most recent
+  // purchase — a longer plan bought earlier can still outlast a short
+  // plan bought after it).
+  const map = new Map();
   try{
     const q = query(collection(db, 'orders'), where('uid', '==', uid));
     const snap = await getDocs(q);
@@ -716,8 +737,14 @@ export async function getGamePurchaseDates(uid){
       if(!purchasedAt) return;
       (o.items || []).forEach(it=>{
         if(it.type !== 'games' || !it.id) return;
+        // `hours` is set on every order item created after the tier system
+        // shipped. Older orders (single fixed-plan games) predate it — 24h
+        // is used as a conservative fallback so those purchases don't just
+        // silently vanish.
+        const hours = Number(it.hours || 24);
+        const expiresAt = new Date(purchasedAt.getTime() + hours * 60 * 60 * 1000);
         const existing = map.get(it.id);
-        if(!existing || purchasedAt > existing) map.set(it.id, purchasedAt);
+        if(!existing || expiresAt > existing.expiresAt) map.set(it.id, { purchasedAt, expiresAt });
       });
     });
   }catch(err){ console.error('getGamePurchaseDates error:', err); }
