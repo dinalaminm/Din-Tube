@@ -69,7 +69,7 @@ function renderMoreGrid(others){
     const fromPrice = gameFromPrice(g);
     return `
       <a class="gs-item" href="game-detail.html?id=${encodeURIComponent(g.id)}">
-        <div class="gs-item-thumb" style="background:${g.imageUrl ? `url('${g.imageUrl}') center/cover` : bg};">
+        <div class="gs-item-thumb" style="background:${g.imageUrl ? `url('${escapeHtml(g.imageUrl)}') center/cover` : bg};">
           <span class="gs-live-badge"><i></i>LIVE</span>
           <span class="gs-play-icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="#fff"><path d="M8 5.5v13l11-6.5-11-6.5Z"/></svg></span>
         </div>
