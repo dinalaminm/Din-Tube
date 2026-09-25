@@ -83,13 +83,12 @@ async function boot(){
       return;
     }
     const dates = await getGamePurchaseDates(user.uid);
-    const purchasedAt = dates.get(id);
-    if(!purchasedAt){
-      showGate('এখনো কেনা হয়নি', 'এই গেমটি খেলতে আগে কিনতে হবে।', true);
+    const access = dates.get(id);
+    if(!access){
+      showGate('এখনো কেনা হয়নি', 'এই গেমটি খেলতে আগে সাবস্ক্রাইব করতে হবে।', true);
       return;
     }
-    const planDays = Number(game.planDays || 0);
-    const expiresAt = new Date(purchasedAt.getTime() + planDays * 24 * 60 * 60 * 1000);
+    const expiresAt = access.expiresAt;
     if(expiresAt.getTime() <= Date.now()){
       showGate('মেয়াদ শেষ হয়ে গেছে', 'এই গেমটির প্ল্যানের মেয়াদ শেষ হয়ে গেছে। আবার খেলতে হলে নতুন করে কিনুন।', true);
       return;
