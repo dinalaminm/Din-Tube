@@ -46,7 +46,7 @@ function render(){
     const fromPrice = gameFromPrice(game);
     return `
       <a class="gs-item" href="${active ? `play-game.html?id=${encodeURIComponent(game.id)}` : `game-detail.html?id=${encodeURIComponent(game.id)}`}">
-        <div class="gs-item-thumb" style="background:${game.imageUrl ? `url('${game.imageUrl}') center/cover` : bg};">
+        <div class="gs-item-thumb" style="background:${game.imageUrl ? `url('${escapeHtml(game.imageUrl)}') center/cover` : bg};">
           <span class="gs-live-badge"><i></i>LIVE</span>
           <span class="gs-play-icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="#fff"><path d="M8 5.5v13l11-6.5-11-6.5Z"/></svg></span>
         </div>
