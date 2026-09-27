@@ -56,7 +56,10 @@ function render(){
           <h4>${escapeHtml(game.name || '')}</h4>
           <p>${escapeHtml(game.description || '')}</p>
           ${active
-            ? `<div class="gs-item-foot"><span class="gs-active-label" data-countdown-until="${access.expiresAt.getTime()}" data-countdown-label="Active — ">Active — …</span></div>`
+            ? `<div class="gs-item-foot"><span class="gs-active-wrap">
+                <span class="gs-active-tag"><i></i>Active</span>
+                <span class="gs-countdown"><svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l3 2"/><path d="M9 2h6"/></svg><span data-countdown-until="${access.expiresAt.getTime()}">…</span></span>
+              </span></div>`
             : `<div class="gs-item-foot"><span class="gs-from-price">From Tk${fromPrice.toLocaleString('en-US')}</span><span class="gs-subscribe-link">Subscribe →</span></div>`
           }
         </div>
