@@ -1445,7 +1445,19 @@ body.pz-page .bar-head a{color:#F00; font-weight:700; font-size:0.98rem;}
 .gs-item-foot{display:flex; align-items:center; gap:10px; margin-top:auto; padding-top:4px;}
 .gs-from-price{color:var(--coral); font-weight:800; font-size:0.92rem;}
 .gs-subscribe-link{color:var(--muted); font-weight:700; font-size:0.82rem;}
-.gs-active-label{color:#DC2626; font-weight:700; font-size:0.82rem;}
+.gs-active-wrap{display:inline-flex; align-items:center; gap:7px;}
+.gs-active-tag{
+  display:inline-flex; align-items:center; gap:5px; color:#16A34A; font-weight:800; font-size:0.78rem;
+  background:#EAFBF1; border:1px solid #BFEBD3; padding:3px 9px 3px 7px; border-radius:100px;
+}
+.gs-active-tag i{width:6px; height:6px; border-radius:50%; background:#16A34A; display:inline-block; animation:gsPulse 1.6s ease-in-out infinite;}
+@keyframes gsPulse{0%,100%{opacity:1; transform:scale(1);} 50%{opacity:0.45; transform:scale(0.75);}}
+.gs-countdown{
+  display:inline-flex; align-items:center; gap:5px; color:#DC2626; font-weight:800; font-size:0.8rem;
+  background:#FEF2F2; border:1px solid #FBD5D5; padding:3px 9px; border-radius:100px;
+  font-variant-numeric:tabular-nums; letter-spacing:0.02em; font-family:'Courier New',monospace;
+}
+.gs-countdown svg{flex:0 0 auto;}
 
 .gs-paywith{margin-top:32px; background:var(--surface); border:1.5px solid var(--line); border-radius:18px; padding:20px 16px; text-align:center;}
 .gs-paywith-label{color:var(--muted); font-size:0.68rem; font-weight:800; letter-spacing:0.12em;}
