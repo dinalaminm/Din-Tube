@@ -1445,7 +1445,7 @@ body.pz-page .bar-head a{color:#F00; font-weight:700; font-size:0.98rem;}
 .gs-item-foot{display:flex; align-items:center; gap:10px; margin-top:auto; padding-top:4px;}
 .gs-from-price{color:var(--coral); font-weight:800; font-size:0.92rem;}
 .gs-subscribe-link{color:var(--muted); font-weight:700; font-size:0.82rem;}
-.gs-active-label{color:#16A34A; font-weight:700; font-size:0.82rem;}
+.gs-active-label{color:#DC2626; font-weight:700; font-size:0.82rem;}
 
 .gs-paywith{margin-top:32px; background:var(--surface); border:1.5px solid var(--line); border-radius:18px; padding:20px 16px; text-align:center;}
 .gs-paywith-label{color:var(--muted); font-size:0.68rem; font-weight:800; letter-spacing:0.12em;}
