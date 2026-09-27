@@ -1,11 +1,12 @@
 import {
   db, collection, getDocs,
-  onUserReady, getGamePurchaseDates, GAME_TIERS, gameFromPrice,
+  onUserReady, getGamePurchaseDates, loadGameTiers, gameFromPrice,
   itemBg, escapeHtml, renderSkeletonList
 } from '../common.js';
 
 const list = document.getElementById('gamesList');
 let games = [];
+let tiers = []; // admin-configured plan list
 let accessMap = new Map(); // gameId -> { purchasedAt, expiresAt }
 
 function fmtDate(d){
@@ -15,11 +16,15 @@ function fmtDate(d){
 async function boot(){
   renderSkeletonList('gamesList', 4);
   try{
-    const snap = await getDocs(collection(db, 'games'));
+    const [snap, loadedTiers] = await Promise.all([
+      getDocs(collection(db, 'games')),
+      loadGameTiers()
+    ]);
+    tiers = loadedTiers;
     games = [];
     snap.forEach(d => games.push({ id: d.id, ...d.data() }));
   }catch(err){
-    list.innerHTML = '<p style="color:var(--coral);">লোড করা যায়নি। Firestore রুলস/কানেকশন চেক করুন।</p>';
+    list.innerHTML = '<p style="color:var(--coral);">Could not load. Check Firestore rules/connection.</p>';
     console.error('games load error:', err);
     return;
   }
@@ -36,14 +41,14 @@ async function boot(){
 
 function render(){
   if(games.length === 0){
-    list.innerHTML = '<p style="color:var(--muted);">এখনো কোনো লাইভ স্ট্রিম যোগ করা হয়নি।</p>';
+    list.innerHTML = '<p style="color:var(--muted);">No live streams added yet.</p>';
     return;
   }
   list.innerHTML = games.map((game, i)=>{
     const access = accessMap.get(game.id);
     const active = access && access.expiresAt.getTime() > Date.now();
     const bg = itemBg(game, i);
-    const fromPrice = gameFromPrice(game);
+    const fromPrice = gameFromPrice(game, tiers);
     return `
       <a class="gs-item" href="${active ? `play-game.html?id=${encodeURIComponent(game.id)}` : `game-detail.html?id=${encodeURIComponent(game.id)}`}">
         <div class="gs-item-thumb" style="background:${game.imageUrl ? `url('${escapeHtml(game.imageUrl)}') center/cover` : bg};">
@@ -54,8 +59,8 @@ function render(){
           <h4>${escapeHtml(game.name || '')}</h4>
           <p>${escapeHtml(game.description || '')}</p>
           ${active
-            ? `<div class="gs-item-foot"><span class="gs-active-label">চলছে — ${fmtDate(access.expiresAt)} পর্যন্ত</span></div>`
-            : `<div class="gs-item-foot"><span class="gs-from-price">From ৳${fromPrice.toLocaleString('en-US')}</span><span class="gs-subscribe-link">Subscribe →</span></div>`
+            ? `<div class="gs-item-foot"><span class="gs-active-label">Active — until ${fmtDate(access.expiresAt)}</span></div>`
+            : `<div class="gs-item-foot"><span class="gs-from-price">From Tk${fromPrice.toLocaleString('en-US')}</span><span class="gs-subscribe-link">Subscribe →</span></div>`
           }
         </div>
       </a>

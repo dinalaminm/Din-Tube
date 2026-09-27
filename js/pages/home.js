@@ -15,7 +15,7 @@ function setupPromoVideo(rawVideoId){
     <iframe id="promoIframe" src="https://www.youtube.com/embed/${videoId}?autoplay=1&mute=1&playsinline=1&rel=0&modestbranding=1&enablejsapi=1"
       style="position:absolute; inset:0; width:100%; height:100%; border:0;"
       allow="autoplay; encrypted-media" allowfullscreen></iframe>
-    <div class="promo-unmute" id="promoUnmute" title="সাউন্ড অন করুন">
+    <div class="promo-unmute" id="promoUnmute" title="Turn Sound On">
       <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5 6 9H3v6h3l5 4V5Z"/><path d="M16 8a5 5 0 0 1 0 8"/></svg>
     </div>
   `;
@@ -57,7 +57,7 @@ async function loadHomepageSettings(){
 }
 loadHomepageSettings();
 
-/* ---------- Video content == video packs now: the homepage "ভিডিও কনটেন্ট"
+/* ---------- Video content == video packs now: the homepage "Video Content"
    preview pulls from the same "videopacks" collection as video-packs.html,
    as a compact starting-price card. Each card links to that pack's own
    video-pack-detail.html?id=... page (video, description, buy). ---------- */
@@ -70,7 +70,7 @@ async function loadVideoPacksPreview(){
     const packs = [];
     snap.forEach(d => packs.push({ id: d.id, ...d.data() }));
     if(packs.length === 0){
-      grid.innerHTML = '<p style="color:var(--muted);">এখনো কোনো ভিডিও প্যাক যোগ করা হয়নি।</p>';
+      grid.innerHTML = '<p style="color:var(--muted);">No video packs added yet.</p>';
       return;
     }
     grid.innerHTML = packs.map((pack, i)=>{
@@ -80,20 +80,20 @@ async function loadVideoPacksPreview(){
       return `
         <a class="product-card" href="video-pack-detail.html?id=${encodeURIComponent(pack.id)}" style="text-decoration:none; color:inherit;">
           <div class="product-img" style="background:${pack.imageUrl ? `url('${pack.imageUrl}') center/cover` : bg};">
-            ${remaining === 0 ? `<div class="badge-sale" style="background:#9CA3AF;">স্টক নেই</div>` : ''}
+            ${remaining === 0 ? `<div class="badge-sale" style="background:#9CA3AF;">Out of Stock</div>` : ''}
           </div>
           <div class="product-body">
             <h4>${escapeHtml(pack.title || '')}</h4>
-            <span style="color:var(--muted); font-size:0.75rem; font-weight:600;">${remaining === 0 ? 'স্টক শেষ' : `স্টকে আছে ${remaining} টি`}</span>
+            <span style="color:var(--muted); font-size:0.75rem; font-weight:600;">${remaining === 0 ? 'Out of Stock' : `${remaining} in stock`}</span>
             <div class="price-row">
-              <span class="price-now">৳${Number(pack.price1 || 0).toLocaleString('en-US')} থেকে</span>
+              <span class="price-now">Tk${Number(pack.price1 || 0).toLocaleString('en-US')} onward</span>
             </div>
           </div>
         </a>
       `;
     }).join('');
   }catch(err){
-    grid.innerHTML = '<p style="color:var(--coral);">লোড করা যায়নি। Firestore রুলস/কানেকশন চেক করুন।</p>';
+    grid.innerHTML = '<p style="color:var(--coral);">Could not load. Check Firestore rules/connection.</p>';
     console.error('videopacks preview load error:', err);
   }
 }
@@ -102,9 +102,9 @@ async function loadVideoPacksPreview(){
 let coursesData = [];
 let productsData = [];
 async function boot(){
-  coursesData = await loadCollectionGrid('courses', 'courseGrid', { type:'courses', emptyText:'এখনো কোনো কোর্স যোগ করা হয়নি।' });
+  coursesData = await loadCollectionGrid('courses', 'courseGrid', { type:'courses', emptyText:'No courses added yet.' });
   await loadVideoPacksPreview();
-  productsData = await loadCollectionGrid('products', 'productGrid', { type:'products', emptyText:'এখনো কোনো প্রোডাক্ট যোগ করা হয়নি।' });
+  productsData = await loadCollectionGrid('products', 'productGrid', { type:'products', emptyText:'No products added yet.' });
   renderCategoryChips();
 }
 boot();
@@ -120,7 +120,7 @@ function renderCategoryChips(){
   const wrap = document.getElementById('categoryChips');
   if(!wrap) return;
   const cats = getCategories();
-  wrap.innerHTML = `<button type="button" class="chip ${!activeCategory ? 'active' : ''}" data-cat="">সব</button>` +
+  wrap.innerHTML = `<button type="button" class="chip ${!activeCategory ? 'active' : ''}" data-cat="">All</button>` +
     cats.map(c => `<button type="button" class="chip ${activeCategory === c ? 'active' : ''}" data-cat="${c}">${c}</button>`).join('');
   wrap.querySelectorAll('.chip').forEach(btn=>{
     btn.addEventListener('click', ()=>{
@@ -143,17 +143,17 @@ function applyFilters(){
   });
   const filteredProducts = productsData.filter(p=> !term || (p.name || '').toLowerCase().includes(term));
   courseGrid.innerHTML = '';
-  if(filteredCourses.length === 0) courseGrid.innerHTML = '<p style="color:var(--muted);">কিছু পাওয়া যায়নি।</p>';
+  if(filteredCourses.length === 0) courseGrid.innerHTML = '<p style="color:var(--muted);">Nothing found.</p>';
   filteredCourses.forEach((c, i)=> courseGrid.appendChild(renderCard('courses', c, i)));
   productGrid.innerHTML = '';
-  if(filteredProducts.length === 0) productGrid.innerHTML = '<p style="color:var(--muted);">কিছু পাওয়া যায়নি।</p>';
+  if(filteredProducts.length === 0) productGrid.innerHTML = '<p style="color:var(--muted);">Nothing found.</p>';
   filteredProducts.forEach((p, i)=> productGrid.appendChild(renderCard('products', p, i)));
 }
 document.getElementById('globalSearchInput')?.addEventListener('input', applyFilters);
 
-/* নাম না থাকা রিভিউয়ারদের জন্য: নামের ওপর ভিত্তি করে (হ্যাশ) প্রতিবার একই কিন্তু
-   রিভিউভেদে আলাদা একটা পুরুষ/মহিলা অ্যাভাটার এলোমেলোভাবে বেছে নেয়। */
-const AVATAR_COLORS = ['#FF7A45','#FFB020','#22B07D','#3B82F6','#8B5CF6','#F472B6','#14B8A6','#EF4444'];
+/* For reviewers with no name: based on the name (hash), consistently picks the same but
+   randomly picks a distinct male/female avatar per reviewer. */
+const AVATAR_COLORS = ['#8B6B3D','#6B4F27','#7A7368','#9C8A5E','#5C5240','#B08D57','#4A4436','#856F42'];
 const AVATAR_SKIN = '#F4C89A';
 function avatarHash(str){
   let h = 0;

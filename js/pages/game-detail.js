@@ -1,7 +1,7 @@
 import {
   db, collection, getDocs, doc, getDoc, addDoc, serverTimestamp, increment, runTransaction,
   onUserReady, getCurrentUser, getCurrentProfile, syncProfileCache, getGamePurchaseDates,
-  itemBg, escapeHtml, showToast, extractYouTubeId, GAME_TIERS, gameFromPrice
+  itemBg, escapeHtml, showToast, extractYouTubeId, loadGameTiers, gameFromPrice
 } from '../common.js';
 
 const params = new URLSearchParams(location.search);
@@ -9,8 +9,8 @@ const gameId = params.get('id');
 
 let game = null;
 let access = null; // { purchasedAt, expiresAt } | null
-// Default selection mirrors the reference design: "1 Days" pre-selected.
-let selectedTier = GAME_TIERS.find(t => t.label === '1 Days') || GAME_TIERS[0];
+let tiers = []; // admin-configured plan list — populated in boot() before anything renders
+let selectedTier = null;
 
 function fmtDate(d){
   return d.toLocaleDateString('bn-BD', { day:'numeric', month:'short', year:'numeric' });
@@ -21,8 +21,8 @@ function tierPrice(t){
 }
 
 function availableTiers(){
-  const withPrice = GAME_TIERS.filter(t => tierPrice(t) > 0);
-  return withPrice.length ? withPrice : GAME_TIERS; // legacy games with no tier prices set yet — show all, priced ৳0
+  const withPrice = tiers.filter(t => tierPrice(t) > 0);
+  return withPrice.length ? withPrice : tiers; // legacy games with no tier prices set yet — show all, priced Tk0
 }
 
 function renderPeriodGrid(){
@@ -32,12 +32,12 @@ function renderPeriodGrid(){
     const active = t.key === selectedTier.key;
     return `<button type="button" class="gd-period-card${active ? ' active' : ''}" data-key="${t.key}">
       <span class="gd-period-name">${t.label}</span>
-      <span class="gd-period-price">৳${tierPrice(t).toLocaleString('en-US')}</span>
+      <span class="gd-period-price">Tk${tierPrice(t).toLocaleString('en-US')}</span>
     </button>`;
   }).join('');
   grid.querySelectorAll('.gd-period-card').forEach(btn=>{
     btn.addEventListener('click', ()=>{
-      const t = GAME_TIERS.find(x => x.key === btn.dataset.key);
+      const t = tiers.find(x => x.key === btn.dataset.key);
       if(!t) return;
       selectedTier = t;
       renderPeriodGrid();
@@ -47,7 +47,7 @@ function renderPeriodGrid(){
 }
 
 function renderPriceRow(){
-  document.getElementById('gdPrice').textContent = '৳' + tierPrice(selectedTier).toLocaleString('en-US');
+  document.getElementById('gdPrice').textContent = 'Tk' + tierPrice(selectedTier).toLocaleString('en-US');
   document.getElementById('gdSelectedPeriod').textContent = selectedTier.label;
 }
 
@@ -56,7 +56,7 @@ function renderAccessState(){
   document.getElementById('gdActiveBox').style.display = active ? 'block' : 'none';
   document.getElementById('gdBuyBox').style.display = active ? 'none' : 'block';
   if(active){
-    document.getElementById('gdActiveText').textContent = `চলছে — ${fmtDate(access.expiresAt)} পর্যন্ত`;
+    document.getElementById('gdActiveText').textContent = `Active — until ${fmtDate(access.expiresAt)}`;
     document.getElementById('gdPlayBtn').href = `play-game.html?id=${encodeURIComponent(gameId)}`;
   }
 }
@@ -66,7 +66,7 @@ function renderMoreGrid(others){
   if(others.length === 0){ grid.innerHTML = ''; return; }
   grid.innerHTML = others.map((g, i)=>{
     const bg = itemBg(g, i);
-    const fromPrice = gameFromPrice(g);
+    const fromPrice = gameFromPrice(g, tiers);
     return `
       <a class="gs-item" href="game-detail.html?id=${encodeURIComponent(g.id)}">
         <div class="gs-item-thumb" style="background:${g.imageUrl ? `url('${escapeHtml(g.imageUrl)}') center/cover` : bg};">
@@ -76,7 +76,7 @@ function renderMoreGrid(others){
         <div class="gs-item-body">
           <h4>${escapeHtml(g.name || '')}</h4>
           <p>${escapeHtml(g.description || '')}</p>
-          <div class="gs-item-foot"><span class="gs-from-price">From ৳${fromPrice.toLocaleString('en-US')}</span><span class="gs-subscribe-link">Subscribe →</span></div>
+          <div class="gs-item-foot"><span class="gs-from-price">From Tk${fromPrice.toLocaleString('en-US')}</span><span class="gs-subscribe-link">Subscribe →</span></div>
         </div>
       </a>`;
   }).join('');
@@ -84,20 +84,25 @@ function renderMoreGrid(others){
 
 async function boot(){
   if(!gameId){
-    document.getElementById('gdCard').innerHTML = '<p style="padding:24px; color:var(--coral);">লাইভ স্ট্রিম পাওয়া যায়নি।</p>';
+    document.getElementById('gdCard').innerHTML = '<p style="padding:24px; color:var(--coral);">Live stream not found.</p>';
     return;
   }
   try{
-    const [gameSnap, allSnap] = await Promise.all([
+    const [gameSnap, allSnap, loadedTiers] = await Promise.all([
       getDoc(doc(db, 'games', gameId)),
-      getDocs(collection(db, 'games'))
+      getDocs(collection(db, 'games')),
+      loadGameTiers()
     ]);
+    tiers = loadedTiers;
+    // Default selection mirrors the reference design: "1 Days" pre-selected
+    // when that plan exists, else whatever the admin listed first.
+    selectedTier = tiers.find(t => t.label === '1 Days') || tiers[0];
     if(!gameSnap.exists()){
-      document.getElementById('gdCard').innerHTML = '<p style="padding:24px; color:var(--coral);">এই লাইভ স্ট্রিমটি পাওয়া যায়নি — হয়তো মুছে ফেলা হয়েছে।</p>';
+      document.getElementById('gdCard').innerHTML = '<p style="padding:24px; color:var(--coral);">This live stream could not be found — it may have been deleted.</p>';
       return;
     }
     game = { id: gameSnap.id, ...gameSnap.data() };
-    document.title = `${game.name || 'লাইভ স্ট্রিম'} | Creator Rivo`;
+    document.title = `${game.name || 'Live Stream'} | Creator Rivo`;
 
     const videoId = extractYouTubeId(game.videoId || '');
     if(videoId){
@@ -112,8 +117,8 @@ async function boot(){
     document.getElementById('gdDescription').textContent = game.description || '';
     if(!game.description) document.getElementById('gdDescription').style.display = 'none';
 
-    const tiers = availableTiers();
-    if(!tiers.some(t => t.key === selectedTier.key)) selectedTier = tiers[0];
+    const priced = availableTiers();
+    if(!priced.some(t => t.key === selectedTier.key)) selectedTier = priced[0];
     renderPeriodGrid();
     renderPriceRow();
 
@@ -127,19 +132,19 @@ async function boot(){
     });
   }catch(err){
     console.error('game-detail load error:', err);
-    document.getElementById('gdCard').innerHTML = '<p style="padding:24px; color:var(--coral);">লোড করা যায়নি। Firestore রুলস/কানেকশন চেক করুন।</p>';
+    document.getElementById('gdCard').innerHTML = '<p style="padding:24px; color:var(--coral);">Could not load. Check Firestore rules/connection.</p>';
   }
 }
 boot();
 
 document.getElementById('gdShareBtn').addEventListener('click', async ()=>{
-  const shareData = { title: game ? game.name : 'লাইভ স্ট্রিম', url: location.href };
+  const shareData = { title: game ? game.name : 'Live Stream', url: location.href };
   try{
     if(navigator.share){ await navigator.share(shareData); return; }
   }catch(e){ /* user cancelled or unsupported — fall through to copy */ }
   try{
     await navigator.clipboard.writeText(location.href);
-    showToast('লিংক কপি হয়েছে');
+    showToast('Link copied');
   }catch(e){ /* clipboard unavailable */ }
 });
 
@@ -195,9 +200,9 @@ function openCheckout(){
   }
   const total = tierPrice(selectedTier);
   document.getElementById('checkoutItemsLabel').textContent = `${game.name || ''} (${selectedTier.label})`;
-  document.getElementById('checkoutTotalLabel').textContent = '৳' + total.toLocaleString('en-US');
+  document.getElementById('checkoutTotalLabel').textContent = 'Tk' + total.toLocaleString('en-US');
   const profile = getCurrentProfile();
-  document.getElementById('pmWalletBalance').textContent = 'ব্যালেন্স: ৳' + Number(profile?.walletBalance || 0).toLocaleString('en-US');
+  document.getElementById('pmWalletBalance').textContent = 'Balance: Tk' + Number(profile?.walletBalance || 0).toLocaleString('en-US');
   resetCheckoutModal();
   overlay.style.display = 'flex';
 }
@@ -224,8 +229,8 @@ continueBtn.addEventListener('click', async ()=>{
     const numbers = await getMerchantNumbers();
     const number = numbers[MERCHANT_NUMBER_FIELD[selectedMethod]];
     document.getElementById('manualPayInstruction').textContent = number
-      ? `নিচের ${selectedMethod} নম্বরে "Send Money" করে টাকা পাঠান, তারপর ট্রানজেকশন আইডি বসান।`
-      : `${selectedMethod} নম্বর এখনো যোগ করা হয়নি — অনুগ্রহ করে সাপোর্টে যোগাযোগ করুন।`;
+      ? `Send the money to the ${selectedMethod} number below via "Send Money", then enter the transaction ID.`
+      : `${selectedMethod} number not added yet — please contact support.`;
     document.getElementById('manualPayNumber').textContent = number || '';
     stepMethod.style.display = 'none';
     stepManual.style.display = 'block';
@@ -254,7 +259,7 @@ document.getElementById('manualPayCopyBtn').addEventListener('click', async (e)=
     document.body.removeChild(ta);
   }
   btn.classList.add('copied');
-  showToast('নম্বর কপি হয়েছে');
+  showToast('Number copied');
   setTimeout(()=> btn.classList.remove('copied'), 1500);
 });
 
@@ -270,7 +275,7 @@ function currentOrderItem(){
 }
 
 function showSuccess(expiresAt){
-  document.getElementById('checkoutSuccessExpiry').textContent = `${fmtDate(expiresAt)} পর্যন্ত সক্রিয়।`;
+  document.getElementById('checkoutSuccessExpiry').textContent = `Active until ${fmtDate(expiresAt)}.`;
   document.getElementById('checkoutSuccessPlayBtn').href = `play-game.html?id=${encodeURIComponent(gameId)}`;
   stepMethod.style.display = 'none';
   stepManual.style.display = 'none';
@@ -284,11 +289,11 @@ async function payWithWallet(){
   const total = tierPrice(selectedTier);
   if(total > Number(profile?.walletBalance || 0)){
     msg.className = 'form-msg err';
-    msg.textContent = 'ওয়ালেটে পর্যাপ্ত ব্যালেন্স নেই। আগে ডিপোজিট করুন।';
+    msg.textContent = 'Insufficient wallet balance. Please deposit first.';
     return;
   }
   msg.className = 'form-msg';
-  msg.textContent = 'পেমেন্ট প্রসেস হচ্ছে...';
+  msg.textContent = 'Processing payment...';
   continueBtn.disabled = true;
   const userRef = doc(db, 'users', currentUser.uid);
   const orderRef = doc(collection(db, 'orders'));
@@ -305,7 +310,7 @@ async function payWithWallet(){
       });
       tx.set(txnRef, {
         uid: currentUser.uid, type: 'purchase', status: 'completed', amount: total,
-        orderId: orderRef.id, note: 'ওয়ালেট দিয়ে লাইভ স্ট্রিম সাবস্ক্রিপশন কেনা', createdAt: serverTimestamp()
+        orderId: orderRef.id, note: 'Live stream subscription purchase via wallet', createdAt: serverTimestamp()
       });
     });
     if(profile){ profile.walletBalance = Number(profile.walletBalance || 0) - total; syncProfileCache(); }
@@ -319,7 +324,7 @@ async function payWithWallet(){
     renderAccessState();
   }catch(err){
     msg.className = 'form-msg err';
-    msg.textContent = err.message === 'insufficient-balance' ? 'ওয়ালেটে পর্যাপ্ত ব্যালেন্স নেই।' : 'পেমেন্ট ব্যর্থ হয়েছে, আবার চেষ্টা করুন।';
+    msg.textContent = err.message === 'insufficient-balance' ? 'Insufficient wallet balance.' : 'Payment failed, please try again.';
     console.error('wallet payment error:', err);
   }finally{
     continueBtn.disabled = false;
@@ -332,14 +337,14 @@ document.getElementById('manualSubmitBtn').addEventListener('click', async ()=>{
   const currentUser = getCurrentUser();
   if(!txnId){
     msg.className = 'form-msg err';
-    msg.textContent = 'ট্রানজেকশন আইডি দিন।';
+    msg.textContent = 'Enter a transaction ID.';
     return;
   }
   const total = tierPrice(selectedTier);
   const btn = document.getElementById('manualSubmitBtn');
   btn.disabled = true;
   msg.className = 'form-msg';
-  msg.textContent = 'অর্ডার প্রসেস হচ্ছে...';
+  msg.textContent = 'Processing order...';
   try{
     await addDoc(collection(db, 'orders'), {
       uid: currentUser.uid,
@@ -353,10 +358,10 @@ document.getElementById('manualSubmitBtn').addEventListener('click', async ()=>{
       createdAt: serverTimestamp()
     });
     overlay.style.display = 'none';
-    showToast('অর্ডার পাঠানো হয়েছে! পেমেন্ট ভেরিফাই হলে সাবস্ক্রিপশন চালু হবে — "আমার অর্ডার"-এ পেন্ডিং হিসেবে দেখা যাবে।');
+    showToast('Order sent! Subscription will activate once payment is verified — you\'ll see it as pending in "My Orders".');
   }catch(err){
     msg.className = 'form-msg err';
-    msg.textContent = 'অর্ডার করা যায়নি, আবার চেষ্টা করুন।';
+    msg.textContent = 'Could not place order, please try again.';
     console.error('manual order create error:', err);
   }finally{
     btn.disabled = false;

@@ -26,18 +26,18 @@ function renderCart(){
       <div class="thumb" style="background:${item.grad}"></div>
       <div class="info">
         <h4>${item.name}</h4>
-        <span style="color:var(--coral); font-weight:800;">৳${item.price.toLocaleString('en-US')}</span>
+        <span style="color:var(--coral); font-weight:800;">Tk${item.price.toLocaleString('en-US')}</span>
         <div class="qty">
           <button data-act="dec" data-idx="${idx}" type="button">−</button>
           <span>${item.qty}</span>
           <button data-act="inc" data-idx="${idx}" type="button">+</button>
         </div>
       </div>
-      <button class="remove" data-act="remove" data-idx="${idx}" type="button">মুছুন</button>
+      <button class="remove" data-act="remove" data-idx="${idx}" type="button">Remove</button>
     `;
     wrap.appendChild(row);
   });
-  document.getElementById('cartTotal').textContent = '৳' + total.toLocaleString('en-US');
+  document.getElementById('cartTotal').textContent = 'Tk' + total.toLocaleString('en-US');
   totalRow.style.display = 'flex';
   openCheckoutBtn.style.display = 'block';
   wrap.querySelectorAll('button[data-act]').forEach(btn=>{
@@ -56,9 +56,9 @@ function renderCart(){
 renderCart();
 onUserReady(()=> renderCart());
 
-/* If we arrived here via a detail page's "এখনই কিনুন" (Buy Now) button
+/* If we arrived here via a detail page's "Buy Now" button
    (cart.html?checkout=1), skip straight to the checkout modal instead of
-   making the person tap "চেকআউট করুন" again. */
+   making the person tap "Checkout" again. */
 if(new URLSearchParams(window.location.search).get('checkout') === '1'){
   onUserReady(()=>{
     if(getCart().length > 0) document.getElementById('openCheckoutBtn').click();
@@ -109,17 +109,17 @@ document.getElementById('openCheckoutBtn').addEventListener('click', ()=>{
   const currentUser = getCurrentUser();
   if(!currentUser){
     document.getElementById('checkoutMsg').className = 'form-msg err';
-    document.getElementById('checkoutMsg').textContent = 'চেকআউট করতে আগে লগ ইন করুন।';
+    document.getElementById('checkoutMsg').textContent = 'Log in first to checkout.';
     setTimeout(()=> window.location.href = 'login.html', 900);
     return;
   }
   const cart = getCart();
   const total = cart.reduce((s,c)=> s + c.price * c.qty, 0);
   const itemCount = cart.reduce((s,c)=> s + c.qty, 0);
-  document.getElementById('checkoutItemsLabel').textContent = itemCount + 'টা আইটেম';
-  document.getElementById('checkoutTotalLabel').textContent = '৳' + total.toLocaleString('en-US');
+  document.getElementById('checkoutItemsLabel').textContent = itemCount + ' item(s)';
+  document.getElementById('checkoutTotalLabel').textContent = 'Tk' + total.toLocaleString('en-US');
   const profile = getCurrentProfile();
-  document.getElementById('pmWalletBalance').textContent = 'ব্যালেন্স: ৳' + Number(profile?.walletBalance || 0).toLocaleString('en-US');
+  document.getElementById('pmWalletBalance').textContent = 'Balance: Tk' + Number(profile?.walletBalance || 0).toLocaleString('en-US');
   resetCheckoutModal();
   overlay.style.display = 'flex';
 });
@@ -145,8 +145,8 @@ continueBtn.addEventListener('click', async ()=>{
     const numbers = await getMerchantNumbers();
     const number = numbers[MERCHANT_NUMBER_FIELD[selectedMethod]];
     document.getElementById('manualPayInstruction').textContent = number
-      ? `নিচের ${selectedMethod} নম্বরে "Send Money" করে টাকা পাঠান, তারপর ট্রানজেকশন আইডি বসান।`
-      : `${selectedMethod} নম্বর এখনো যোগ করা হয়নি — অনুগ্রহ করে সাপোর্টে যোগাযোগ করুন।`;
+      ? `Send the money to the ${selectedMethod} number below via "Send Money", then enter the transaction ID.`
+      : `${selectedMethod} number not added yet — please contact support.`;
     document.getElementById('manualPayNumber').textContent = number || '';
     stepMethod.style.display = 'none';
     stepManual.style.display = 'block';
@@ -175,14 +175,14 @@ document.getElementById('manualPayCopyBtn').addEventListener('click', async (e)=
     document.body.removeChild(ta);
   }
   btn.classList.add('copied');
-  showToast('নম্বর কপি হয়েছে');
+  showToast('Number copied');
   setTimeout(()=> btn.classList.remove('copied'), 1500);
 });
 
 // Products/software need their downloadUrl stamped onto the order item right at
 // purchase time — the wallet path marks the order 'completed' immediately (no
 // admin approval step to catch it later), so this is the only chance to capture
-// it for the buyer's "আমার ডাউনলোড" page.
+// it for the buyer's "My Downloads" page.
 async function buildOrderItems(cart){
   const items = cart.map(c => ({ id: c.id || null, type: c.type || null, name: c.name, price: c.price, qty: c.qty }));
   for(const it of items){
@@ -204,11 +204,11 @@ async function payWithWallet(){
   const total = cart.reduce((s,c)=> s + c.price * c.qty, 0);
   if(total > Number(profile?.walletBalance || 0)){
     msg.className = 'form-msg err';
-    msg.textContent = 'ওয়ালেটে পর্যাপ্ত ব্যালেন্স নেই। আগে ডিপোজিট করুন।';
+    msg.textContent = 'Insufficient wallet balance. Please deposit first.';
     return;
   }
   msg.className = 'form-msg';
-  msg.textContent = 'পেমেন্ট প্রসেস হচ্ছে...';
+  msg.textContent = 'Processing payment...';
   continueBtn.disabled = true;
   const items = await buildOrderItems(cart);
   const userRef = doc(db, 'users', currentUser.uid);
@@ -226,17 +226,17 @@ async function payWithWallet(){
       });
       tx.set(txnRef, {
         uid: currentUser.uid, type: 'purchase', status: 'completed', amount: total,
-        orderId: orderRef.id, note: 'ওয়ালেট দিয়ে অর্ডার পরিশোধ', createdAt: serverTimestamp()
+        orderId: orderRef.id, note: 'Order paid via wallet', createdAt: serverTimestamp()
       });
     });
     if(profile){ profile.walletBalance = Number(profile.walletBalance || 0) - total; syncProfileCache(); }
     saveCart([]);
     renderCart();
     overlay.style.display = 'none';
-    showToast('পেমেন্ট সফল হয়েছে! অ্যাক্সেস এখনই আনলক হয়ে গেছে।');
+    showToast('Payment successful! Access unlocked now.');
   }catch(err){
     msg.className = 'form-msg err';
-    msg.textContent = err.message === 'insufficient-balance' ? 'ওয়ালেটে পর্যাপ্ত ব্যালেন্স নেই।' : 'পেমেন্ট ব্যর্থ হয়েছে, আবার চেষ্টা করুন।';
+    msg.textContent = err.message === 'insufficient-balance' ? 'Insufficient wallet balance.' : 'Payment failed, please try again.';
     console.error('wallet payment error:', err);
   }finally{
     continueBtn.disabled = false;
@@ -249,7 +249,7 @@ document.getElementById('manualSubmitBtn').addEventListener('click', async ()=>{
   const currentUser = getCurrentUser();
   if(!txnId){
     msg.className = 'form-msg err';
-    msg.textContent = 'ট্রানজেকশন আইডি দিন।';
+    msg.textContent = 'Enter a transaction ID.';
     return;
   }
   const cart = getCart();
@@ -257,7 +257,7 @@ document.getElementById('manualSubmitBtn').addEventListener('click', async ()=>{
   const btn = document.getElementById('manualSubmitBtn');
   btn.disabled = true;
   msg.className = 'form-msg';
-  msg.textContent = 'অর্ডার প্রসেস হচ্ছে...';
+  msg.textContent = 'Processing order...';
   try{
     await addDoc(collection(db, 'orders'), {
       uid: currentUser.uid,
@@ -273,10 +273,10 @@ document.getElementById('manualSubmitBtn').addEventListener('click', async ()=>{
     saveCart([]);
     renderCart();
     overlay.style.display = 'none';
-    showToast('অর্ডার পাঠানো হয়েছে! পেমেন্ট ভেরিফাই হলে অ্যাক্সেস আনলক হবে।');
+    showToast('Order sent! Access will unlock once payment is verified.');
   }catch(err){
     msg.className = 'form-msg err';
-    msg.textContent = 'অর্ডার করা যায়নি, আবার চেষ্টা করুন।';
+    msg.textContent = 'Could not place order, please try again.';
     console.error('manual order create error:', err);
   }finally{
     btn.disabled = false;

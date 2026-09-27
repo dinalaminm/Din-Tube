@@ -6,7 +6,7 @@ import {
 requireAuth();
 
 /* ---------- Wallet balance: cache in localStorage so a refresh shows the
-   last known amount instantly instead of flashing ৳0 while auth loads. ---------- */
+   last known amount instantly instead of flashing Tk0 while auth loads. ---------- */
 const WALLET_BALANCE_CACHE_KEY = 'cr_wallet_balance_cache';
 function getCachedWalletBalance(){
   try{
@@ -19,11 +19,11 @@ function cacheWalletBalance(balance){
 }
 
 /* Render immediately on script load: the cached balance if we have one,
-   otherwise a shimmer placeholder (never a bare "৳0"). */
+   otherwise a shimmer placeholder (never a bare "Tk0"). */
 (function renderInitialBalance(){
   const el = document.getElementById('walletBalanceDisplay');
   const cached = getCachedWalletBalance();
-  if(cached !== null) el.textContent = '৳' + cached.toLocaleString('en-US');
+  if(cached !== null) el.textContent = 'Tk' + cached.toLocaleString('en-US');
   else el.innerHTML = '<span class="skeleton-dark skel-amount"></span>';
 })();
 
@@ -36,11 +36,11 @@ onUserReady((user)=>{
    is open, so listen for changes on the profile doc instead of the
    site-wide cached read (which can lag up to PROFILE_CACHE_TTL behind).
    Also re-loads the transaction list on change so the deposit's status
-   pill flips from পেন্ডিং to অনুমোদিত without a manual refresh. */
+   pill flips from Pending to Approved without a manual refresh. */
 let firstProfileSnapshot = true;
 watchProfileLive((profile)=>{
   const balance = Number(profile?.walletBalance || 0);
-  document.getElementById('walletBalanceDisplay').textContent = '৳' + balance.toLocaleString('en-US');
+  document.getElementById('walletBalanceDisplay').textContent = 'Tk' + balance.toLocaleString('en-US');
   cacheWalletBalance(balance);
   if(!firstProfileSnapshot) loadWalletTransactions();
   firstProfileSnapshot = false;
@@ -91,7 +91,7 @@ function renderMerchantNumber(method, numbers){
   const field = MERCHANT_NUMBER_FIELD[method];
   if(!field) return;
   box.dataset.method = method;
-  copyBtn.textContent = 'কপি';
+  copyBtn.textContent = 'Copy';
   copyBtn.classList.remove('copied');
   const number = numbers ? numbers[field] : null;
   if(number){
@@ -99,10 +99,10 @@ function renderMerchantNumber(method, numbers){
     copyBtn.disabled = false;
   }else if(numbers){
     // Settings have actually loaded and this method genuinely has no number set.
-    valueEl.textContent = `${method} নম্বর এখনো যোগ করা হয়নি`;
+    valueEl.textContent = `${method} number not added yet`;
     copyBtn.disabled = true;
   }else{
-    // Nothing cached yet (first-ever visit) — shimmer instead of a "লোড হচ্ছে..." label.
+    // Nothing cached yet (first-ever visit) — shimmer instead of a "Loading..." label.
     valueEl.innerHTML = '<span class="skeleton-dark skel-merchant-number"></span>';
     copyBtn.disabled = true;
   }
@@ -113,9 +113,9 @@ function renderMethodInstructions(method){
   const ussd = MERCHANT_USSD[method] || '';
   const sendMoneyLabel = MERCHANT_SENDMONEY_LABEL[method] || 'Send Money';
   list.innerHTML = `
-    <li>${ussd} ডায়াল করে আপনার ${method} মোবাইল মেনুতে যান অথবা ${method} অ্যাপে যান।</li>
-    <li style="color:#FFEB3B; font-weight:800;">${sendMoneyLabel} - এ ক্লিক করুন।</li>
-    <li>প্রাপক নম্বর হিসেবে নিচের এই নম্বরটি লিখুন</li>
+    <li>Dial ${ussd} to open your ${method} mobile menu, or open the ${method} app.</li>
+    <li style="color:#FFEB3B; font-weight:800;">Tap ${sendMoneyLabel}.</li>
+    <li>Enter the number below as the recipient number</li>
   `;
 }
 
@@ -155,10 +155,10 @@ async function copyMerchantNumber(){
   const number = document.getElementById('merchantNumberValue').textContent.trim();
   if(!number) return;
   const markCopied = ()=>{
-    showToast('নম্বর কপি হয়েছে!');
-    copyBtn.textContent = '✓ কপি হয়েছে';
+    showToast('Number copied!');
+    copyBtn.textContent = '✓ Copied';
     copyBtn.classList.add('copied');
-    setTimeout(()=>{ copyBtn.textContent = 'কপি'; copyBtn.classList.remove('copied'); }, 1600);
+    setTimeout(()=>{ copyBtn.textContent = 'Copy'; copyBtn.classList.remove('copied'); }, 1600);
   };
   try{
     await navigator.clipboard.writeText(number);
@@ -169,7 +169,7 @@ async function copyMerchantNumber(){
     document.body.appendChild(temp);
     temp.select();
     try{ document.execCommand('copy'); markCopied(); }
-    catch(e){ showToast('কপি করা যায়নি।'); }
+    catch(e){ showToast('Could not copy.'); }
     document.body.removeChild(temp);
   }
 }
@@ -186,20 +186,20 @@ document.getElementById('depositForm').addEventListener('submit', async (e)=>{
   const btnText = submitBtn.querySelector('.btn-text');
   const spinner = document.getElementById('depositSpinner');
   const currentUser = getCurrentUser();
-  if(!currentUser){ msg.textContent = 'আগে লগ ইন করুন।'; msg.className = 'form-msg err'; return; }
+  if(!currentUser){ msg.textContent = 'Please log in first.'; msg.className = 'form-msg err'; return; }
   const amount = Number(document.getElementById('depAmount').value);
   const method = document.getElementById('depMethod').value;
   const txnId = document.getElementById('depTxnId').value.trim();
   const note = document.getElementById('depNote').value.trim();
   if(!amount || amount <= 0 || !txnId){
-    msg.textContent = 'পরিমাণ ও ট্রানজেকশন আইডি সঠিকভাবে দিন।';
+    msg.textContent = 'Enter the amount and transaction ID correctly.';
     msg.className = 'form-msg err';
     return;
   }
   msg.textContent = '';
   msg.className = 'form-msg';
   submitBtn.disabled = true;
-  btnText.textContent = 'পাঠানো হচ্ছে...';
+  btnText.textContent = 'Sending...';
   spinner.hidden = false;
   try{
     await addDoc(collection(db, 'walletTransactions'), {
@@ -213,7 +213,7 @@ document.getElementById('depositForm').addEventListener('submit', async (e)=>{
     document.getElementById('depositOverlay').style.display = 'none';
     document.getElementById('depositSuccessOverlay').style.display = 'flex';
   }catch(err){
-    msg.textContent = 'পাঠানো যায়নি, আবার চেষ্টা করুন।';
+    msg.textContent = 'Could not send, please try again.';
     msg.className = 'form-msg err';
     console.error('deposit request error:', err);
   }finally{
@@ -242,8 +242,8 @@ document.getElementById('depositOverlay').addEventListener('click', (e)=>{
   if(e.target.id === 'depositOverlay') document.getElementById('depositOverlay').style.display = 'none';
 });
 
-const txnTypeLabel = { deposit:'ডিপোজিট', purchase:'কেনাকাটা', refund:'রিফান্ড' };
-const txnStatusLabel = { pending:'পেন্ডিং', approved:'অনুমোদিত', rejected:'বাতিল', completed:'সম্পন্ন' };
+const txnTypeLabel = { deposit:'Deposit', purchase:'Purchase', refund:'Refund' };
+const txnStatusLabel = { pending:'Pending', approved:'Approved', rejected:'Rejected', completed:'Completed' };
 const txnIconSvg = {
   deposit: '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v13m0 0-4.5-4.5M12 17l4.5-4.5"/><path d="M4 20h16"/></svg>',
   purchase: '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8h12l1 12.5a1 1 0 0 1-1 1.5H6a1 1 0 0 1-1-1.5L6 8Z"/><path d="M9 8V6a3 3 0 0 1 6 0v2"/></svg>',
@@ -262,7 +262,7 @@ async function loadWalletTransactions(){
     snap.forEach(d => txns.push({ id: d.id, ...d.data() }));
     txns.sort((a,b)=> (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0));
     if(txns.length === 0){
-      wrap.innerHTML = '<p style="color:var(--muted);">এখনো কোনো লেনদেন নেই।</p>';
+      wrap.innerHTML = '<p style="color:var(--muted);">No transactions yet.</p>';
       return;
     }
     wrap.innerHTML = txns.map(t=>{
@@ -279,12 +279,12 @@ async function loadWalletTransactions(){
               <span class="txn-status-pill ${t.status || ''}">${txnStatusLabel[t.status] || t.status}</span>
             </div>
           </div>
-          <span class="txn-amt ${isCredit ? 'credit' : 'debit'}">${sign}৳${Number(t.amount || 0).toLocaleString('en-US')}</span>
+          <span class="txn-amt ${isCredit ? 'credit' : 'debit'}">${sign}Tk${Number(t.amount || 0).toLocaleString('en-US')}</span>
         </div>
       `;
     }).join('');
   }catch(err){
-    wrap.innerHTML = '<p style="color:var(--coral);">লেনদেন লোড করা যায়নি।</p>';
+    wrap.innerHTML = '<p style="color:var(--coral);">Could not load transactions.</p>';
     console.error('loadWalletTransactions error:', err);
   }
 }

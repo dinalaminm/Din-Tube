@@ -4,10 +4,10 @@ const DL_ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stro
 const DL_BTN_ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12m0 0-4-4m4 4 4-4"/><path d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/></svg>';
 const DL_EMPTY_ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M7 16a4.5 4.5 0 0 1-1-8.9 5.5 5.5 0 0 1 10.7-2A4.5 4.5 0 0 1 17.5 16"/><path d="M12 11v8m0 0-3-3m3 3 3-3"/></svg>';
 
-// আইটেমের ছবি থাকলে আইকনের জায়গায় ছবি; ছবি না থাকলে/লোড না হলে আগের আইকনই থাকে
+// use the item's image in place of the icon if it has one; keep the old icon if there's no image or it fails to load
 function iconBox(fallbackSvg, imageUrl){
   if(!imageUrl) return `<div class="dl-icon">${fallbackSvg}</div>`;
-  // স্টাইল ইনলাইন রাখা হয়েছে — ব্রাউজারে পুরনো style.css জমা থাকলেও ছবি ঠিক দেখাবে
+  // styles kept inline — the image still displays correctly even with an old cached style.css
   return `<div class="dl-icon dl-has-img" style="position:relative;overflow:hidden;width:54px;height:54px;border-radius:14px;">${fallbackSvg}<img src="${escapeHtml(imageUrl)}" alt="" loading="lazy" style="position:absolute;top:0;left:0;width:100%;height:100%;object-fit:cover;display:block;" onerror="this.style.display='none'"></div>`;
 }
 
@@ -39,7 +39,7 @@ onUserReady(async (user)=>{
         // Video pack links live directly on the order item (deliveredLinks), so they
         // survive even if the pack is later deleted/out of stock — no doc lookup needed.
         if(it.type === 'videopacks' && Array.isArray(it.deliveredLinks) && it.deliveredLinks.length){
-          videoPackGroups.push({ packName: it.name || 'ভিডিও প্যাক', createdAt: o.createdAt, links: it.deliveredLinks });
+          videoPackGroups.push({ packName: it.name || 'Video Pack', createdAt: o.createdAt, links: it.deliveredLinks });
           continue;
         }
         if(!it.id || !it.type || (it.type !== 'products' && it.type !== 'software' && it.type !== 'courses')) continue;
@@ -70,7 +70,7 @@ onUserReady(async (user)=>{
       wrap.innerHTML = `
         <div class="dl-empty">
           ${DL_EMPTY_ICON}
-          <p>এখনো কোনো ডাউনলোডযোগ্য প্রোডাক্ট নেই — অর্ডার সম্পন্ন হলে এখানে দেখা যাবে।</p>
+          <p>No downloadable products yet — they'll appear here once an order is completed.</p>
         </div>`;
       return;
     }
@@ -79,22 +79,22 @@ onUserReady(async (user)=>{
     videoPackGroups.forEach(group => {
       const dateStr = formatOrderDateTime(group.createdAt);
       const rangeLabel = group.links.length > 1
-        ? `ভিডিও ${group.startSerial}–${group.startSerial + group.links.length - 1}`
-        : `ভিডিও ${group.startSerial}`;
+        ? `Video ${group.startSerial}–${group.startSerial + group.links.length - 1}`
+        : `Video ${group.startSerial}`;
       rows.push(`
         <div class="dl-vp-group">
           <div class="dl-vp-head">
             <div class="dl-icon">${DL_ICON}</div>
             <div class="dl-vp-head-info">
               <b>${escapeHtml(group.packName)}</b>
-              <span>${rangeLabel} · ${group.links.length} টি ${dateStr ? '· ' + dateStr : ''}</span>
+              <span>${rangeLabel} · ${group.links.length} ${dateStr ? '· ' + dateStr : ''}</span>
             </div>
           </div>
           <div class="dl-vp-rows">
             ${group.links.map((link, idx)=> `
               <div class="dl-vp-row">
-                <span>ভিডিও #${group.startSerial + idx}</span>
-                <a href="${escapeHtml(link)}" target="_blank" rel="noopener">${DL_BTN_ICON}লিংক খুলুন</a>
+                <span>Video #${group.startSerial + idx}</span>
+                <a href="${escapeHtml(link)}" target="_blank" rel="noopener">${DL_BTN_ICON}Open Link</a>
               </div>
             `).join('')}
           </div>
@@ -107,9 +107,9 @@ onUserReady(async (user)=>{
           ${iconBox(DL_ICON, item.imageUrl)}
           <div class="dl-info">
             <b>${item.name}</b>
-            <span>ডাউনলোডের জন্য প্রস্তুত</span>
+            <span>Ready to Download</span>
           </div>
-          <a href="${item.downloadUrl}" target="_blank" rel="noopener" class="dl-btn">${DL_BTN_ICON}ডাউনলোড</a>
+          <a href="${item.downloadUrl}" target="_blank" rel="noopener" class="dl-btn">${DL_BTN_ICON}Download</a>
         </div>
       `);
     });
@@ -118,7 +118,7 @@ onUserReady(async (user)=>{
     wrap.innerHTML = `
       <div class="dl-empty dl-error">
         ${DL_EMPTY_ICON}
-        <p>লোড করা যায়নি। পুনরায় চেষ্টা করুন।</p>
+        <p>Could not load. Please try again.</p>
       </div>`;
     console.error('mydownloads error:', err);
   }

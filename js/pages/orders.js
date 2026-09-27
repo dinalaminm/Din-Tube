@@ -2,7 +2,7 @@ import { db, collection, getDocs, query, where, requireAuth, onUserReady, escape
 
 requireAuth();
 
-const STATUS_LABEL = { pending:'পেন্ডিং', paid:'পেইড', completed:'সম্পন্ন', cancelled:'বাতিল', refunded:'রিফান্ড হয়েছে' };
+const STATUS_LABEL = { pending:'Pending', paid:'Paid', completed:'Completed', cancelled:'Cancelled', refunded:'Refunded' };
 const STATUS_COLOR = { pending:'#F59E0B', paid:'#2563EB', completed:'#16A34A', cancelled:'#6B7280', refunded:'#7C3AED' };
 // Fixed display order for filter chips, so it doesn't jump around per user.
 const STATUS_ORDER = ['pending', 'paid', 'completed', 'cancelled', 'refunded'];
@@ -20,11 +20,11 @@ function formatOrderDate(createdAt){
 
 function paymentMetaLine(o){
   if(!o.paymentMethod) return '';
-  if(o.paymentMethod === 'Wallet') return 'ওয়ালেট থেকে সরাসরি পরিশোধ করা হয়েছে।';
+  if(o.paymentMethod === 'Wallet') return 'Paid directly from wallet.';
   const method = escapeHtml(o.paymentMethod);
   return o.transactionId
-    ? `${method} দিয়ে পরিশোধ করা হয়েছে, ট্রানজেকশন আইডি ${escapeHtml(o.transactionId)}।`
-    : `${method} দিয়ে পরিশোধ করা হয়েছে।`;
+    ? `Paid via ${method}, transaction ID ${escapeHtml(o.transactionId)}.`
+    : `Paid via ${method}.`;
 }
 
 function renderStats(){
@@ -35,9 +35,9 @@ function renderStats(){
     .filter(o => o.status === 'completed' || o.status === 'paid')
     .reduce((s,o) => s + Number(o.total || 0), 0);
   el.innerHTML = `
-    <div class="orders-stat"><span class="num">${allOrders.length}</span><span class="lbl">মোট অর্ডার</span></div>
-    <div class="orders-stat"><span class="num">${pendingCount}</span><span class="lbl">পেন্ডিং</span></div>
-    <div class="orders-stat"><span class="num">৳${totalSpent.toLocaleString('en-US')}</span><span class="lbl">মোট খরচ</span></div>
+    <div class="orders-stat"><span class="num">${allOrders.length}</span><span class="lbl">Total Orders</span></div>
+    <div class="orders-stat"><span class="num">${pendingCount}</span><span class="lbl">Pending</span></div>
+    <div class="orders-stat"><span class="num">Tk${totalSpent.toLocaleString('en-US')}</span><span class="lbl">Total Spent</span></div>
   `;
   el.style.display = 'flex';
 }
@@ -46,7 +46,7 @@ function renderFilters(){
   const el = document.getElementById('ordersFilters');
   const present = STATUS_ORDER.filter(s => allOrders.some(o => o.status === s));
   if(allOrders.length === 0 || present.length < 2){ el.style.display = 'none'; return; }
-  const chips = [{ key:'all', label:'সব' }, ...present.map(s => ({ key:s, label:STATUS_LABEL[s] || s }))];
+  const chips = [{ key:'all', label:'All' }, ...present.map(s => ({ key:s, label:STATUS_LABEL[s] || s }))];
   el.innerHTML = chips.map(c => `<button type="button" class="chip${activeFilter === c.key ? ' active' : ''}" data-filter="${c.key}">${c.label}</button>`).join('');
   el.style.display = 'flex';
   el.querySelectorAll('.chip').forEach(btn => {
@@ -64,15 +64,15 @@ function renderList(){
     wrap.innerHTML = `
       <div class="orders-empty">
         <svg viewBox="0 0 24 24" width="46" height="46" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8h12l1 12.5a1 1 0 0 1-1 1.5H6a1 1 0 0 1-1-1.5L6 8Z"/><path d="M9 8V6a3 3 0 0 1 6 0v2"/></svg>
-        <p>এখনো কোনো অর্ডার নেই। প্রোডাক্ট বা কোর্স দেখে কেনাকাটা শুরু করুন।</p>
-        <a href="index.html#shop">কেনাকাটা শুরু করুন</a>
+        <p>No orders yet. Browse products or courses to start shopping.</p>
+        <a href="index.html#shop">Start Shopping</a>
       </div>
     `;
     return;
   }
   const filtered = activeFilter === 'all' ? allOrders : allOrders.filter(o => o.status === activeFilter);
   if(filtered.length === 0){
-    wrap.innerHTML = '<p style="color:var(--muted); padding:24px 0;">এই ক্যাটাগরিতে কোনো অর্ডার নেই।</p>';
+    wrap.innerHTML = '<p style="color:var(--muted); padding:24px 0;">No orders in this category.</p>';
     return;
   }
   wrap.innerHTML = filtered.map(o => {
@@ -91,8 +91,8 @@ function renderList(){
       .filter(it => Array.isArray(it.deliveredLinks) && it.deliveredLinks.length)
       .map(it => `
         <div class="receipt-links">
-          <span class="receipt-links-label">${escapeHtml(it.name)} — ভিডিও লিংক:</span>
-          ${it.deliveredLinks.map((link, idx) => `<a href="${escapeHtml(link)}" target="_blank" rel="noopener" class="receipt-link-btn">ভিডিও ${idx + 1}</a>`).join('')}
+          <span class="receipt-links-label">${escapeHtml(it.name)} — Video Links:</span>
+          ${it.deliveredLinks.map((link, idx) => `<a href="${escapeHtml(link)}" target="_blank" rel="noopener" class="receipt-link-btn">Video ${idx + 1}</a>`).join('')}
         </div>
       `).join('');
     return `
@@ -107,8 +107,8 @@ function renderList(){
           ${linksHtml}
           <div class="receipt-divider"></div>
           <div class="receipt-total-row">
-            <span class="lbl">মোট</span>
-            <span class="amount">৳${Number(o.total || 0).toLocaleString('en-US')}</span>
+            <span class="lbl">Total</span>
+            <span class="amount">Tk${Number(o.total || 0).toLocaleString('en-US')}</span>
           </div>
           ${meta ? `<div class="receipt-meta">${meta}</div>` : ''}
         </div>
@@ -130,7 +130,7 @@ onUserReady(async (user)=>{
     renderFilters();
     renderList();
   }catch(err){
-    document.getElementById('myOrdersList').innerHTML = '<p style="color:var(--coral);">অর্ডার লোড করা যায়নি।</p>';
+    document.getElementById('myOrdersList').innerHTML = '<p style="color:var(--coral);">Could not load orders.</p>';
     console.error('loadMyOrders error:', err);
   }
 });

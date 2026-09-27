@@ -42,7 +42,7 @@ function showGate(heading, message, showBuyBtn){
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="11" rx="5.5"/><path d="M7.5 10.5v4M5.5 12.5h4"/><circle cx="15.2" cy="10.8" r="1" fill="currentColor" stroke="none"/><circle cx="17.8" cy="13.4" r="1" fill="currentColor" stroke="none"/></svg>
       <h2>${heading}</h2>
       <p>${message}</p>
-      ${showBuyBtn ? `<a href="games.html" class="btn-primary" style="text-decoration:none; padding:11px 22px; border-radius:10px;">গেমস পেজে যান</a>` : ''}
+      ${showBuyBtn ? `<a href="games.html" class="btn-primary" style="text-decoration:none; padding:11px 22px; border-radius:10px;">Go to Games Page</a>` : ''}
     </div>
   `;
 }
@@ -53,8 +53,8 @@ function fmtDate(d){
 
 async function boot(){
   if(!id){
-    titleEl.textContent = 'পাওয়া যায়নি';
-    showGate('গেম পাওয়া যায়নি', 'লিংকটি সঠিক নয়। গেমস পেজ থেকে আবার চেষ্টা করুন।', true);
+    titleEl.textContent = 'Not Found';
+    showGate('Game Not Found', 'The link is invalid. Please try again from the Games page.', true);
     return;
   }
 
@@ -62,42 +62,42 @@ async function boot(){
   try{
     const snap = await getDoc(doc(db, 'games', id));
     if(!snap.exists()){
-      titleEl.textContent = 'পাওয়া যায়নি';
-      showGate('গেম পাওয়া যায়নি', 'এই গেমটি এখন আর নেই।', true);
+      titleEl.textContent = 'Not Found';
+      showGate('Game Not Found', 'This game no longer exists.', true);
       return;
     }
     game = { id: snap.id, ...snap.data() };
   }catch(err){
     console.error('play-game fetch error:', err);
-    titleEl.textContent = 'লোড করা যায়নি';
-    showGate('লোড করা যায়নি', 'Firestore রুলস/কানেকশন চেক করুন।', false);
+    titleEl.textContent = 'Could Not Load';
+    showGate('Could Not Load', 'Check Firestore rules/connection.', false);
     return;
   }
 
-  titleEl.textContent = game.name || 'গেম';
+  titleEl.textContent = game.name || 'Game';
 
   onUserReady(async (user)=>{
     if(!user){
-      showGate('লগ ইন করুন', 'এই গেমটি খেলতে আগে লগ ইন করুন। কয়েক মুহূর্তের মধ্যে লগ ইন পেজে নিয়ে যাওয়া হচ্ছে...', false);
+      showGate('Log In', 'Log in first to play this game. Redirecting to the login page in a moment...', false);
       setTimeout(()=>{ window.location.href = 'login.html'; }, 1200);
       return;
     }
     const dates = await getGamePurchaseDates(user.uid);
     const access = dates.get(id);
     if(!access){
-      showGate('এখনো কেনা হয়নি', 'এই গেমটি খেলতে আগে সাবস্ক্রাইব করতে হবে।', true);
+      showGate('Not Purchased Yet', 'You need to subscribe before playing this game.', true);
       return;
     }
     const expiresAt = access.expiresAt;
     if(expiresAt.getTime() <= Date.now()){
-      showGate('মেয়াদ শেষ হয়ে গেছে', 'এই গেমটির প্ল্যানের মেয়াদ শেষ হয়ে গেছে। আবার খেলতে হলে নতুন করে কিনুন।', true);
+      showGate('Plan Expired', 'This game\'s plan has expired. Buy again to keep playing.', true);
       return;
     }
     if(!game.gameHtml){
-      showGate('গেম কোড পাওয়া যায়নি', 'অ্যাডমিন এখনো এই গেমের HTML কোড যোগ করেননি।', false);
+      showGate('Game Code Not Found', 'The admin hasn\'t added this game\'s HTML code yet.', false);
       return;
     }
-    expiryEl.textContent = 'মেয়াদ: ' + fmtDate(expiresAt);
+    expiryEl.textContent = 'Expires: ' + fmtDate(expiresAt);
     const wrap = document.createElement('div');
     wrap.className = 'pg-frame-wrap';
     const iframe = document.createElement('iframe');

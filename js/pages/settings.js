@@ -19,11 +19,11 @@ document.getElementById('settingsProfileForm').addEventListener('submit', async 
   e.preventDefault();
   const msg = document.getElementById('settingsProfileMsg');
   const currentUser = getCurrentUser();
-  if(!currentUser){ msg.textContent = 'আগে লগ ইন করুন।'; msg.className = 'form-msg err'; return; }
+  if(!currentUser){ msg.textContent = 'Please log in first.'; msg.className = 'form-msg err'; return; }
   const name = document.getElementById('setName').value.trim();
   const phone = document.getElementById('setPhone').value.trim();
-  if(!name){ msg.textContent = 'নাম লিখুন।'; msg.className = 'form-msg err'; return; }
-  msg.textContent = 'সংরক্ষণ হচ্ছে...';
+  if(!name){ msg.textContent = 'Enter a name.'; msg.className = 'form-msg err'; return; }
+  msg.textContent = 'Saving...';
   msg.className = 'form-msg';
   try{
     await updateProfile(auth.currentUser, { displayName: name });
@@ -31,10 +31,10 @@ document.getElementById('settingsProfileForm').addEventListener('submit', async 
     const profile = getCurrentProfile();
     if(profile){ profile.name = name; profile.phone = phone; syncProfileCache(); }
     updateHeaderAvatar(name);
-    msg.textContent = 'সংরক্ষণ করা হয়েছে!';
+    msg.textContent = 'Saved!';
     msg.className = 'form-msg ok';
   }catch(err){
-    msg.textContent = 'সংরক্ষণ ব্যর্থ হয়েছে, আবার চেষ্টা করুন।';
+    msg.textContent = 'Save failed, please try again.';
     msg.className = 'form-msg err';
     console.error(err);
   }
@@ -46,10 +46,10 @@ document.getElementById('resetPassBtn').addEventListener('click', async ()=>{
   if(!currentUser) return;
   try{
     await sendPasswordResetEmail(auth, currentUser.email);
-    msg.textContent = 'পাসওয়ার্ড রিসেট লিংক ' + currentUser.email + '-এ পাঠানো হয়েছে।';
+    msg.textContent = 'Password reset link sent to ' + currentUser.email + '.';
     msg.className = 'form-msg ok';
   }catch(err){
-    msg.textContent = 'পাঠানো যায়নি, আবার চেষ্টা করুন।';
+    msg.textContent = 'Could not send, please try again.';
     msg.className = 'form-msg err';
     console.error(err);
   }
@@ -60,7 +60,7 @@ document.getElementById('exportDataBtn').addEventListener('click', async ()=>{
   const currentUser = getCurrentUser();
   if(!currentUser) return;
   btn.disabled = true;
-  btn.textContent = 'তৈরি হচ্ছে...';
+  btn.textContent = 'Creating...';
   try{
     const [ticketsSnap, ordersSnap, walletSnap] = await Promise.all([
       getDocs(query(collection(db, 'supportTickets'), where('uid', '==', currentUser.uid))),
@@ -90,10 +90,10 @@ document.getElementById('exportDataBtn').addEventListener('click', async ()=>{
     URL.revokeObjectURL(url);
   }catch(err){
     console.error('data export error:', err);
-    showToast('ডেটা এক্সপোর্ট করা যায়নি');
+    showToast('Could not export data');
   }finally{
     btn.disabled = false;
-    btn.textContent = '📥 আমার ডেটা এক্সপোর্ট করুন (JSON)';
+    btn.textContent = '📥 Export My Data (JSON)';
   }
 });
 
@@ -109,26 +109,26 @@ document.getElementById('deleteAccountForm').addEventListener('submit', async (e
   if(!currentUser){ return; }
   const pass = document.getElementById('deleteConfirmPass').value;
   if(!pass){
-    msg.textContent = 'পাসওয়ার্ড দিন।';
+    msg.textContent = 'Enter a password.';
     msg.className = 'form-msg err';
     return;
   }
-  if(!confirm('আপনি কি নিশ্চিত? এই কাজটি ফেরানো যাবে না।')) return;
-  msg.textContent = 'ডিলিট হচ্ছে...';
+  if(!confirm('Are you sure? This action cannot be undone.')) return;
+  msg.textContent = 'Deleting...';
   msg.className = 'form-msg';
   try{
     const cred = EmailAuthProvider.credential(currentUser.email, pass);
     await reauthenticateWithCredential(auth.currentUser, cred);
     await deleteDoc(doc(db, 'users', currentUser.uid));
     await deleteUser(auth.currentUser);
-    showToast('অ্যাকাউন্ট ডিলিট করা হয়েছে');
+    showToast('Account deleted');
     window.location.href = 'index.html';
   }catch(err){
     console.error('account delete error:', err);
     if(err.code === 'auth/wrong-password' || err.code === 'auth/invalid-credential'){
-      msg.textContent = 'পাসওয়ার্ড ভুল হয়েছে।';
+      msg.textContent = 'Incorrect password.';
     } else {
-      msg.textContent = 'ডিলিট করা যায়নি, আবার চেষ্টা করুন।';
+      msg.textContent = 'Could not delete, please try again.';
     }
     msg.className = 'form-msg err';
   }

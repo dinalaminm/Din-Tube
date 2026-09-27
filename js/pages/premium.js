@@ -20,11 +20,11 @@ function renderHeroAndStatus(){
   const heroText = document.getElementById('premiumHeroText');
   const statusBox = document.getElementById('plansStatus');
   if(premium.active){
-    heroText.textContent = 'আপনার প্রিমিয়াম মেম্বারশিপ সক্রিয় আছে — সব লক করা ভিডিও উপভোগ করুন';
+    heroText.textContent = 'Your premium membership is active — enjoy all locked videos';
     statusBox.style.display = 'block';
-    statusBox.innerHTML = `<span style="color:#16A34A; font-weight:700;">আপনার প্রিমিয়াম মেয়াদ আছে — ${fmtDate(premium.expiresAt)} পর্যন্ত।</span> নিচে থেকে মেয়াদ বাড়াতে পারেন।`;
+    statusBox.innerHTML = `<span style="color:#16A34A; font-weight:700;">Your premium plan is active — until ${fmtDate(premium.expiresAt)}.</span> You can extend it below.`;
   }else{
-    heroText.textContent = 'এই ভিডিওটি দেখতে সাবস্ক্রাইব করুন';
+    heroText.textContent = 'Subscribe to watch this video';
     statusBox.style.display = 'none';
   }
 }
@@ -39,12 +39,12 @@ async function loadPlaylists(){
     snap.forEach(d => videos.push({ id: d.id, ...d.data() }));
     const groups = new Map();
     videos.forEach(v=>{
-      const cat = v.category || 'সাধারণ';
+      const cat = v.category || 'General';
       if(!groups.has(cat)) groups.set(cat, []);
       groups.get(cat).push(v);
     });
     if(groups.size === 0){
-      grid.innerHTML = '<p style="color:var(--muted); grid-column:1/-1;">এখনো কোনো প্লেলিস্ট নেই।</p>';
+      grid.innerHTML = '<p style="color:var(--muted); grid-column:1/-1;">No playlists yet.</p>';
       return;
     }
     grid.innerHTML = '';
@@ -57,7 +57,7 @@ async function loadPlaylists(){
       a.href = `videos.html?category=${encodeURIComponent(category)}`;
       a.innerHTML = `
         <div class="playlist-thumb" style="background:${thumb.imageUrl ? `url('${thumb.imageUrl}') center/cover` : bg};">
-          <span class="playlist-count-badge">${items.length} টি ভিডিও</span>
+          <span class="playlist-count-badge">${items.length} videos</span>
           <span class="playlist-lock-badge">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><rect x="4.5" y="10.5" width="15" height="10" rx="2"/><path d="M8 10.5V7a4 4 0 0 1 8 0v3.5"/></svg>
           </span>
@@ -70,7 +70,7 @@ async function loadPlaylists(){
       grid.appendChild(a);
     });
   }catch(err){
-    grid.innerHTML = '<p style="color:var(--coral); grid-column:1/-1;">লোড করা যায়নি।</p>';
+    grid.innerHTML = '<p style="color:var(--coral); grid-column:1/-1;">Could not load.</p>';
     console.error('premium playlists load error:', err);
   }
 }
@@ -84,7 +84,7 @@ async function loadPlans(){
     snap.forEach(d => plans.push({ id: d.id, ...d.data() }));
     renderPlans();
   }catch(err){
-    list.innerHTML = '<p style="color:var(--coral);">লোড করা যায়নি।</p>';
+    list.innerHTML = '<p style="color:var(--coral);">Could not load.</p>';
     console.error('premium plans load error:', err);
   }
 }
@@ -92,7 +92,7 @@ async function loadPlans(){
 function renderPlans(){
   const list = document.getElementById('plansList');
   if(plans.length === 0){
-    list.innerHTML = '<p style="color:var(--muted);">এখনো কোনো প্ল্যান যোগ করা হয়নি।</p>';
+    list.innerHTML = '<p style="color:var(--muted);">No plans added yet.</p>';
     return;
   }
   list.innerHTML = plans.map(plan=>{
@@ -110,20 +110,20 @@ function renderPlans(){
             ${discount ? `<span class="plan-discount">-${discount}%</span>` : ''}
           </div>
           <div class="plan-price-row">
-            <span class="plan-price">৳${price.toLocaleString('en-US')}</span>
-            ${oldPrice ? `<span class="plan-old-price">৳${oldPrice.toLocaleString('en-US')}</span>` : ''}
+            <span class="plan-price">Tk${price.toLocaleString('en-US')}</span>
+            ${oldPrice ? `<span class="plan-old-price">Tk${oldPrice.toLocaleString('en-US')}</span>` : ''}
           </div>
           <div class="plan-tags">
-            <span class="plan-tag access">${Number(plan.days || 0)} দিনের অ্যাক্সেস</span>
-            <span class="plan-tag">সব প্লেলিস্ট</span>
+            <span class="plan-tag access">${Number(plan.days || 0)}-day access</span>
+            <span class="plan-tag">All Playlists</span>
           </div>
           <ul class="plan-features">
-            <li>সব লক করা প্রিমিয়াম ভিডিও আনলক</li>
-            <li>পুরো মেয়াদের জন্য সাইট-ওয়াইড মেম্বারশিপ</li>
-            <li>মেয়াদ শেষ হওয়ার আগে যেকোনো সময় বাড়ানো যাবে</li>
+            <li>Unlocks all locked premium videos</li>
+            <li>Site-wide membership for the full term</li>
+            <li>Can be extended any time before it expires</li>
           </ul>
           <button type="button" class="plan-subscribe-btn" data-plan-id="${plan.id}">
-            ${premium.active ? 'মেয়াদ বাড়ান' : 'সাবস্ক্রাইব করুন'}
+            ${premium.active ? 'Extend Plan' : 'Subscribe'}
           </button>
         </div>
       </div>
@@ -202,10 +202,10 @@ function openCheckout(plan){
   }
   checkoutPlan = plan;
   const price = Number(plan.price || 0);
-  document.getElementById('checkoutItemsLabel').textContent = `${plan.title || ''} প্ল্যান (${Number(plan.days || 0)} দিন)`;
-  document.getElementById('checkoutTotalLabel').textContent = '৳' + price.toLocaleString('en-US');
+  document.getElementById('checkoutItemsLabel').textContent = `${plan.title || ''} Plan (${Number(plan.days || 0)} days)`;
+  document.getElementById('checkoutTotalLabel').textContent = 'Tk' + price.toLocaleString('en-US');
   const profile = getCurrentProfile();
-  document.getElementById('pmWalletBalance').textContent = 'ব্যালেন্স: ৳' + Number(profile?.walletBalance || 0).toLocaleString('en-US');
+  document.getElementById('pmWalletBalance').textContent = 'Balance: Tk' + Number(profile?.walletBalance || 0).toLocaleString('en-US');
   resetCheckoutModal();
   overlay.style.display = 'flex';
 }
@@ -232,8 +232,8 @@ continueBtn.addEventListener('click', async ()=>{
     const numbers = await getMerchantNumbers();
     const number = numbers[MERCHANT_NUMBER_FIELD[selectedMethod]];
     document.getElementById('manualPayInstruction').textContent = number
-      ? `নিচের ${selectedMethod} নম্বরে "Send Money" করে টাকা পাঠান, তারপর ট্রানজেকশন আইডি বসান।`
-      : `${selectedMethod} নম্বর এখনো যোগ করা হয়নি — অনুগ্রহ করে সাপোর্টে যোগাযোগ করুন।`;
+      ? `Send the money to the ${selectedMethod} number below via "Send Money", then enter the transaction ID.`
+      : `${selectedMethod} number not added yet — please contact support.`;
     document.getElementById('manualPayNumber').textContent = number || '';
     stepMethod.style.display = 'none';
     stepManual.style.display = 'block';
@@ -262,7 +262,7 @@ document.getElementById('manualPayCopyBtn').addEventListener('click', async (e)=
     document.body.removeChild(ta);
   }
   btn.classList.add('copied');
-  showToast('নম্বর কপি হয়েছে');
+  showToast('Number copied');
   setTimeout(()=> btn.classList.remove('copied'), 1500);
 });
 
@@ -270,7 +270,7 @@ function currentOrderItem(){
   return {
     id: checkoutPlan.id || null,
     type: 'premium',
-    name: `${checkoutPlan.title || ''} প্ল্যান`,
+    name: `${checkoutPlan.title || ''} Plan`,
     price: Number(checkoutPlan.price || 0),
     qty: 1,
     days: Number(checkoutPlan.days || 0)
@@ -285,11 +285,11 @@ async function payWithWallet(){
   const days = Number(checkoutPlan.days || 0);
   if(total > Number(profile?.walletBalance || 0)){
     msg.className = 'form-msg err';
-    msg.textContent = 'ওয়ালেটে পর্যাপ্ত ব্যালেন্স নেই। আগে ডিপোজিট করুন।';
+    msg.textContent = 'Insufficient wallet balance. Please deposit first.';
     return;
   }
   msg.className = 'form-msg';
-  msg.textContent = 'পেমেন্ট প্রসেস হচ্ছে...';
+  msg.textContent = 'Processing payment...';
   continueBtn.disabled = true;
   const userRef = doc(db, 'users', currentUser.uid);
   const orderRef = doc(collection(db, 'orders'));
@@ -311,19 +311,19 @@ async function payWithWallet(){
       });
       tx.set(txnRef, {
         uid: currentUser.uid, type: 'purchase', status: 'completed', amount: total,
-        orderId: orderRef.id, note: 'ওয়ালেট দিয়ে প্রিমিয়াম সাবস্ক্রিপশন', createdAt: serverTimestamp()
+        orderId: orderRef.id, note: 'Premium subscription via wallet', createdAt: serverTimestamp()
       });
     });
     if(profile){ profile.walletBalance = Number(profile.walletBalance || 0) - total; syncProfileCache(); }
     premium = { active:true, expiresAt:newExpiry };
-    document.getElementById('successExpiryText').textContent = `আপনার প্রিমিয়াম মেয়াদ এখন ${fmtDate(newExpiry)} পর্যন্ত।`;
+    document.getElementById('successExpiryText').textContent = `Your premium plan is now active until ${fmtDate(newExpiry)}.`;
     stepMethod.style.display = 'none';
     stepSuccess.style.display = 'block';
     renderHeroAndStatus();
     renderPlans();
   }catch(err){
     msg.className = 'form-msg err';
-    msg.textContent = err.message === 'insufficient-balance' ? 'ওয়ালেটে পর্যাপ্ত ব্যালেন্স নেই।' : 'পেমেন্ট ব্যর্থ হয়েছে, আবার চেষ্টা করুন।';
+    msg.textContent = err.message === 'insufficient-balance' ? 'Insufficient wallet balance.' : 'Payment failed, please try again.';
     console.error('wallet payment error:', err);
   }finally{
     continueBtn.disabled = false;
@@ -336,14 +336,14 @@ document.getElementById('manualSubmitBtn').addEventListener('click', async ()=>{
   const currentUser = getCurrentUser();
   if(!txnId){
     msg.className = 'form-msg err';
-    msg.textContent = 'ট্রানজেকশন আইডি দিন।';
+    msg.textContent = 'Enter a transaction ID.';
     return;
   }
   const total = Number(checkoutPlan.price || 0);
   const btn = document.getElementById('manualSubmitBtn');
   btn.disabled = true;
   msg.className = 'form-msg';
-  msg.textContent = 'অর্ডার প্রসেস হচ্ছে...';
+  msg.textContent = 'Processing order...';
   try{
     // Premium activation happens when admin approves this order — see admin.html.
     await addDoc(collection(db, 'orders'), {
@@ -358,10 +358,10 @@ document.getElementById('manualSubmitBtn').addEventListener('click', async ()=>{
       createdAt: serverTimestamp()
     });
     overlay.style.display = 'none';
-    showToast('অর্ডার পাঠানো হয়েছে! পেমেন্ট ভেরিফাই হলে প্রিমিয়াম সক্রিয় হবে — "আমার অর্ডার"-এ পেন্ডিং হিসেবে দেখা যাবে।');
+    showToast('Order sent! Premium will activate once payment is verified — you\'ll see it as pending in "My Orders".');
   }catch(err){
     msg.className = 'form-msg err';
-    msg.textContent = 'অর্ডার করা যায়নি, আবার চেষ্টা করুন।';
+    msg.textContent = 'Could not place order, please try again.';
     console.error('manual order create error:', err);
   }finally{
     btn.disabled = false;

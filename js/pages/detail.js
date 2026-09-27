@@ -11,11 +11,11 @@ const id = params.get('id');
 const COLLECTION_BY_TYPE = { courses:'courses', products:'products', software:'software', videos:'videos' };
 
 /* ---------- Physical products: delivery-details order flow ---------- */
-const DELIVERY_COUNTRIES = ['Bangladesh'];              // এখানে দেশ যোগ করলেই ড্রপডাউনে আসবে
-const DEFAULT_DELIVERY_DAYS = { inside: 5, outside: 10 }; // প্রোডাক্টে দিন সেট না থাকলে এটা দেখাবে
-let pendingDelivery = null; // { country, phone, address } — Buy Now চাপার পর চেকআউটে যায়
+const DELIVERY_COUNTRIES = ['Bangladesh'];              // add a country here to have it appear in the dropdown
+const DEFAULT_DELIVERY_DAYS = { inside: 5, outside: 10 }; // shown when the product has no days set
+let pendingDelivery = null; // { country, phone, address } — goes to checkout after tapping Buy Now
 
-// productType সেট থাকলে সেটাই; না থাকলে ডাউনলোড লিংক ছাড়া প্রোডাক্ট = ফিজিক্যাল
+// use productType if set; otherwise a product with no download link = Physical
 function isPhysicalProduct(item){
   if(type !== 'products') return false;
   if(item.productType) return item.productType === 'physical';
@@ -55,11 +55,11 @@ function setupPhysicalUI(item){
   badges.innerHTML = html;
   badges.style.display = 'flex';
 
-  // 50% OFF · Save ৳400
+  // 50% OFF · Save Tk400
   const price = Number(item.price || 0), old = Number(item.oldPrice || 0);
   const badgeEl = document.getElementById('detailDiscountBadge');
   if(old > price){
-    badgeEl.textContent = `${Math.round((old - price) / old * 100)}% OFF · Save ৳${(old - price).toLocaleString('en-US')}`;
+    badgeEl.textContent = `${Math.round((old - price) / old * 100)}% OFF · Save Tk${(old - price).toLocaleString('en-US')}`;
     badgeEl.style.display = 'inline-block';
   } else {
     badgeEl.style.display = 'none';
@@ -126,8 +126,8 @@ function renderFeatures(list){
 
 async function boot(){
   if(!type || !id || !COLLECTION_BY_TYPE[type]){
-    document.getElementById('detailTitle').textContent = 'পাওয়া যায়নি';
-    document.getElementById('detailDesc').textContent = 'এই আইটেমটি খুঁজে পাওয়া যায়নি। হোমপেজে ফিরে যান।';
+    document.getElementById('detailTitle').textContent = 'Not Found';
+    document.getElementById('detailDesc').textContent = 'This item could not be found. Go back to the homepage.';
     return;
   }
 
@@ -139,8 +139,8 @@ async function boot(){
     if(!snap.exists()){
       clearDetailImageSkeleton();
       document.getElementById('detailImageWrap').style.display = 'none';
-      document.getElementById('detailTitle').textContent = 'পাওয়া যায়নি';
-      document.getElementById('detailDesc').textContent = 'এই আইটেমটি এখন আর নেই।';
+      document.getElementById('detailTitle').textContent = 'Not Found';
+      document.getElementById('detailDesc').textContent = 'This item no longer exists.';
       return;
     }
     item = { id: snap.id, ...snap.data() };
@@ -148,8 +148,8 @@ async function boot(){
     console.error('detail fetch error:', err);
     clearDetailImageSkeleton();
     document.getElementById('detailImageWrap').style.display = 'none';
-    document.getElementById('detailTitle').textContent = 'লোড করা যায়নি';
-    document.getElementById('detailDesc').textContent = 'Firestore রুলস/কানেকশন চেক করুন।';
+    document.getElementById('detailTitle').textContent = 'Could Not Load';
+    document.getElementById('detailDesc').textContent = 'Check Firestore rules/connection.';
     return;
   }
 
@@ -216,9 +216,9 @@ function renderDetail(item, owned){
   document.getElementById('detailDesc').textContent = item.description || '';
   renderFeatures(item.features);
 
-  document.getElementById('detailPriceNow').textContent = '৳' + Number(item.price || 0).toLocaleString('en-US');
+  document.getElementById('detailPriceNow').textContent = 'Tk' + Number(item.price || 0).toLocaleString('en-US');
   const oldPriceEl = document.getElementById('detailPriceOld');
-  oldPriceEl.textContent = item.oldPrice ? '৳' + Number(item.oldPrice).toLocaleString('en-US') : '';
+  oldPriceEl.textContent = item.oldPrice ? 'Tk' + Number(item.oldPrice).toLocaleString('en-US') : '';
   const badgeEl = document.getElementById('detailDiscountBadge');
   if((type === 'courses' || type === 'videos') && item.discount){
     badgeEl.textContent = item.discount;
@@ -235,7 +235,7 @@ function renderDetail(item, owned){
   buyBtn.disabled = false;
   buyBtn.style.opacity = '1';
   if(isPhysical){
-    // ফিজিক্যাল প্রোডাক্ট: ডেলিভারির তথ্য নিয়ে অর্ডার — "owned" ধারণা এখানে নেই, আবার অর্ডার করা যায়
+    // physical product: order carries delivery info — no "owned" concept here, can be ordered again
     const soldOut = typeof item.stock === 'number' && item.stock <= 0;
     buyBtn.style.display = 'none';
     buyNowBtn.className = 'pz-buy';
@@ -259,12 +259,12 @@ function renderDetail(item, owned){
   } else if((type === 'products' || type === 'software' || type === 'courses') && item.downloadUrl && owned){
     buyBtn.style.display = 'block';
     buyNowBtn.style.display = 'none';
-    buyBtn.textContent = 'ডাউনলোড করুন';
+    buyBtn.textContent = 'Download';
     buyBtn.onclick = ()=> window.open(item.downloadUrl, '_blank');
   } else if(type === 'videos' && owned){
     buyBtn.style.display = 'block';
     buyNowBtn.style.display = 'none';
-    buyBtn.textContent = 'কেনা হয়ে গেছে ✓';
+    buyBtn.textContent = 'Purchased ✓';
     buyBtn.onclick = null;
     buyBtn.disabled = true;
     buyBtn.style.opacity = '0.6';
@@ -275,16 +275,16 @@ function renderDetail(item, owned){
     // buy button itself never jumps straight to WhatsApp.
     buyBtn.style.display = 'none';
     buyNowBtn.style.display = 'flex';
-    const label = type === 'courses' ? 'কোর্সে ভর্তি হন' : (type === 'products' ? 'কিনুন' : 'এখনই কিনুন');
+    const label = type === 'courses' ? 'Enroll in Course' : (type === 'products' ? 'Buy' : 'Buy Now');
     buyNowBtn.innerHTML = `<svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2 3 14h8l-1 8 10-12h-8l1-8Z"/></svg><span>${label}</span>`;
     buyNowBtn.onclick = ()=> openCheckout(item, type);
   }
 
-  // প্রোডাক্টের কিনুন/Buy Now বাটনের নিচে আলাদা WhatsApp বাটন (ডাউনলোড-আনলক হওয়া ডিজিটাল প্রোডাক্টে নয়)
+  // a separate WhatsApp button below the product's Buy Now button (not for digital products that unlock a download)
   const waBtn = document.getElementById('detailWhatsappBtn');
   const showWa = type === 'products' && (isPhysical || !(item.downloadUrl && owned));
   if(showWa){
-    document.getElementById('detailWhatsappLabel').textContent = isPhysical ? 'Order on WhatsApp' : 'WhatsApp-এ অর্ডার করুন';
+    document.getElementById('detailWhatsappLabel').textContent = isPhysical ? 'Order on WhatsApp' : 'Order on WhatsApp';
     waBtn.style.display = 'flex';
     waBtn.onclick = ()=> redirectToWhatsAppBuy(item);
   } else {
@@ -292,9 +292,9 @@ function renderDetail(item, owned){
     waBtn.onclick = null;
   }
 
-  const labelMap = { courses:'কোর্স', products:'প্রোডাক্ট', software:'সফটওয়্যার', videos:'ভিডিও' };
+  const labelMap = { courses:'Courses', products:'Products', software:'Software', videos:'Video' };
   if(!isPhysical){
-    document.getElementById('detailMoreHeading').innerHTML = 'আরও <em id="detailMoreLabel">' + (labelMap[type] || '') + '</em>';
+    document.getElementById('detailMoreHeading').innerHTML = 'More <em id="detailMoreLabel">' + (labelMap[type] || '') + '</em>';
   }
   loadRelated(item);
 }
@@ -323,11 +323,11 @@ async function redirectToWhatsAppBuy(item){
     }
   }
   if(!whatsappUrlCache){
-    showToast('হোয়াটসঅ্যাপ নম্বর সেট করা নেই — সাপোর্টে যোগাযোগ করুন।');
+    showToast('WhatsApp number not set — please contact support.');
     return;
   }
-  const price = '৳' + Number(item.price || 0).toLocaleString('en-US');
-  const text = `আমি "${itemLabel('products', item)}" (${price}) প্রোডাক্টটি কিনতে চাই।`;
+  const price = 'Tk' + Number(item.price || 0).toLocaleString('en-US');
+  const text = `I want to buy the "${itemLabel('products', item)}" (${price}) product.`;
   const sep = whatsappUrlCache.includes('?') ? '&' : '?';
   window.open(whatsappUrlCache + sep + 'text=' + encodeURIComponent(text), '_blank');
 }
@@ -384,9 +384,9 @@ function openCheckout(item, type){
   checkoutType = type;
   const total = Number(item.price || 0);
   document.getElementById('checkoutItemsLabel').textContent = itemLabel(type, item);
-  document.getElementById('checkoutTotalLabel').textContent = '৳' + total.toLocaleString('en-US');
+  document.getElementById('checkoutTotalLabel').textContent = 'Tk' + total.toLocaleString('en-US');
   const profile = getCurrentProfile();
-  document.getElementById('pmWalletBalance').textContent = 'ব্যালেন্স: ৳' + Number(profile?.walletBalance || 0).toLocaleString('en-US');
+  document.getElementById('pmWalletBalance').textContent = 'Balance: Tk' + Number(profile?.walletBalance || 0).toLocaleString('en-US');
   resetCheckoutModal();
   overlay.style.display = 'flex';
 }
@@ -412,8 +412,8 @@ continueBtn.addEventListener('click', async ()=>{
     const numbers = await getMerchantNumbers();
     const number = numbers[MERCHANT_NUMBER_FIELD[selectedMethod]];
     document.getElementById('manualPayInstruction').textContent = number
-      ? `নিচের ${selectedMethod} নম্বরে "Send Money" করে টাকা পাঠান, তারপর ট্রানজেকশন আইডি বসান।`
-      : `${selectedMethod} নম্বর এখনো যোগ করা হয়নি — অনুগ্রহ করে সাপোর্টে যোগাযোগ করুন।`;
+      ? `Send the money to the ${selectedMethod} number below via "Send Money", then enter the transaction ID.`
+      : `${selectedMethod} number not added yet — please contact support.`;
     document.getElementById('manualPayNumber').textContent = number || '';
     stepMethod.style.display = 'none';
     stepManual.style.display = 'block';
@@ -442,16 +442,16 @@ document.getElementById('manualPayCopyBtn').addEventListener('click', async (e)=
     document.body.removeChild(ta);
   }
   btn.classList.add('copied');
-  showToast('নম্বর কপি হয়েছে');
+  showToast('Number copied');
   setTimeout(()=> btn.classList.remove('copied'), 1500);
 });
 
-/* ফিজিক্যাল প্রোডাক্ট অর্ডার = ডেলিভারি তথ্য আছে + স্টক ট্র্যাক করা থাকলে অর্ডারের সময়ই ১টা কমে */
+/* Physical product order = has delivery info + if stock is tracked, decrements by 1 at order time */
 function isPhysicalOrder(){
   return checkoutType === 'products' && !!checkoutItem && isPhysicalProduct(checkoutItem) && !!pendingDelivery;
 }
 
-// transaction-এর ভেতরে: স্টক ট্র্যাক করা থাকলে যাচাই করে ১ কমায় (পড়া আগে, লেখা পরে — তাই productSnap আগে নিতে হয়)
+// inside the transaction: if stock is tracked, verify then decrement by 1 (reads before writes — so productSnap must be fetched first)
 function reserveStock(tx, productRef, productSnap, items){
   if(!productSnap.exists()) throw new Error('product-missing');
   const st = productSnap.data().stock;
@@ -467,7 +467,7 @@ function currentOrderItems(){
   if(isPhysicalOrder()) item.physical = true;
   // Stamp the download link onto the order item right away for products/software/courses —
   // the instant-wallet path marks the order 'completed' immediately (no admin
-  // approval step), so this is the only chance to capture it for "আমার ডাউনলোড".
+  // approval step), so this is the only chance to capture it for "My Downloads".
   if((checkoutType === 'products' || checkoutType === 'software' || checkoutType === 'courses') && checkoutItem.downloadUrl){
     item.downloadUrl = checkoutItem.downloadUrl;
   }
@@ -481,11 +481,11 @@ async function payWithWallet(){
   const total = Number(checkoutItem.price || 0);
   if(total > Number(profile?.walletBalance || 0)){
     msg.className = 'form-msg err';
-    msg.textContent = 'ওয়ালেটে পর্যাপ্ত ব্যালেন্স নেই। আগে ডিপোজিট করুন।';
+    msg.textContent = 'Insufficient wallet balance. Please deposit first.';
     return;
   }
   msg.className = 'form-msg';
-  msg.textContent = 'পেমেন্ট প্রসেস হচ্ছে...';
+  msg.textContent = 'Processing payment...';
   continueBtn.disabled = true;
   const items = currentOrderItems();
   const physical = isPhysicalOrder();
@@ -504,25 +504,25 @@ async function payWithWallet(){
       tx.set(orderRef, {
         uid: currentUser.uid, name: currentUser.displayName || '', email: currentUser.email || '',
         items, total,
-        // ফিজিক্যাল অর্ডার: টাকা পরিশোধ হয়েছে ('paid'), পণ্য পৌঁছালে অ্যাডমিন 'সম্পন্ন' করবে
+        // physical order: payment made ('paid'), admin marks 'completed' once the item is delivered
         status: physical ? 'paid' : 'completed',
         paymentMethod: 'Wallet', createdAt: serverTimestamp(),
         ...(physical ? { delivery: pendingDelivery } : {})
       });
       tx.set(txnRef, {
         uid: currentUser.uid, type: 'purchase', status: 'completed', amount: total,
-        orderId: orderRef.id, note: 'ওয়ালেট দিয়ে অর্ডার পরিশোধ', createdAt: serverTimestamp()
+        orderId: orderRef.id, note: 'Order paid via wallet', createdAt: serverTimestamp()
       });
     });
     if(profile){ profile.walletBalance = Number(profile.walletBalance || 0) - total; syncProfileCache(); }
     overlay.style.display = 'none';
-    showToast(physical ? 'অর্ডার সফল হয়েছে! আপনার ঠিকানায় ডেলিভারি দেওয়া হবে।' : 'পেমেন্ট সফল হয়েছে! অ্যাক্সেস এখনই আনলক হয়ে গেছে।');
+    showToast(physical ? 'Order successful! It will be delivered to your address.' : 'Payment successful! Access unlocked now.');
     boot();
   }catch(err){
     msg.className = 'form-msg err';
-    msg.textContent = err.message === 'insufficient-balance' ? 'ওয়ালেটে পর্যাপ্ত ব্যালেন্স নেই।'
-      : err.message === 'out-of-stock' ? 'দুঃখিত, প্রোডাক্টটির স্টক শেষ হয়ে গেছে।'
-      : 'পেমেন্ট ব্যর্থ হয়েছে, আবার চেষ্টা করুন।';
+    msg.textContent = err.message === 'insufficient-balance' ? 'Insufficient wallet balance.'
+      : err.message === 'out-of-stock' ? 'Sorry, this product is out of stock.'
+      : 'Payment failed, please try again.';
     console.error('wallet payment error:', err);
   }finally{
     continueBtn.disabled = false;
@@ -535,14 +535,14 @@ document.getElementById('manualSubmitBtn').addEventListener('click', async ()=>{
   const currentUser = getCurrentUser();
   if(!txnId){
     msg.className = 'form-msg err';
-    msg.textContent = 'ট্রানজেকশন আইডি দিন।';
+    msg.textContent = 'Enter a transaction ID.';
     return;
   }
   const total = Number(checkoutItem.price || 0);
   const btn = document.getElementById('manualSubmitBtn');
   btn.disabled = true;
   msg.className = 'form-msg';
-  msg.textContent = 'অর্ডার প্রসেস হচ্ছে...';
+  msg.textContent = 'Processing order...';
   try{
     const items = currentOrderItems();
     const physical = isPhysicalOrder();
@@ -571,12 +571,12 @@ document.getElementById('manualSubmitBtn').addEventListener('click', async ()=>{
     }
     overlay.style.display = 'none';
     showToast(physical
-      ? 'অর্ডার পাঠানো হয়েছে! পেমেন্ট ভেরিফাই হলে ডেলিভারির ব্যবস্থা করা হবে — "আমার অর্ডার"-এ পেন্ডিং হিসেবে দেখা যাবে।'
-      : 'অর্ডার পাঠানো হয়েছে! পেমেন্ট ভেরিফাই হলে অ্যাক্সেস আনলক হবে — "আমার অর্ডার"-এ পেন্ডিং হিসেবে দেখা যাবে।');
+      ? 'Order sent! Delivery will be arranged once payment is verified — you\'ll see it as pending in "My Orders".'
+      : 'Order sent! Access will unlock once payment is verified — you\'ll see it as pending in "My Orders".');
     if(physical) boot();
   }catch(err){
     msg.className = 'form-msg err';
-    msg.textContent = err.message === 'out-of-stock' ? 'দুঃখিত, প্রোডাক্টটির স্টক শেষ হয়ে গেছে।' : 'অর্ডার করা যায়নি, আবার চেষ্টা করুন।';
+    msg.textContent = err.message === 'out-of-stock' ? 'Sorry, this product is out of stock.' : 'Could not place order, please try again.';
     console.error('manual order create error:', err);
   }finally{
     btn.disabled = false;

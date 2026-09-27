@@ -15,7 +15,7 @@ onUserReady((user, profile)=>{
     document.getElementById('profileAvatar').innerHTML = cartoonAvatarSVG(displayName);
     document.getElementById('profileLoggedOut').style.display = 'none';
     document.getElementById('profileLoggedIn').style.display = 'block';
-    document.getElementById('dashWalletBalance').textContent = '৳' + Number(profile?.walletBalance || 0).toLocaleString('en-US');
+    document.getElementById('dashWalletBalance').textContent = 'Tk' + Number(profile?.walletBalance || 0).toLocaleString('en-US');
     if(profile && profile.createdAt && profile.createdAt.toDate){
       document.getElementById('profileJoined').textContent = profile.createdAt.toDate().toLocaleDateString('bn-BD');
     }
