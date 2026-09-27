@@ -93,6 +93,41 @@ export function extractYouTubeId(raw){
   return s;
 }
 
+/* ---------- Live countdown ("Active — until X" → ticking timer) ----------
+   Used anywhere a purchased/subscribed item shows time remaining (game
+   access, live stream access, etc). Elements are marked with
+   data-countdown-until="<expiresAt ms>" and this ticks every second,
+   calling onExpire(el) once per element the moment it hits zero (typically
+   used to trigger a re-render so the UI flips out of the "active" state). */
+export function fmtCountdown(msRemaining){
+  const totalSec = Math.max(0, Math.floor(msRemaining / 1000));
+  const days = Math.floor(totalSec / 86400);
+  const hours = Math.floor((totalSec % 86400) / 3600);
+  const mins = Math.floor((totalSec % 3600) / 60);
+  const secs = totalSec % 60;
+  const pad = n => String(n).padStart(2, '0');
+  return days > 0
+    ? `${days}d ${pad(hours)}:${pad(mins)}:${pad(secs)}`
+    : `${pad(hours)}:${pad(mins)}:${pad(secs)}`;
+}
+
+export function startCountdownTicker(container, onExpire){
+  function tick(){
+    const now = Date.now();
+    let expiredAny = false;
+    container.querySelectorAll('[data-countdown-until]').forEach(el=>{
+      const until = Number(el.dataset.countdownUntil);
+      const remain = until - now;
+      if(remain <= 0){ expiredAny = true; return; }
+      const label = el.dataset.countdownLabel || '';
+      el.textContent = label + fmtCountdown(remain);
+    });
+    if(expiredAny && onExpire) onExpire();
+  }
+  tick();
+  return setInterval(tick, 1000);
+}
+
 export const gradients = [
   "linear-gradient(160deg,#3a2440,#1f1420)",
   "linear-gradient(160deg,#402a24,#20140f)",
