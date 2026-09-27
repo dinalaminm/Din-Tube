@@ -153,7 +153,7 @@ document.getElementById('globalSearchInput')?.addEventListener('input', applyFil
 
 /* For reviewers with no name: based on the name (hash), consistently picks the same but
    randomly picks a distinct male/female avatar per reviewer. */
-const AVATAR_COLORS = ['#8B6B3D','#6B4F27','#7A7368','#9C8A5E','#5C5240','#B08D57','#4A4436','#856F42'];
+const AVATAR_COLORS = ['#0E6E4F','#0A4F38','#667085','#17A374','#14181B','#2F6B4F','#5B6B65','#0D3B2A'];
 const AVATAR_SKIN = '#F4C89A';
 function avatarHash(str){
   let h = 0;
