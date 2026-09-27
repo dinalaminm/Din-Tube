@@ -22,6 +22,24 @@ function isPhysicalProduct(item){
   return !item.downloadUrl;
 }
 
+// Physical products can be set (per-product, from the admin panel) to only
+// collect a small delivery/advance charge now, with the rest paid as Cash
+// on Delivery. If the admin hasn't set one (0/blank), behavior is unchanged:
+// the full price is charged upfront, same as before.
+function deliveryAdvanceFor(item){
+  const adv = Number(item.deliveryCharge || 0);
+  const price = Number(item.price || 0);
+  return adv > 0 && adv < price ? adv : 0;
+}
+function chargeNowFor(item){
+  const adv = deliveryAdvanceFor(item);
+  return adv > 0 ? adv : Number(item.price || 0);
+}
+function codDueFor(item){
+  const adv = deliveryAdvanceFor(item);
+  return adv > 0 ? Number(item.price || 0) - adv : 0;
+}
+
 function normalizeBdPhone(raw){
   let d = String(raw || '').replace(/\D/g, '');
   if(d.length === 13 && d.startsWith('8801')) d = d.slice(2);
@@ -70,6 +88,15 @@ function setupPhysicalUI(item){
   const outside = Number(item.deliveryOutside) > 0 ? Number(item.deliveryOutside) : DEFAULT_DELIVERY_DAYS.outside;
   document.getElementById('deliveryEstimate').innerHTML =
     `Estimated delivery: <strong>Inside Dhaka — ${inside} days; Outside Dhaka — ${outside} days</strong>.`;
+  const codNote = document.getElementById('deliveryCodNote');
+  const advance = deliveryAdvanceFor(item);
+  if(advance > 0){
+    const due = codDueFor(item);
+    codNote.textContent = `Pay only Tk${advance.toLocaleString('en-US')} now — the remaining Tk${due.toLocaleString('en-US')} is Cash on Delivery.`;
+    codNote.style.display = 'block';
+  } else {
+    codNote.style.display = 'none';
+  }
   const countrySel = document.getElementById('delCountry');
   if(!countrySel.options.length){
     countrySel.innerHTML = DELIVERY_COUNTRIES.map(c => `<option value="${c}">${c}</option>`).join('');
@@ -87,6 +114,7 @@ function resetPhysicalUI(){
   document.getElementById('detailCard').classList.remove('pz-card');
   document.getElementById('detailBadges').style.display = 'none';
   document.getElementById('deliveryCard').style.display = 'none';
+  document.getElementById('deliveryCodNote').style.display = 'none';
   document.getElementById('detailViewAll').style.display = 'none';
   const buyNow = document.getElementById('detailBuyNowBtn');
   buyNow.className = 'btn-buynow';
@@ -382,9 +410,17 @@ function openCheckout(item, type){
   }
   checkoutItem = item;
   checkoutType = type;
-  const total = Number(item.price || 0);
+  const total = chargeNowFor(item);
+  const codDue = type === 'products' && isPhysicalProduct(item) ? codDueFor(item) : 0;
   document.getElementById('checkoutItemsLabel').textContent = itemLabel(type, item);
   document.getElementById('checkoutTotalLabel').textContent = 'Tk' + total.toLocaleString('en-US');
+  const codRow = document.getElementById('checkoutCodRow');
+  if(codDue > 0){
+    document.getElementById('checkoutCodLabel').textContent = 'Tk' + codDue.toLocaleString('en-US');
+    codRow.style.display = 'flex';
+  } else {
+    codRow.style.display = 'none';
+  }
   const profile = getCurrentProfile();
   document.getElementById('pmWalletBalance').textContent = 'Balance: Tk' + Number(profile?.walletBalance || 0).toLocaleString('en-US');
   resetCheckoutModal();
@@ -478,7 +514,8 @@ async function payWithWallet(){
   const msg = document.getElementById('checkoutStepMsg');
   const currentUser = getCurrentUser();
   const profile = getCurrentProfile();
-  const total = Number(checkoutItem.price || 0);
+  const total = chargeNowFor(checkoutItem);
+  const codDue = isPhysicalOrder() ? codDueFor(checkoutItem) : 0;
   if(total > Number(profile?.walletBalance || 0)){
     msg.className = 'form-msg err';
     msg.textContent = 'Insufficient wallet balance. Please deposit first.';
@@ -507,7 +544,7 @@ async function payWithWallet(){
         // physical order: payment made ('paid'), admin marks 'completed' once the item is delivered
         status: physical ? 'paid' : 'completed',
         paymentMethod: 'Wallet', createdAt: serverTimestamp(),
-        ...(physical ? { delivery: pendingDelivery } : {})
+        ...(physical ? { delivery: pendingDelivery, codDue } : {})
       });
       tx.set(txnRef, {
         uid: currentUser.uid, type: 'purchase', status: 'completed', amount: total,
@@ -516,7 +553,9 @@ async function payWithWallet(){
     });
     if(profile){ profile.walletBalance = Number(profile.walletBalance || 0) - total; syncProfileCache(); }
     overlay.style.display = 'none';
-    showToast(physical ? 'Order successful! It will be delivered to your address.' : 'Payment successful! Access unlocked now.');
+    showToast(physical
+      ? (codDue > 0 ? `Order placed! Pay Tk${codDue.toLocaleString('en-US')} in cash on delivery.` : 'Order successful! It will be delivered to your address.')
+      : 'Payment successful! Access unlocked now.');
     boot();
   }catch(err){
     msg.className = 'form-msg err';
@@ -538,14 +577,15 @@ document.getElementById('manualSubmitBtn').addEventListener('click', async ()=>{
     msg.textContent = 'Enter a transaction ID.';
     return;
   }
-  const total = Number(checkoutItem.price || 0);
+  const total = chargeNowFor(checkoutItem);
+  const physical = isPhysicalOrder();
+  const codDue = physical ? codDueFor(checkoutItem) : 0;
   const btn = document.getElementById('manualSubmitBtn');
   btn.disabled = true;
   msg.className = 'form-msg';
   msg.textContent = 'Processing order...';
   try{
     const items = currentOrderItems();
-    const physical = isPhysicalOrder();
     const orderData = {
       uid: currentUser.uid,
       name: currentUser.displayName || '',
@@ -559,6 +599,7 @@ document.getElementById('manualSubmitBtn').addEventListener('click', async ()=>{
     };
     if(physical){
       orderData.delivery = pendingDelivery;
+      orderData.codDue = codDue;
       const productRef = doc(db, 'products', checkoutItem.id);
       const orderRef = doc(collection(db, 'orders'));
       await runTransaction(db, async (tx)=>{
