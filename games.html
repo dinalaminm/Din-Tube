@@ -3,10 +3,10 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Games | Creator Rivo</title>
+<title>Live Stream | Creator Rivo</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700;9..144,900&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/style.css?v=2">
+<link rel="stylesheet" href="css/style.css?v=8">
 </head>
 <body>
 <div class="toast" id="toast"></div>
@@ -18,6 +18,7 @@
       <a href="all-courses.html">Courses</a>
       <a href="all-products.html">Products</a>
       <a href="games.html">Games</a>
+      <a href="video-packs.html">Video Pack</a>
       <a href="index.html#reviews">Reviews</a>
     </div>
     <a class="wallet-chip" id="headerWalletChip" href="wallet.html" aria-label="Wallet Balance">
@@ -45,16 +46,144 @@
 </div>
 
 <main class="page-content">
-<div class="wrap" style="padding-top:0; padding-bottom:100px;">
-    <div class="gs-head">
-      <div class="left"><div class="bar"></div><h2>Choose <em>Live Stream</em></h2></div>
-      <p class="gs-subtitle">Subscribe to access live stream products</p>
+<div class="wrap" style="max-width:720px; padding:0 16px 100px; text-align:left;">
+  <div id="gdCard" class="vpd-card">
+    <div id="gdVideoWrap" style="display:none; margin-bottom:0;">
+      <div style="position:relative; padding-top:56.25%; background:#000;">
+        <iframe id="gdVideoFrame" style="position:absolute; inset:0; width:100%; height:100%; border:0;" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+      </div>
     </div>
-    <div class="gs-list" id="gamesList"></div>
+    <div id="gdImageWrap" style="display:none; margin-bottom:0;">
+      <div id="gdImage" style="aspect-ratio:16/9; background-size:cover; background-position:center;"></div>
+    </div>
+    <div class="vpd-body">
+      <div class="vpd-title-row">
+        <h1 id="gdTitle"></h1>
+        <button type="button" class="vpd-share-btn" id="gdShareBtn" aria-label="Share">
+          <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.6" y1="10.5" x2="15.4" y2="6.5"/><line x1="8.6" y1="13.5" x2="15.4" y2="17.5"/></svg>
+          Share
+        </button>
+      </div>
+      <p id="gdDescription" class="vpd-desc"></p>
+
+      <div class="gd-tag-row">
+        <span class="gd-tag gd-tag-live">Live Stream</span>
+        <span class="gd-tag gd-tag-sub">Subscription Required</span>
+      </div>
+
+      <div id="gdActiveBox" style="display:none; margin-bottom:16px;">
+        <span class="gs-active-wrap" style="margin-bottom:0;">
+          <span class="gs-active-tag" style="font-size:0.85rem;"><i></i>Active</span>
+          <span class="gs-countdown" style="font-size:0.88rem;"><svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l3 2"/><path d="M9 2h6"/></svg><span id="gdActiveText"></span></span>
+        </span>
+        <a href="#" class="btn-primary" id="gdPlayBtn" style="display:block; width:100%; box-sizing:border-box; text-align:center; text-decoration:none; border:none; cursor:pointer; margin-top:14px;">Play Now</a>
+      </div>
+
+      <div id="gdBuyBox">
+        <div class="gd-price-row">
+          <span class="gd-price" id="gdPrice"></span>
+          <span class="gd-period-label" id="gdSelectedPeriod"></span>
+        </div>
+
+        <p class="vpd-section-label">Subscription Period</p>
+        <div class="gd-period-grid" id="gdPeriodGrid"></div>
+
+        <button type="button" class="gd-subscribe-btn" id="gdSubscribeBtn">Subscribe Now</button>
+      </div>
+    </div>
   </div>
+
+  <div class="bar-head" style="margin-top:36px;">
+    <div class="left"><div class="bar"></div><h2>More <em>Live Streams</em></h2></div>
+    <a href="games.html">View All →</a>
+  </div>
+  <div id="gdMoreGrid" class="gs-list"></div>
+</div>
 </main>
 
-<script type="module" src="js/pages/games.js"></script>
+<div class="modal-overlay" id="checkoutOverlay" style="display:none;">
+  <div class="modal-box">
+    <div class="modal-head">
+      <div>
+        <span class="modal-eyebrow">CHECKOUT</span>
+        <h3 id="checkoutModalTitle">Choose Payment Method</h3>
+      </div>
+      <button type="button" id="checkoutCloseBtn" class="modal-close" aria-label="Close">✕</button>
+    </div>
+
+    <div id="checkoutStepMethod">
+      <div class="order-summary-box">
+        <span>Order Summary</span>
+        <div class="order-summary-row"><span id="checkoutItemsLabel"></span><strong id="checkoutTotalLabel"></strong></div>
+      </div>
+
+      <p class="pm-section-label">Choose Payment Method</p>
+      <div class="pm-list" id="pmList">
+        <button type="button" class="pm-row" data-method="bKash">
+          <span class="pm-icon" style="background:#fff; padding:7px; border:1px solid var(--line);">
+            <img src="https://i.ibb.co.com/SYN6dMH/20251113-202452.png" alt="bKash" style="width:100%; height:100%; object-fit:contain;">
+          </span>
+          <span class="pm-info"><strong>bKash</strong><span>Mobile Banking · Manual Verification</span></span>
+          <span class="pm-chev"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m9 6 6 6-6 6"/></svg></span>
+        </button>
+        <button type="button" class="pm-row" data-method="Nagad">
+          <span class="pm-icon" style="background:#fff; padding:7px; border:1px solid var(--line);">
+            <img src="https://i.ibb.co.com/Vp3x5kxg/1000022762-removebg-preview.png" alt="Nagad" style="width:100%; height:100%; object-fit:contain;">
+          </span>
+          <span class="pm-info"><strong>Nagad</strong><span>Mobile Banking · Manual Verification</span></span>
+          <span class="pm-chev"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m9 6 6 6-6 6"/></svg></span>
+        </button>
+        <button type="button" class="pm-row" data-method="Rocket">
+          <span class="pm-icon" style="background:#fff; padding:5px; border:1px solid var(--line); overflow:hidden;">
+            <img src="https://i.ibb.co.com/r270jkYV/d6621b10013ac98c8b3b3bc7a03fbf6580b5be6ab5e35898b6a7942177963e90-200.jpg" alt="Rocket" style="width:100%; height:100%; object-fit:cover; border-radius:8px;">
+          </span>
+          <span class="pm-info"><strong>Rocket</strong><span>Mobile Banking · Manual Verification</span></span>
+          <span class="pm-chev"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m9 6 6 6-6 6"/></svg></span>
+        </button>
+        <button type="button" class="pm-row" data-method="Wallet">
+          <span class="pm-icon" style="background:rgba(14,110,79,0.12); color:var(--coral);">
+            <svg viewBox="0 0 24 24" width="21" height="21" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 12V8H6a2 2 0 0 1-2-2c0-1.1.9-2 2-2h12v4"/><path d="M4 6v12c0 1.1.9 2 2 2h14v-4"/><path d="M18 12a2 2 0 0 0 0 4h4v-4Z"/></svg>
+          </span>
+          <span class="pm-info"><strong>Wallet</strong><span id="pmWalletBalance">Balance: Tk0</span></span>
+          <span class="pm-chev"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m9 6 6 6-6 6"/></svg></span>
+        </button>
+      </div>
+
+      <label class="pm-terms">
+        <input type="checkbox" id="checkoutTerms">
+        <span>I have read and agree to the <a href="support.html" target="_blank">Terms</a>, <a href="support.html" target="_blank">Privacy Policy</a>, and <a href="support.html" target="_blank">Return Policy</a>.</span>
+      </label>
+
+      <button type="button" class="btn-primary" id="checkoutContinueBtn" style="width:100%; border:none; cursor:pointer; opacity:0.5;" disabled>Continue</button>
+      <div class="form-msg" id="checkoutStepMsg"></div>
+    </div>
+
+    <div id="checkoutStepManual" style="display:none;">
+      <button type="button" id="checkoutBackBtn" class="pm-back">← Change Payment Method</button>
+      <div class="manual-pay-box">
+        <p id="manualPayInstruction"></p>
+        <div class="manual-pay-number-row">
+          <span class="manual-pay-number" id="manualPayNumber"></span>
+          <button type="button" class="manual-pay-copy-btn" id="manualPayCopyBtn" aria-label="Copy Number" title="Copy">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15H4a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v1"/></svg>
+          </button>
+        </div>
+      </div>
+      <div class="form-field"><label>Transaction ID</label><input type="text" id="manualTxnId" required placeholder="e.g.: 8N7A2K9X1Q"></div>
+      <button type="button" class="btn-primary" id="manualSubmitBtn" style="width:100%; border:none; cursor:pointer;">Confirm Order</button>
+      <div class="form-msg" id="manualPayMsg"></div>
+    </div>
+
+    <div id="checkoutStepSuccess" style="display:none;">
+      <p style="color:#16A34A; font-weight:700; margin:0 0 12px;">Subscription activated!</p>
+      <p id="checkoutSuccessExpiry" style="color:var(--muted); font-size:0.88rem; margin:0 0 18px;"></p>
+      <a href="#" id="checkoutSuccessPlayBtn" class="btn-primary" style="display:block; width:100%; box-sizing:border-box; text-align:center; text-decoration:none; border:none; cursor:pointer; margin-bottom:10px;">Play Now</a>
+      <button type="button" class="btn-primary" id="checkoutSuccessCloseBtn" style="width:100%; border:none; cursor:pointer; background:var(--bg); color:var(--text); border:1.5px solid var(--line);">OK</button>
+    </div>
+  </div>
+</div>
+
+<script type="module" src="js/pages/game-detail.js"></script>
 
 <nav class="tabbar">
   <a data-tab="content" href="index.html"><span class="ic"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M10 9.5v5l4.5-2.5Z" fill="currentColor" stroke="none"/></svg></span>Content</a>
