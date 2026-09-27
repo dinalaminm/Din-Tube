@@ -1,17 +1,14 @@
 import {
   db, collection, getDocs,
   onUserReady, getGamePurchaseDates, loadGameTiers, gameFromPrice,
-  itemBg, escapeHtml, renderSkeletonList
+  itemBg, escapeHtml, renderSkeletonList, startCountdownTicker
 } from '../common.js';
 
 const list = document.getElementById('gamesList');
 let games = [];
 let tiers = []; // admin-configured plan list
 let accessMap = new Map(); // gameId -> { purchasedAt, expiresAt }
-
-function fmtDate(d){
-  return d.toLocaleDateString('bn-BD', { day:'numeric', month:'short', year:'numeric' });
-}
+let countdownTimer = null;
 
 async function boot(){
   renderSkeletonList('gamesList', 4);
@@ -59,13 +56,16 @@ function render(){
           <h4>${escapeHtml(game.name || '')}</h4>
           <p>${escapeHtml(game.description || '')}</p>
           ${active
-            ? `<div class="gs-item-foot"><span class="gs-active-label">Active — until ${fmtDate(access.expiresAt)}</span></div>`
+            ? `<div class="gs-item-foot"><span class="gs-active-label" data-countdown-until="${access.expiresAt.getTime()}" data-countdown-label="Active — ">Active — …</span></div>`
             : `<div class="gs-item-foot"><span class="gs-from-price">From Tk${fromPrice.toLocaleString('en-US')}</span><span class="gs-subscribe-link">Subscribe →</span></div>`
           }
         </div>
       </a>
     `;
   }).join('');
+
+  if(countdownTimer) clearInterval(countdownTimer);
+  countdownTimer = startCountdownTicker(list, render); // when an item's timer hits 0, flip that card to "Subscribe" by re-rendering
 }
 
 boot();
