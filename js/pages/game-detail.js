@@ -62,7 +62,6 @@ function renderAccessState(){
     const activeBox = document.getElementById('gdActiveBox');
     const textEl = document.getElementById('gdActiveText');
     textEl.dataset.countdownUntil = access.expiresAt.getTime();
-    textEl.dataset.countdownLabel = 'Active — ';
     accessCountdownTimer = startCountdownTicker(activeBox, ()=>{
       // access just expired — flip back to the buy/subscribe view automatically
       access = null;
