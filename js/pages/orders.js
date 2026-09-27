@@ -107,9 +107,14 @@ function renderList(){
           ${linksHtml}
           <div class="receipt-divider"></div>
           <div class="receipt-total-row">
-            <span class="lbl">Total</span>
+            <span class="lbl">${o.codDue > 0 ? 'Advance Paid' : 'Total'}</span>
             <span class="amount">Tk${Number(o.total || 0).toLocaleString('en-US')}</span>
           </div>
+          ${o.codDue > 0 ? `
+          <div class="receipt-total-row" style="color:#B45309;">
+            <span class="lbl">Cash on Delivery Due</span>
+            <span class="amount">Tk${Number(o.codDue).toLocaleString('en-US')}</span>
+          </div>` : ''}
           ${meta ? `<div class="receipt-meta">${meta}</div>` : ''}
         </div>
       </div>
