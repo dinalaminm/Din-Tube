@@ -1,7 +1,7 @@
 import {
   db, collection, getDocs, doc, getDoc, addDoc, serverTimestamp, increment, runTransaction,
   onUserReady, getCurrentUser, getCurrentProfile, syncProfileCache, getGamePurchaseDates,
-  itemBg, escapeHtml, showToast, extractYouTubeId, loadGameTiers, gameFromPrice
+  itemBg, escapeHtml, showToast, extractYouTubeId, loadGameTiers, gameFromPrice, startCountdownTicker
 } from '../common.js';
 
 const params = new URLSearchParams(location.search);
@@ -51,12 +51,23 @@ function renderPriceRow(){
   document.getElementById('gdSelectedPeriod').textContent = selectedTier.label;
 }
 
+let accessCountdownTimer = null;
+
 function renderAccessState(){
   const active = access && access.expiresAt.getTime() > Date.now();
   document.getElementById('gdActiveBox').style.display = active ? 'block' : 'none';
   document.getElementById('gdBuyBox').style.display = active ? 'none' : 'block';
+  if(accessCountdownTimer){ clearInterval(accessCountdownTimer); accessCountdownTimer = null; }
   if(active){
-    document.getElementById('gdActiveText').textContent = `Active — until ${fmtDate(access.expiresAt)}`;
+    const activeBox = document.getElementById('gdActiveBox');
+    const textEl = document.getElementById('gdActiveText');
+    textEl.dataset.countdownUntil = access.expiresAt.getTime();
+    textEl.dataset.countdownLabel = 'Active — ';
+    accessCountdownTimer = startCountdownTicker(activeBox, ()=>{
+      // access just expired — flip back to the buy/subscribe view automatically
+      access = null;
+      renderAccessState();
+    });
     document.getElementById('gdPlayBtn').href = `play-game.html?id=${encodeURIComponent(gameId)}`;
   }
 }
