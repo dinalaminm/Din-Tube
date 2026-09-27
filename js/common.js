@@ -232,7 +232,7 @@ onAuthStateChanged(auth, async (user)=>{
       loadPendingOrderBadge(null);
       readyCallbacks.forEach(cb => cb(null, null));
       readyCallbacks.length = 0;
-      alert('আপনার অ্যাকাউন্টটি সাসপেন্ড করা হয়েছে। বিস্তারিত জানতে সাপোর্টে যোগাযোগ করুন।');
+      alert('Your account has been suspended. Contact support for details.');
       return;
     }
   } else if(prevUid){
@@ -363,7 +363,7 @@ export function cartoonAvatarSVG(name){
        ${hasExtra ? `<path d="M38 80c4 3 20 3 24 0" stroke="#00000022" stroke-width="6" fill="none" stroke-linecap="round"/>` : ''}
        <path d="M0 26c0-22 20-38 50-38s50 16 50 38c0 6-1 12-3 17-1-16-9-27-47-27s-46 11-47 27c-2-5-3-11-3-17Z" fill="${hairColor}"/>`;
 
-  return `<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="প্রোফাইল" preserveAspectRatio="xMidYMid slice">
+  return `<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Profile" preserveAspectRatio="xMidYMid slice">
     <rect width="100" height="100" fill="${bg}"/>
     ${face}
   </svg>`;
@@ -387,21 +387,21 @@ function getCachedWalletBalance(){
 function cacheWalletBalance(balance){
   try{ localStorage.setItem(WALLET_BALANCE_CACHE_KEY, JSON.stringify({ balance })); }catch(e){ /* ignore */ }
 }
-/* Header chip has limited width, so amounts of ৳10,000+ are shown compactly
-   (৳52K, ৳3.2L) instead of the full figure — the exact amount is always on
+/* Header chip has limited width, so amounts of Tk10,000+ are shown compactly
+   (Tk52K, Tk3.2L) instead of the full figure — the exact amount is always on
    wallet.html. Kept separate from wallet.js's own display, which always
    shows the full number. */
 function formatCompactBalance(n){
   n = Number(n) || 0;
   if(n >= 100000){
     const v = n / 100000;
-    return '৳' + (Number.isInteger(v) ? v : v.toFixed(1)) + 'L';
+    return 'Tk' + (Number.isInteger(v) ? v : v.toFixed(1)) + 'L';
   }
   if(n >= 10000){
     const v = n / 1000;
-    return '৳' + (Number.isInteger(v) ? v : v.toFixed(1)) + 'K';
+    return 'Tk' + (Number.isInteger(v) ? v : v.toFixed(1)) + 'K';
   }
-  return '৳' + n.toLocaleString('en-US');
+  return 'Tk' + n.toLocaleString('en-US');
 }
 
 function primeAvatarFromCache(){
@@ -425,7 +425,7 @@ function primeAvatarFromCache(){
     const cachedBalance = getCachedWalletBalance();
     if(cachedBalance !== null){
       bal.textContent = formatCompactBalance(cachedBalance);
-      bal.title = '৳' + cachedBalance.toLocaleString('en-US');
+      bal.title = 'Tk' + cachedBalance.toLocaleString('en-US');
       chip.style.display = 'flex';
     }
   }
@@ -442,7 +442,7 @@ export function updateHeaderAvatar(displayName){
   avatarBtn.innerHTML = svg;
   avatarBtn.href = 'profile.html';
   avatarBtn.classList.remove('guest');
-  avatarBtn.setAttribute('aria-label', 'প্রোফাইল');
+  avatarBtn.setAttribute('aria-label', 'Profile');
   try{ localStorage.setItem(AVATAR_CACHE_KEY, JSON.stringify({ name: displayName, svg })); }catch(e){ /* ignore */ }
 }
 
@@ -456,7 +456,7 @@ function applyHeaderAuthState(user, profile){
       avatarBtn.innerHTML = '<svg class="guest-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="3.5"/><path d="M4.5 20a7.5 7.5 0 0 1 15 0"/></svg>';
       avatarBtn.href = 'login.html';
       avatarBtn.classList.add('guest');
-      avatarBtn.setAttribute('aria-label', 'লগ ইন');
+      avatarBtn.setAttribute('aria-label', 'Log In');
       try{ localStorage.removeItem(AVATAR_CACHE_KEY); }catch(e){ /* ignore */ }
       try{ localStorage.removeItem(WALLET_BALANCE_CACHE_KEY); }catch(e){ /* ignore */ }
     }
@@ -473,7 +473,7 @@ function updateHeaderWallet(user, profile){
   if(user){
     const balance = Number(profile?.walletBalance || 0);
     bal.textContent = formatCompactBalance(balance);
-    bal.title = '৳' + balance.toLocaleString('en-US');
+    bal.title = 'Tk' + balance.toLocaleString('en-US');
     chip.style.display = 'flex';
     cacheWalletBalance(balance);
   } else {
@@ -501,8 +501,8 @@ async function loadNoticeBadge(){
 }
 
 /* ---------- Bottom tab bar active-state (runs on every page) ----------
-   Most pages have a fixed page-to-tab mapping, but the "কোর্স" and
-   "প্রোডাক্ট" tabs point to in-page anchors on index.html (#courses /
+   Most pages have a fixed page-to-tab mapping, but the "Courses" and
+   "Product" tabs point to in-page anchors on index.html (#courses /
    #shop) rather than separate pages, so a static "active" class in the
    HTML can't track them. This recalculates the correct tab whenever the
    hash changes too, so tapping those tabs actually highlights them. */
@@ -624,7 +624,7 @@ export function renderSkeletonList(containerId, count){
 
 export function renderCard(type, item, i){
   const bg = itemBg(item, i);
-  const badge = (type === 'courses' || type === 'videos') ? (item.discount || '') : (item.oldPrice ? 'সেল' : '');
+  const badge = (type === 'courses' || type === 'videos') ? (item.discount || '') : (item.oldPrice ? 'Sale' : '');
   const el = document.createElement('a');
   el.className = 'product-card';
   el.href = `detail.html?type=${encodeURIComponent(type)}&id=${encodeURIComponent(item.id)}`;
@@ -634,8 +634,8 @@ export function renderCard(type, item, i){
   el.innerHTML = `
     <div class="product-img" style="background:${bg}">
       ${badge ? `<div class="badge-sale">${escapeHtml(badge)}</div>` : ''}
-      ${type === 'videos' && Number(item.price||0) <= 0 ? `<div class="badge-sale" style="background:#16A34A;">ফ্রি</div>` : ''}
-      <button type="button" class="fav-btn${favActive ? ' active' : ''}" aria-label="ফেভারিটে যোগ করুন">
+      ${type === 'videos' && Number(item.price||0) <= 0 ? `<div class="badge-sale" style="background:#16A34A;">Free</div>` : ''}
+      <button type="button" class="fav-btn${favActive ? ' active' : ''}" aria-label="Add to Favorites">
         <svg viewBox="0 0 24 24" width="17" height="17" fill="${favActive ? 'currentColor' : 'none'}" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.8 8.6c0 4-6.4 8.8-8.8 10.6-2.4-1.8-8.8-6.6-8.8-10.6a5 5 0 0 1 9-3 5 5 0 0 1 8.6 3Z"/></svg>
       </button>
     </div>
@@ -643,8 +643,8 @@ export function renderCard(type, item, i){
       <h4>${escapeHtml(itemLabel(type, item))}</h4>
       ${(type === 'courses' || type === 'videos' || type === 'software') ? `<span style="color:var(--muted); font-size:0.75rem; font-weight:600;">${escapeHtml(item.category || '')}</span>` : ''}
       <div class="price-row">
-        <span class="price-now">৳${Number(item.price || 0).toLocaleString('en-US')}</span>
-        ${item.oldPrice ? `<span class="price-old">৳${Number(item.oldPrice).toLocaleString('en-US')}</span>` : ''}
+        <span class="price-now">Tk${Number(item.price || 0).toLocaleString('en-US')}</span>
+        ${item.oldPrice ? `<span class="price-old">Tk${Number(item.oldPrice).toLocaleString('en-US')}</span>` : ''}
       </div>
     </div>
   `;
@@ -655,7 +655,7 @@ export function renderCard(type, item, i){
     const nowFav = toggleFavorite(type, item);
     favBtn.classList.toggle('active', nowFav);
     favBtn.querySelector('svg').setAttribute('fill', nowFav ? 'currentColor' : 'none');
-    showToast(nowFav ? 'ফেভারিটে যোগ করা হয়েছে' : 'ফেভারিট থেকে সরানো হয়েছে');
+    showToast(nowFav ? 'Added to favorites' : 'Removed from favorites');
   });
   return el;
 }
@@ -671,14 +671,14 @@ export async function loadCollectionGrid(collectionName, gridId, opts){
     snap.forEach(d => data.push({ id: d.id, ...d.data() }));
     if(opts && typeof opts.filterFn === 'function') data = data.filter(opts.filterFn);
     if(data.length === 0){
-      grid.innerHTML = `<p style="color:var(--muted);">${(opts && opts.emptyText) || 'এখনো কিছু যোগ করা হয়নি।'}</p>`;
+      grid.innerHTML = `<p style="color:var(--muted);">${(opts && opts.emptyText) || 'Nothing added yet.'}</p>`;
       return data;
     }
     grid.innerHTML = '';
     data.forEach((item, i)=> grid.appendChild(renderCard((opts && opts.type) || collectionName, item, i)));
     return data;
   }catch(err){
-    grid.innerHTML = '<p style="color:var(--coral);">লোড করা যায়নি। Firestore রুলস/কানেকশন চেক করুন।</p>';
+    grid.innerHTML = '<p style="color:var(--coral);">Could not load. Check Firestore rules/connection.</p>';
     console.error(`load ${collectionName} error:`, err);
     return [];
   }
@@ -704,19 +704,40 @@ export async function getOwnedItemIds(uid){
    permanent like courses/products, so this returns the most recent
    completed-purchase date per game instead of a simple owned/not-owned set.
    Callers add the game's own planDays to compute the actual expiry. ---------- */
-/* Games ("Live Stream") subscription periods — fixed 5-tier structure,
-   matching every game/stream in the games collection. Each game doc
-   holds its own price per tier under these `key`s (admin-entered);
-   `hours` is the subscription length used for expiry math. */
-export const GAME_TIERS = [
+/* Games ("Live Stream") subscription periods — admin-customizable from the
+   admin panel's "Game Plans" settings (stored at settings/gameTiers), not a
+   fixed structure anymore. Each tier's `key` is the Firestore field on the
+   game doc that holds that tier's price; `hours` is the subscription length
+   used for expiry math. DEFAULT_GAME_TIERS is only the starting point used
+   until the admin saves their own tier list for the first time. */
+export const DEFAULT_GAME_TIERS = [
   { hours:2,      label:'2 Hours',  key:'price2h'  },
   { hours:24,     label:'1 Days',   key:'price1d'  },
   { hours:24*7,   label:'7 Days',   key:'price7d'  },
   { hours:24*30,  label:'30 Days',  key:'price30d' },
   { hours:24*60,  label:'60 Days',  key:'price60d' },
 ];
-export function gameFromPrice(game){
-  const prices = GAME_TIERS.map(t => Number(game[t.key] || 0)).filter(p => p > 0);
+
+let gameTiersCache = null;
+// Loads the admin's configured tier list once per page load and caches it —
+// call this (and await it) before reading tier data; gameFromPrice() below
+// can also be given a tiers array directly when you already have one.
+export async function loadGameTiers(){
+  if(gameTiersCache) return gameTiersCache;
+  try{
+    const snap = await getDoc(doc(db, 'settings', 'gameTiers'));
+    const tiers = snap.exists() ? snap.data().tiers : null;
+    gameTiersCache = (Array.isArray(tiers) && tiers.length) ? tiers : DEFAULT_GAME_TIERS;
+  }catch(err){
+    console.error('loadGameTiers error:', err);
+    gameTiersCache = DEFAULT_GAME_TIERS;
+  }
+  return gameTiersCache;
+}
+
+export function gameFromPrice(game, tiers){
+  const list = tiers || gameTiersCache || DEFAULT_GAME_TIERS;
+  const prices = list.map(t => Number(game[t.key] || 0)).filter(p => p > 0);
   if(prices.length) return Math.min(...prices);
   return Number(game.price || 0); // legacy single-price games predating the tier system
 }
@@ -769,11 +790,11 @@ function initFooterNewsletter(){
     const msg = document.getElementById('footerNewsletterMsg');
     const email = emailInput.value.trim();
     if(!email){
-      msg.textContent = 'ইমেইল দিন।';
+      msg.textContent = 'Enter an email.';
       msg.className = 'foot-news-msg err';
       return;
     }
-    msg.textContent = 'ধন্যবাদ! আপনি সাবস্ক্রাইব করেছেন।';
+    msg.textContent = 'Thank you! You\'ve subscribed.';
     msg.className = 'foot-news-msg';
     form.reset();
   });
