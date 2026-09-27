@@ -79,6 +79,7 @@
     <div class="pz-delivery" id="deliveryCard" style="display:none;">
       <h3>Delivery details</h3>
       <p class="pz-est" id="deliveryEstimate"></p>
+      <p class="pz-est" id="deliveryCodNote" style="display:none; color:#B45309; font-weight:700;"></p>
       <div class="pz-field">
         <label for="delCountry">Country <i>*</i></label>
         <select id="delCountry"></select>
@@ -124,6 +125,7 @@
       <div class="order-summary-box">
         <span>Order Summary</span>
         <div class="order-summary-row"><span id="checkoutItemsLabel"></span><strong id="checkoutTotalLabel"></strong></div>
+        <div class="order-summary-row" id="checkoutCodRow" style="display:none; color:#B45309;"><span>Cash on Delivery Due</span><strong id="checkoutCodLabel"></strong></div>
       </div>
 
       <p class="pm-section-label">Choose Payment Method</p>
